@@ -32,67 +32,123 @@
 	<script type="text/javascript" src="js/mymath.js"></script>
     <script>
 		lamp = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0};//初始状态都为0（熄灭）
-		docommand = function(dev_id, id){
+		docommand = function(dev_id, id, command){
 			var btn = document.getElementById(id.toString());
-			if(lamp[id] === 0)//document.getElementById(id.toString()).innerText === '熄灭')
-				command = 'on';
-			else
-				command = 'off';
-				
+	
 			btn.style.backgroundColor = '#ee0';
+			
+			if('lamp' == dev_id){
+				if(lamp[id] === 0)
+					command = 'on';
+				else
+					command = 'off';
+				param = "dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+			}
+			else if('car' == dev_id)
+				param = "dev_id=" + dev_id + "&command=" + command;
 	
 			loadXMLDoc("/control",function()
 			{
 				if (xmlhttp.readyState==4 && xmlhttp.status==200){
-					var json = JSON.parse(base64decode(xmlhttp.responseText));
-					var id = parseInt(json.id);
-					var command = json.command;
 					console.log(base64decode(xmlhttp.responseText));
-					if(command === 'on'){
-						lamp[id] = 1;
-						btn.style.backgroundColor = '#e00';
-					}						
-					else{
-						lamp[id] = 0;
-						btn.style.backgroundColor = '#0a0';
+					var json = JSON.parse(base64decode(xmlhttp.responseText));
+					var command = json.command;
+					if('lamp' == dev_id){
+						var id = parseInt(json.id);
+						if(command === 'on'){
+							lamp[id] = 1;
+							btn.style.backgroundColor = '#e00';
+						}						
+						else{
+							lamp[id] = 0;
+							btn.style.backgroundColor = '#0a0';
+						}
+						if(id === 12){
+							for(var i=1;i<13;i++){
+								lamp[i] = lamp[id];
+								if(lamp[id])
+									document.getElementById(i.toString()).style.backgroundColor = '#e00';
+								else
+									document.getElementById(i.toString()).style.backgroundColor = '#0a0';
+							}
+						}
 					}
-					if(id === 12){
-						for(var i=1;i<13;i++){
-							lamp[i] = lamp[id];
-							if(lamp[id])
-								document.getElementById(i.toString()).style.backgroundColor = '#e00';
-							else
-								document.getElementById(i.toString()).style.backgroundColor = '#0a0';
+					else if('car' == dev_id){
+						if(command === 'front'){
+							document.getElementById('car_2').style.backgroundColor = '#0a0';
+							document.getElementById('car_3').style.backgroundColor = '#0a0';
+							document.getElementById('car_4').style.backgroundColor = '#0a0';
+							document.getElementById('car_5').style.backgroundColor = '#0a0';
+						}						
+						else if(command === 'back'){
+							document.getElementById('car_1').style.backgroundColor = '#0a0';
+							document.getElementById('car_3').style.backgroundColor = '#0a0';
+							document.getElementById('car_4').style.backgroundColor = '#0a0';
+							document.getElementById('car_5').style.backgroundColor = '#0a0';
+						}
+						else if(command === 'stop'){
+							document.getElementById('car_1').style.backgroundColor = '#0a0';
+							document.getElementById('car_2').style.backgroundColor = '#0a0';
+							document.getElementById('car_4').style.backgroundColor = '#0a0';
+							document.getElementById('car_5').style.backgroundColor = '#0a0';
+						}
+						else if(command === 'left'){
+							document.getElementById('car_1').style.backgroundColor = '#0a0';
+							document.getElementById('car_2').style.backgroundColor = '#0a0';
+							document.getElementById('car_3').style.backgroundColor = '#0a0';
+							document.getElementById('car_5').style.backgroundColor = '#0a0';
+						}
+						else if(command === 'right'){
+							document.getElementById('car_1').style.backgroundColor = '#0a0';
+							document.getElementById('car_2').style.backgroundColor = '#0a0';
+							document.getElementById('car_3').style.backgroundColor = '#0a0';
+							document.getElementById('car_4').style.backgroundColor = '#0a0';
 						}
 					}
 				}	
-				xmlhttp.oncallback(xmlhttp.readyState);
-				
-			}, "dev_id=" + dev_id + "&id=" + id + "&command=" + command);
+				xmlhttp.oncallback(xmlhttp.readyState);	
+			}, param);
 		}
     </script>
 </head>
 <body>
-<div class="wrap"><h1>树莓派GPIO测试</h1></div>
-<div class="wrap">
-	<button id="1" class="btn" onclick="docommand('lamp', '1')">灯1</button>
-	<button id="2" class="btn" onclick="docommand('lamp', '2')">灯2</button>
-	<button id="3" class="btn" onclick="docommand('lamp', '3')">灯3</button>
+<div class="wrap"><h1>灯测试</h1></div>
+<div class="lamp">
+	<div class="wrap">
+		<button id="1" class="btn" onclick="docommand('lamp', '1')">灯1</button>
+		<button id="2" class="btn" onclick="docommand('lamp', '2')">灯2</button>
+		<button id="3" class="btn" onclick="docommand('lamp', '3')">灯3</button>
+	</div>
+	<div class="wrap">
+		<button id="4" class="btn" onclick="docommand('lamp', '4')">灯4</button>
+		<button id="5" class="btn" onclick="docommand('lamp', '5')">灯5</button>
+		<button id="6" class="btn" onclick="docommand('lamp', '6')">灯6</button>
+	</div>
+	<div class="wrap">
+		<button id="7" class="btn" onclick="docommand('lamp', '7')">灯7</button>
+		<button id="8" class="btn" onclick="docommand('lamp', '8')">灯8</button>
+		<button id="9" class="btn" onclick="docommand('lamp', '9')">灯9</button>
+	</div>
+	<div class="wrap">
+		<button id="10" class="btn" onclick="docommand('lamp', '10')">灯10</button>
+		<button id="12" class="btn" onclick="docommand('lamp', '12')">所有</button>
+		<button id="11" class="btn" onclick="docommand('lamp', '11')">灯11</button>
+	</div>
 </div>
-<div class="wrap">
-	<button id="4" class="btn" onclick="docommand('lamp', '4')">灯4</button>
-	<button id="5" class="btn" onclick="docommand('lamp', '5')">灯5</button>
-	<button id="6" class="btn" onclick="docommand('lamp', '6')">灯6</button>
-</div>
-<div class="wrap">
-	<button id="7" class="btn" onclick="docommand('lamp', '7')">灯7</button>
-	<button id="8" class="btn" onclick="docommand('lamp', '8')">灯8</button>
-	<button id="9" class="btn" onclick="docommand('lamp', '9')">灯9</button>
-</div>
-<div class="wrap">
-	<button id="10" class="btn" onclick="docommand('lamp', '10')">灯10</button>
-	<button id="12" class="btn" onclick="docommand('lamp', '12')">所有</button>
-	<button id="11" class="btn" onclick="docommand('lamp', '11')">灯11</button>
-</div>
+<div class="wrap"><hr/></div>
+<div class="wrap"><h1>小车测试</h1></div>
+<div class="car">
+	<div class="wrap">
+		<button id="car_1" class="btn" onclick="docommand('car', 'car_1', 'front')" style="border-top-left-radius:5em;border-top-right-radius:5em;">前进</button>
+	</div>
+	<div class="wrap">
+		<button id="car_4" class="btn" onclick="docommand('car', 'car_4', 'left')" style="border-top-left-radius:15em;border-bottom-left-radius:15em;">左转</button>
+		<button id="car_3" class="btn" onclick="docommand('car', 'car_3', 'stop')">停止</button>
+		<button id="car_5" class="btn" onclick="docommand('car', 'car_5', 'right')" style="border-top-right-radius:15em;border-bottom-right-radius:15em;">右转</button>
+	</div>
+	<div class="wrap">
+		<button id="car_2" class="btn" onclick="docommand('car', 'car_2', 'back')" style="border-bottom-left-radius:5em;border-bottom-right-radius:5em;">后退</button>
+	</div>
+</div>	
 </body>
 </html>
