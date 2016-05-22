@@ -9,9 +9,8 @@ __version__ = '1.0'
 __all__ = ["ControlHandler", "RPi_GPIO"]
 
 import os
-#import RPi.GPIO as io
+import RPi.GPIO as io
 import tornado.web
-import signal
 import json
 import base64
 
@@ -30,11 +29,11 @@ class RPi_GPIO():
 		return False;
 		
 	def init(modules):
-		if RPi_GPIO.is_exist(modules, 'RPi'):
+		if RPi_GPIO.is_exist(modules, 'io'):
 			print ("RPi.GPIO init...")
 			RPi_GPIO._is_exist = True
 			io.setmode(io.BOARD)
-			for k,v in _OUT_:
+			for k,v in _OUT_.items():
 				io.setup(int(v), io.OUT)
 				io.output(int(v), io.HIGH)
 
@@ -56,11 +55,8 @@ class ControlHandler(tornado.web.RequestHandler):
         ''' 
         post 参数示例: /control?dev_id=lamp&id=1&command=on
         '''
-        if post_data['dev_id'][0] == 'lamp':
-            str = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}';
-        elif post_data['dev_id'][0] == 'car':
-            str = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'; 
-			
+
+        str = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}';
         self.write(base64.encodestring(str.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
 		
         if post_data['dev_id'][0] == 'lamp':
@@ -76,8 +72,8 @@ class ControlHandler(tornado.web.RequestHandler):
             command = True
         RPi_GPIO.output(int(_OUT_[id]), command)
 
-        if id == 12:
-            for k,v in _OUT_:
+        if id == '12':
+            for k,v in _OUT_.items():
                 RPi_GPIO.output(int(v), command)
 				
     def car(post_data):

@@ -15,12 +15,12 @@
 	.btn
 	{
 		margin: 0px 5px 0px 0px;
-		width: 30%;
-		height: 120px;line-height:120px;
-		border-top-left-radius:0.3em;
-		border-top-right-radius:0.3em;
-		border-bottom-left-radius:0.3em;
-		border-bottom-right-radius:0.3em;
+		width: 180px;
+		height: 180px;line-height:180px;
+		border-top-left-radius:3em;
+		border-top-right-radius:3em;
+		border-bottom-left-radius:3em;
+		border-bottom-right-radius:3em;
 		background-color: #0a0;
 		border: 1px solid #D7D7D7;
 		outline:none;
@@ -42,15 +42,14 @@
 					command = 'on';
 				else
 					command = 'off';
-				param = "dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 			}
-			else if('car' == dev_id)
-				param = "dev_id=" + dev_id + "&command=" + command;
+			
+			param = "dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 	
 			loadXMLDoc("/control",function()
 			{
 				if (xmlhttp.readyState==4 && xmlhttp.status==200){
-					console.log(base64decode(xmlhttp.responseText));
+					console.log(base64decode(xmlhttp.responseText));	
 					var json = JSON.parse(base64decode(xmlhttp.responseText));
 					var command = json.command;
 					if('lamp' == dev_id){
@@ -74,35 +73,11 @@
 						}
 					}
 					else if('car' == dev_id){
-						if(command === 'front'){
-							document.getElementById('car_2').style.backgroundColor = '#0a0';
-							document.getElementById('car_3').style.backgroundColor = '#0a0';
-							document.getElementById('car_4').style.backgroundColor = '#0a0';
-							document.getElementById('car_5').style.backgroundColor = '#0a0';
-						}						
-						else if(command === 'back'){
-							document.getElementById('car_1').style.backgroundColor = '#0a0';
-							document.getElementById('car_3').style.backgroundColor = '#0a0';
-							document.getElementById('car_4').style.backgroundColor = '#0a0';
-							document.getElementById('car_5').style.backgroundColor = '#0a0';
-						}
-						else if(command === 'stop'){
-							document.getElementById('car_1').style.backgroundColor = '#0a0';
-							document.getElementById('car_2').style.backgroundColor = '#0a0';
-							document.getElementById('car_4').style.backgroundColor = '#0a0';
-							document.getElementById('car_5').style.backgroundColor = '#0a0';
-						}
-						else if(command === 'left'){
-							document.getElementById('car_1').style.backgroundColor = '#0a0';
-							document.getElementById('car_2').style.backgroundColor = '#0a0';
-							document.getElementById('car_3').style.backgroundColor = '#0a0';
-							document.getElementById('car_5').style.backgroundColor = '#0a0';
-						}
-						else if(command === 'right'){
-							document.getElementById('car_1').style.backgroundColor = '#0a0';
-							document.getElementById('car_2').style.backgroundColor = '#0a0';
-							document.getElementById('car_3').style.backgroundColor = '#0a0';
-							document.getElementById('car_4').style.backgroundColor = '#0a0';
+						keys = ['car_1', 'car_2', 'car_3', 'car_4', 'car_5'];
+						for(index in keys){
+							if(keys[index] != json.id){
+								document.getElementById(keys[index]).style.backgroundColor = '#0a0';
+							}
 						}
 					}
 				}	
@@ -135,19 +110,20 @@
 		<button id="11" class="btn" onclick="docommand('lamp', '11')">灯11</button>
 	</div>
 </div>
-<div class="wrap"><hr/></div>
+<br/><br/>
+<div class="wrap"><hr/></div><br/>
 <div class="wrap"><h1>小车测试</h1></div>
 <div class="car">
 	<div class="wrap">
-		<button id="car_1" class="btn" onclick="docommand('car', 'car_1', 'front')" style="border-top-left-radius:5em;border-top-right-radius:5em;">前进</button>
+		<button id="car_1" class="btn" onclick="docommand('car', 'car_1', 'front')" style="border-top-left-radius:3em;border-top-right-radius:3em;border-bottom-left-radius:0.3em;border-bottom-right-radius:0.3em;">前进</button>
 	</div>
 	<div class="wrap">
-		<button id="car_4" class="btn" onclick="docommand('car', 'car_4', 'left')" style="border-top-left-radius:15em;border-bottom-left-radius:15em;">左转</button>
+		<button id="car_4" class="btn" onclick="docommand('car', 'car_4', 'left')" style="border-top-left-radius:3em;border-bottom-left-radius:3em;border-top-right-radius:0.3em;border-bottom-right-radius:0.3em;">左转</button>
 		<button id="car_3" class="btn" onclick="docommand('car', 'car_3', 'stop')">停止</button>
-		<button id="car_5" class="btn" onclick="docommand('car', 'car_5', 'right')" style="border-top-right-radius:15em;border-bottom-right-radius:15em;">右转</button>
+		<button id="car_5" class="btn" onclick="docommand('car', 'car_5', 'right')" style="border-top-right-radius:3em;border-bottom-right-radius:3em;border-top-left-radius:0.3em;border-bottom-left-radius:0.3em;">右转</button>
 	</div>
 	<div class="wrap">
-		<button id="car_2" class="btn" onclick="docommand('car', 'car_2', 'back')" style="border-bottom-left-radius:5em;border-bottom-right-radius:5em;">后退</button>
+		<button id="car_2" class="btn" onclick="docommand('car', 'car_2', 'back')" style="border-bottom-left-radius:3em;border-bottom-right-radius:3em;border-top-left-radius:0.3em;border-top-right-radius:0.3em;">后退</button>
 	</div>
 </div>	
 </body>

@@ -5,8 +5,12 @@
 """
 __author__ = 'yejs'
 __version__ = '1.0'
- 
+
+from myhandler import ControlHandler
+from myhandler import RPi_GPIO 
 import os
+import RPi.GPIO as io
+
 import tornado.httpserver
 import tornado.options
 import tornado.ioloop
@@ -31,8 +35,7 @@ def try_exit():
         tornado.ioloop.IOLoop.instance().stop()
         logging.info('exit success')
 
-from myhandler import ControlHandler
-from myhandler import RPi_GPIO
+
 '''
 handler  是一个列表，每个列表项是tuple，每个tuple有三个选项，第一个为条件匹配项，符合此条件的则调用第二个handler选项，第三个可选项作为参数传给handler
 '''
