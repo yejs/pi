@@ -7,124 +7,75 @@
     <meta name="viewport" content="maximum-scale=1.0"/>
     <meta name="viewport" content="user-scalable=1.0"/>
     <title>树莓派GPIO测试</title>
-	<style type="text/css"> 
-	.wrap
-	{
-		margin: 0px 0px 15px 0px;text-align:center;
-	}
-	.btn
-	{
-		margin: 0px 5px 0px 0px;
-		width: 180px;
-		height: 180px;line-height:180px;
-		border-top-left-radius:3em;
-		border-top-right-radius:3em;
-		border-bottom-left-radius:3em;
-		border-bottom-right-radius:3em;
-		background-color: #0a0;
-		border: 1px solid #D7D7D7;
-		outline:none;
-		font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:36px;
-	}
-	.btn:active{outline:none;}
-	</style>
+	<link rel="stylesheet" type="text/css"href="css/menu.css"/>
 
 	<script type="text/javascript" src="js/mymath.js"></script>
+	
     <script>
-		lamp = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0};//初始状态都为0（熄灭）
-		docommand = function(dev_id, id, command){
-			var btn = document.getElementById(id.toString());
-	
-			btn.style.backgroundColor = '#ee0';
+		window.onload = function(){
+			document.getElementById("wrap").style.display="block";
 			
-			if('lamp' == dev_id){
-				if(lamp[id] === 0)
-					command = 'on';
-				else
-					command = 'off';
+			var _title = ['灯光测试', '小车测试', '视频监控'];
+			var news=document.getElementById("news_ul");
+			for(var i=0;i<_title.length;i++){
+				var li = create_element(news, 'li', null, null, null);
+				var a = create_element(li, 'a', null, null, _title[i]);
+				a.setAttribute("href", 'javascript:onNewsTitle(' + i + ');');
+				li.style.border = "0px";
+				li.style.borderBottomStyle ="none";
 			}
+			setTimeout(function() {onNewsTitle(0);},20);
 			
-			param = "dev_id=" + dev_id + "&id=" + id + "&command=" + command;
-	
-			loadXMLDoc("/control",function()
+		}
+		
+		onNewsTitle = function(i){
+			var news=document.getElementById("news_ul");
+			var elem_child = news.getElementsByTagName("li"); 
+			for(var j=0;j<elem_child.length;j++)
 			{
-				if (xmlhttp.readyState==4 && xmlhttp.status==200){
-					console.log(base64decode(xmlhttp.responseText));	
-					var json = JSON.parse(base64decode(xmlhttp.responseText));
-					var command = json.command;
-					if('lamp' == dev_id){
-						var id = parseInt(json.id);
-						if(command === 'on'){
-							lamp[id] = 1;
-							btn.style.backgroundColor = '#e00';
-						}						
-						else{
-							lamp[id] = 0;
-							btn.style.backgroundColor = '#0a0';
-						}
-						if(id === 12){
-							for(var i=1;i<13;i++){
-								lamp[i] = lamp[id];
-								if(lamp[id])
-									document.getElementById(i.toString()).style.backgroundColor = '#e00';
-								else
-									document.getElementById(i.toString()).style.backgroundColor = '#0a0';
-							}
-						}
-					}
-					else if('car' == dev_id){
-						keys = ['car_1', 'car_2', 'car_3', 'car_4', 'car_5'];
-						for(index in keys){
-							if(keys[index] != json.id){
-								document.getElementById(keys[index]).style.backgroundColor = '#0a0';
-							}
-						}
-					}
-				}	
-				xmlhttp.oncallback(xmlhttp.readyState);	
-			}, param);
+				var a = elem_child[j].getElementsByTagName("a")[0]; 
+				if(i == j){
+					a.style.color = '#f00';
+					a.style.background = getMenuImg(0);
+				}
+				else{
+					a.style.color = '#000';
+					a.style.background = 'transparent';
+				}
+			}
+			if(0 == i){
+				document.getElementById("lamp").style.display="block";
+				document.getElementById("car").style.display="none";
+				document.getElementById("video").style.display="none";
+			}
+			else if(1 == i){
+				document.getElementById("lamp").style.display="none";
+				document.getElementById("car").style.display="block";
+			}
+			else if(2 == i){
+				document.getElementById("lamp").style.display="none";
+				document.getElementById("car").style.display="none";
+				document.getElementById("video").style.display="block";
+			}
 		}
     </script>
 </head>
 <body>
-<div class="wrap"><h1>灯测试</h1></div>
-<div class="lamp">
-	<div class="wrap">
-		<button id="1" class="btn" onclick="docommand('lamp', '1')">灯1</button>
-		<button id="2" class="btn" onclick="docommand('lamp', '2')">灯2</button>
-		<button id="3" class="btn" onclick="docommand('lamp', '3')">灯3</button>
+
+<div id = "wrap" style="display:none;overflow-y:auto;height: 100%; position: relative;width:100%;background:white;margin:0 auto;max-width:1080px;">
+	<div class="menu" id = "news" align="left">
+		<ul id = "news_ul">
+		</ul>
 	</div>
-	<div class="wrap">
-		<button id="4" class="btn" onclick="docommand('lamp', '4')">灯4</button>
-		<button id="5" class="btn" onclick="docommand('lamp', '5')">灯5</button>
-		<button id="6" class="btn" onclick="docommand('lamp', '6')">灯6</button>
+	<div id="lamp" style="display:block">
+		<iframe src='lamp.html' style="width:100%;height:100vh;border:none;"></iframe>
 	</div>
-	<div class="wrap">
-		<button id="7" class="btn" onclick="docommand('lamp', '7')">灯7</button>
-		<button id="8" class="btn" onclick="docommand('lamp', '8')">灯8</button>
-		<button id="9" class="btn" onclick="docommand('lamp', '9')">灯9</button>
+	<div id="car" style="display:none">
+		<iframe src='car.html' style="width:100%;height:100vh;border:none;"></iframe>
 	</div>
-	<div class="wrap">
-		<button id="10" class="btn" onclick="docommand('lamp', '10')">灯10</button>
-		<button id="12" class="btn" onclick="docommand('lamp', '12')">所有</button>
-		<button id="11" class="btn" onclick="docommand('lamp', '11')">灯11</button>
+	<div id="video" style="display:none">
+		<iframe src='192.168.1.102:8081' style="width:100%;height:100vh;border:none;"></iframe>
 	</div>
 </div>
-<br/><br/>
-<div class="wrap"><hr/></div><br/>
-<div class="wrap"><h1>小车测试</h1></div>
-<div class="car">
-	<div class="wrap">
-		<button id="car_1" class="btn" onclick="docommand('car', 'car_1', 'front')" style="border-top-left-radius:3em;border-top-right-radius:3em;border-bottom-left-radius:0.3em;border-bottom-right-radius:0.3em;">前进</button>
-	</div>
-	<div class="wrap">
-		<button id="car_4" class="btn" onclick="docommand('car', 'car_4', 'left')" style="border-top-left-radius:3em;border-bottom-left-radius:3em;border-top-right-radius:0.3em;border-bottom-right-radius:0.3em;">左转</button>
-		<button id="car_3" class="btn" onclick="docommand('car', 'car_3', 'stop')">停止</button>
-		<button id="car_5" class="btn" onclick="docommand('car', 'car_5', 'right')" style="border-top-right-radius:3em;border-bottom-right-radius:3em;border-top-left-radius:0.3em;border-bottom-left-radius:0.3em;">右转</button>
-	</div>
-	<div class="wrap">
-		<button id="car_2" class="btn" onclick="docommand('car', 'car_2', 'back')" style="border-bottom-left-radius:3em;border-bottom-right-radius:3em;border-top-left-radius:0.3em;border-top-right-radius:0.3em;">后退</button>
-	</div>
-</div>	
 </body>
 </html>

@@ -144,3 +144,31 @@ out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
 } 
 return out; 
 } 
+
+var create_element = function(parant, _element, _class, _id, _text) 
+{ 
+	var ele = document.createElement(_element); 
+	if(_text)
+		ele.innerHTML = _text; 
+	if(_class)
+		ele.setAttribute("class", _class);
+	//	ele.className=_class;
+	if(_id)
+		ele.setAttribute("id", _id);
+	//	ele.id = _id;
+	if(parant)
+		parant.appendChild(ele); 
+	return ele;
+} 
+
+function getMenuImg(i)
+{ 
+	var img = 'transparent url(/';
+
+	if(i == 0)
+		img += 'web/images/menu_bk0.png) top left no-repeat';
+	else
+		img += 'web/images/menu_bk1.png) top left no-repeat';
+
+	return img;
+}

@@ -9,7 +9,7 @@ __version__ = '1.0'
 __all__ = ["ControlHandler", "RPi_GPIO"]
 
 import os
-import RPi.GPIO as io
+#import RPi.GPIO as io
 import tornado.web
 import json
 import base64
