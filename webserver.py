@@ -9,7 +9,7 @@ __version__ = '1.0'
 from myhandler import ControlHandler
 from myhandler import RPi_GPIO 
 import os
-import RPi.GPIO as io
+#import RPi.GPIO as io
 
 import tornado.httpserver
 import tornado.options
