@@ -45,7 +45,7 @@ div.menu
     overflow:auto;position:relative; width: 100%;max-width:100%;height:auto;
     margin: 0px; /* 与外界元素的距离为0 */
     padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
-	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:34px;
+	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:22px;
 }
 
 /* 所有class为menu的div中的ul样式 */
@@ -69,6 +69,7 @@ div.menu ul li
 {
 	/*float:left; 向左漂移，将竖排变为横排 */
 	display:inline-block;
+	margin: 0px 20px;
 	outline:none;
 	border-bottom-color:#FFF;
 }
@@ -327,13 +328,13 @@ div.item  input.mybtn
 
 	.wrap
 	{
-		margin: 0px 0px 65px 0px;text-align:center;
+		margin: 0px 0px 25px 0px;text-align:center;
 	}
 	.btn
 	{
-		margin: 0px 25px 0px 25px;
-		width: 180px;
-		height: 180px;line-height:180px;
+		margin: 0px 5px 0px 5px;
+		width: 200px;
+		height: 200px;line-height:200px;
 		border-top-left-radius:3em;
 		border-top-right-radius:3em;
 		border-bottom-left-radius:3em;
@@ -341,6 +342,6 @@ div.item  input.mybtn
 		background-color: #0a0;
 		border: 1px solid #D7D7D7;
 		outline:none;
-		font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:36px;
+		font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:32px;
 	}
 	.btn:active{outline:none;}

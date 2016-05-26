@@ -9,6 +9,9 @@
     <title>树莓派GPIO测试</title>
 	<link rel="stylesheet" type="text/css"href="css/menu.css"/>
 
+	<style type="text/css">
+		.myframe {width:100%;height:100vh;border:none;}
+	</style>
 	<script type="text/javascript" src="js/mymath.js"></script>
 	
     <script>
@@ -53,6 +56,7 @@
 				document.getElementById("car").style.display="block";
 			}
 			else if(2 == i){
+			//	window.location.href = 'http://192.168.1.102:8081';
 				document.getElementById("lamp").style.display="none";
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="block";
@@ -68,13 +72,13 @@
 		</ul>
 	</div>
 	<div id="lamp" style="display:block">
-		<iframe src='lamp.html' style="width:100%;height:100vh;border:none;"></iframe>
+		<iframe src='lamp.html' class="myframe"></iframe>
 	</div>
 	<div id="car" style="display:none">
-		<iframe src='car.html' style="width:100%;height:100vh;border:none;"></iframe>
+		<iframe src='car.html' class="myframe"></iframe>
 	</div>
 	<div id="video" style="display:none">
-		<iframe src='192.168.1.102:8081' style="width:100%;height:100vh;border:none;"></iframe>
+		<embed src='fake.html' class="myframe"></embed>
 	</div>
 </div>
 </body>
