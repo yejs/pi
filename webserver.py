@@ -6,9 +6,9 @@
 __author__ = 'yejs'
 __version__ = '1.0'
 
-from myhandler import ControlHandler
+from myhandler import ControlHandler, ChatSocketHandler
 from myhandler import RPi_GPIO 
-import os
+import os, threading
 #import RPi.GPIO as io
 
 import tornado.httpserver
@@ -43,10 +43,14 @@ application = tornado.web.Application([
     ('/', tornado.web.RedirectHandler, dict(url='/web/index.html')),	#不输入任何参数，默认重定向打开首页
     ('/web/(.*)', tornado.web.StaticFileHandler, dict(path='./web')),	#打开静态页面
     ('/control', ControlHandler),										#动态控制方法
+	('/socket', ChatSocketHandler),
 ])
  
 if __name__ == "__main__":
     try:
+        #t = threading.Thread(target=InitWebSocketServer,args=(u'',))
+        #t.setDaemon(True)
+        #t.start()
         RPi_GPIO.init(dir())
         #os.chdir(os.path.dirname(__file__))
         tornado.options.parse_command_line()

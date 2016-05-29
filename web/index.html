@@ -46,19 +46,34 @@
 					a.style.background = 'transparent';
 				}
 			}
+			var news=document.getElementById("video");
+			var elem_child = news.getElementsByTagName("iframe"); 
+		
 			if(0 == i){
 				document.getElementById("lamp").style.display="block";
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="none";
+				elem_child[0].src = "";
 			}
 			else if(1 == i){
 				document.getElementById("lamp").style.display="none";
 				document.getElementById("car").style.display="block";
+				document.getElementById("video").style.display="none";
+				elem_child[0].src = "";
 			}
 			else if(2 == i){
 				document.getElementById("lamp").style.display="none";
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="block";
+				
+				var src = window.location.host;
+				var npos = src.indexOf(":");
+			//	alert(src);
+				if(npos >= 0)
+					src = src.substr(0,npos);
+				src += ":8080/javascript_simple.html";
+				elem_child[0].src = "http://" + src;
+			//	alert(src);
 			}
 		}
     </script>
@@ -77,7 +92,7 @@
 		<iframe src='car.html' class="myframe"></iframe>
 	</div>
 	<div id="video" style="display:none">
-		<iframe src='fake.html' class="myframe"></iframe>
+		<iframe src='' class="myframe"></iframe>
 	</div>
 </div>
 </body>

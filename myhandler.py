@@ -11,14 +11,13 @@ __all__ = ["ControlHandler", "RPi_GPIO"]
 import os
 #import RPi.GPIO as io
 import tornado.web
+import tornado.websocket
 import json
 import base64
 
 #BOARD模式
 _OUT_ = {'1':'11', '2':'12', '3':'13', '4':'15', '5':'16', '6':'18', '7':'22', '8':'7', '9':'3', '10':'5','11':'24', '12':'26', '13':'19', '14':'21', '15':'23', '16':'8', '17':'10'}
-
 _LAMP_ = {'1':'off', '2':'off', '3':'off', '4':'off', '5':'off', '6':'off', '7':'off', '8':'off', '9':'off', '10':'off', '11':'off', '12':'off', '13':'off', '14':'off', '15':'off', '16':'off', '17':'off'}
-
 
 class RPi_GPIO():
 	_is_exist = False;
@@ -48,6 +47,40 @@ class RPi_GPIO():
 
 		io.output(channle, command)
 
+def send_lamp_status():
+    for handler in ChatSocketHandler.socket_handlers:
+        str1 = '{\"event\": \"lamp\", \"data\":{'
+ 
+        first = True  
+        for key, value in _LAMP_.items():
+            if first:
+                first = False
+            else :
+                str1 += ","
+            str1 += "\"%s\":\"%s\"" % (key, value)
+        str1 += '}}'
+  
+        send_message(str1) 
+			
+def send_message(message):
+    for handler in ChatSocketHandler.socket_handlers:
+        try:
+            handler.write_message(message)
+        except:
+            logging.error('Error sending message', exc_info=True)
+			
+class ChatSocketHandler(tornado.websocket.WebSocketHandler):
+    socket_handlers = set()
+    def open(self):
+        ChatSocketHandler.socket_handlers.add(self)
+        send_lamp_status()
+        #send_message('A new user has entered the chat room.')
+    def on_close(self):
+        ChatSocketHandler.socket_handlers.remove(self)
+        #send_message('A user has left the chat room.')
+    def on_message(self, message):
+        send_message(message)
+		
 class ControlHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         post_data = {}
@@ -82,6 +115,8 @@ class ControlHandler(tornado.web.RequestHandler):
                 _LAMP_[k] = post_data['command'][0]
         else:
             _LAMP_[post_data['id'][0]] = post_data['command'][0]
+			
+        send_lamp_status()
 				
     def car(post_data):
         command = post_data['command'][0]
