@@ -48,9 +48,6 @@ application = tornado.web.Application([
  
 if __name__ == "__main__":
     try:
-        #t = threading.Thread(target=InitWebSocketServer,args=(u'',))
-        #t.setDaemon(True)
-        #t.start()
         RPi_GPIO.init(dir())
         #os.chdir(os.path.dirname(__file__))
         tornado.options.parse_command_line()
