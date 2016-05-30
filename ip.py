@@ -16,6 +16,6 @@ for I in res:
 		#http://blog.sina.com.cn/s/blog_abd39cc70102vrdt.html
 		#LD_LIBRARY_PATH=/home/pi/mjpg-streamer-master/mjpg-streamer-experimental ./mjpg_streamer -i "./input_uvc.so -y -d /dev/video0 -r 640x480 -f 12" -o "./output_http.so -w ./www"
 		''' 
-		v4l2_palette 8
-		minimum_frame_time 1
+		http://blog.csdn.net/lwei_998/article/details/6637912
+		http://blog.sina.com.cn/s/blog_688077cf01013qrk.html
 		'''

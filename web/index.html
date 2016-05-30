@@ -18,7 +18,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['灯光测试', '小车测试', '视频监控'];
+			var _title = ['灯光', '小车', '视频监控', '视频监控', '视频监控', '视频监控', '视频监控'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -42,7 +42,7 @@
 					a.style.background = getMenuImg(0);
 				}
 				else{
-					a.style.color = '#000';
+					a.style.color = '#033';
 					a.style.background = 'transparent';
 				}
 			}
@@ -68,12 +68,11 @@
 				
 				var src = window.location.host;
 				var npos = src.indexOf(":");
-			//	alert(src);
+
 				if(npos >= 0)
 					src = src.substr(0,npos);
 				src += ":8080/javascript_simple.html";
 				elem_child[0].src = "http://" + src;
-			//	alert(src);
 			}
 		}
     </script>
