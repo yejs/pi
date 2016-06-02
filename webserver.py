@@ -6,7 +6,7 @@
 __author__ = 'yejs'
 __version__ = '1.0'
 
-from myhandler import ControlHandler, ChatSocketHandler
+from myhandler import WebHandler, WebSocket, SocketServer
 from myhandler import RPi_GPIO 
 import os, threading
 #import RPi.GPIO as io
@@ -42,8 +42,8 @@ handler  是一个列表，每个列表项是tuple，每个tuple有三个选项�
 application = tornado.web.Application([
     ('/', tornado.web.RedirectHandler, dict(url='/web/index.html')),	#不输入任何参数，默认重定向打开首页
     ('/web/(.*)', tornado.web.StaticFileHandler, dict(path='./web')),	#打开静态页面
-    ('/control', ControlHandler),										#动态控制方法
-	('/socket', ChatSocketHandler),
+    ('/control', WebHandler),										#动态控制方法
+	('/socket', WebSocket),
 ])
  
 if __name__ == "__main__":
@@ -52,8 +52,10 @@ if __name__ == "__main__":
         #os.chdir(os.path.dirname(__file__))
         tornado.options.parse_command_line()
         signal.signal(signal.SIGINT, signal_handler)       
-        http_server = tornado.httpserver.HTTPServer(application)
+        http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
         http_server.listen(options.port)
+        server = SocketServer()    
+        server.listen(5000)
         print ("webserver 127.0.0.1:%s start..." % options.port)
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()

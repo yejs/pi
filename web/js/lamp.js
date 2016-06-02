@@ -18,14 +18,16 @@ function lamp()
 	this.timer = null;
 	this.ws = null;
 
+	//websocket 处理函数
 	this.onmessage = function(evt)
 	{
 		var json = JSON.parse(evt.data);
 		if(!json)
 			return;
-	
+		
+		
 		if( json.event === "lamp" ){
-		//	console.log(json.data);
+			//console.log(json.data);
 			ret = json.data;
 			for(var i=1;i<12;i++){
 				if(ret[i.toString()] === 'on'){
@@ -54,6 +56,9 @@ function lamp()
 				document.getElementById('12').style.backgroundColor = '#0a0';
 			}
 		} 
+		else if( json.event === "msg" ){
+			console.log(json.data);
+		}
 	}
 	this.onopen = function()
 	{
@@ -61,13 +66,6 @@ function lamp()
 			clearInterval(_lamp.timer);
 		
 		_lamp.ws.handshake = true;
-		
-		setTimeout(function(){
-			_lamp.ws.send(JSON.stringify({
-			"event": "AUTH",
-			"data": 'video_client'
-			}));
-		}, 3000);
 		
 	}
 	
@@ -97,10 +95,11 @@ docommand = function(dev_id, id, command){
 	
 	param = "dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 
+	//页面ajax请求
 	loadXMLDoc("/control",function()
 	{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200){
-			console.log(base64decode(xmlhttp.responseText));	
+			//console.log(base64decode(xmlhttp.responseText));	
 			var json = JSON.parse(base64decode(xmlhttp.responseText));
 			var command = json.command;
 			if('lamp' == dev_id){
