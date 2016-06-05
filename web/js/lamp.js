@@ -7,7 +7,6 @@ _port = 8000;
 
 window.onload = function(){
 	if(document.getElementById('lamp')){
-		console.log('111');
 		_lamp = new lamp();
 		_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
 	}

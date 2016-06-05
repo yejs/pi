@@ -14,8 +14,10 @@ for I in res:
 		#http://blog.csdn.net/bona020/article/details/51034043#comments
 		#http://blog.csdn.net/Bobsweetie/article/details/50814849
 		#http://blog.sina.com.cn/s/blog_abd39cc70102vrdt.html
-		#LD_LIBRARY_PATH=/home/pi/mjpg-streamer-master/mjpg-streamer-experimental ./mjpg_streamer -i "./input_uvc.so -y -d /dev/video0 -r 640x480 -f 12" -o "./output_http.so -w ./www"
+		#LD_LIBRARY_PATH=/home/pi/mjpg/mjpg (./mjpg_streamer -i "./input_uvc.so -y -d /dev/video0 -r 640x480 -f 12" -o "./output_http.so -w ./www" &)
 		''' 
 		http://blog.csdn.net/lwei_998/article/details/6637912
 		http://blog.sina.com.cn/s/blog_688077cf01013qrk.html
+		
+		AT+CIPSTART="TCP","192.168.1.101","5000"
 		'''

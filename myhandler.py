@@ -9,7 +9,7 @@ __version__ = '1.0'
 __all__ = ["WebHandler", "RPi_GPIO"]
 
 import os
-#import RPi.GPIO as io
+import RPi.GPIO as GPIO
 import tornado.web
 import tornado.websocket
 from tornado.tcpserver import TCPServer 
@@ -18,7 +18,7 @@ import base64
 import logging
 
 #BOARD模式
-_LAMP_ = {'1':{'pin': '11', 'ip' : '192.168.26.140' , 'status' : 'off'}, '2':{'pin': '12', 'ip' : '192.168.1.111' , 'status' : 'off'}, '3':{'pin': '13', 'ip' : '192.168.1.111' , 'status' : 'off'}, '4':{'pin': '15', 'ip' : '192.168.1.111' , 'status' : 'off'}, '5':{'pin': '16', 'ip' : '192.168.1.111' , 'status' : 'off'}, '6':{'pin': '18', 'ip' : '192.168.1.111' , 'status' : 'off'}, '7':{'pin': '22', 'ip' : '192.168.1.111' , 'status' : 'off'}, '8':{'pin': '7', 'ip' : '192.168.1.111' , 'status' : 'off'}, '9':{'pin': '3', 'ip' : '192.168.1.111' , 'status' : 'off'}, '10':{'pin': '5', 'ip' : '192.168.1.111' , 'status' : 'off'}, '11':{'pin': '24', 'ip' : '192.168.1.111' , 'status' : 'off'}, '12':{'pin': '26', 'ip' : '192.168.1.111' , 'status' : 'off'}, '13':{'pin': '19', 'ip' : '192.168.1.111' , 'status' : 'off'}, '14':{'pin': '21', 'ip' : '192.168.1.111' , 'status' : 'off'}, '15':{'pin': '23', 'ip' : '192.168.1.111' , 'status' : 'off'}, '16':{'pin': '8', 'ip' : '192.168.1.111' , 'status' : 'off'}, '17':{'pin': '10', 'ip' : '192.168.1.111' , 'status' : 'off'}}
+_LAMP_ = {'1':{'pin': '11', 'ip' : '192.168.1.101' , 'status' : 'off'}, '2':{'pin': '12', 'ip' : '192.168.1.111' , 'status' : 'off'}, '3':{'pin': '13', 'ip' : '192.168.1.111' , 'status' : 'off'}, '4':{'pin': '15', 'ip' : '192.168.1.111' , 'status' : 'off'}, '5':{'pin': '16', 'ip' : '192.168.1.111' , 'status' : 'off'}, '6':{'pin': '18', 'ip' : '192.168.1.111' , 'status' : 'off'}, '7':{'pin': '22', 'ip' : '192.168.1.111' , 'status' : 'off'}, '8':{'pin': '7', 'ip' : '192.168.1.111' , 'status' : 'off'}, '9':{'pin': '3', 'ip' : '192.168.1.111' , 'status' : 'off'}, '10':{'pin': '5', 'ip' : '192.168.1.111' , 'status' : 'off'}, '11':{'pin': '24', 'ip' : '192.168.1.111' , 'status' : 'off'}, '12':{'pin': '26', 'ip' : '192.168.1.111' , 'status' : 'off'}, '13':{'pin': '19', 'ip' : '192.168.1.111' , 'status' : 'off'}, '14':{'pin': '21', 'ip' : '192.168.1.111' , 'status' : 'off'}, '15':{'pin': '23', 'ip' : '192.168.1.111' , 'status' : 'off'}, '16':{'pin': '8', 'ip' : '192.168.1.111' , 'status' : 'off'}, '17':{'pin': '10', 'ip' : '192.168.1.111' , 'status' : 'off'}}
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 class RPi_GPIO():
 	_is_exist = False;
@@ -30,23 +30,23 @@ class RPi_GPIO():
 		return False;
 		
 	def init(modules):
-		if RPi_GPIO.is_exist(modules, 'io'):
+		if RPi_GPIO.is_exist(modules, 'GPIO'):
 			print ("RPi.GPIO init...")
 			RPi_GPIO._is_exist = True
-			io.setmode(io.BOARD)
+			GPIO.setmode(GPIO.BOARD)
 			for k,v in _LAMP_.items():
-				io.setup(int(v['pin']), io.OUT)
-				io.output(int(v['pin']), io.HIGH)
+				GPIO.setup(int(v['pin']), GPIO.OUT)
+				GPIO.output(int(v['pin']), GPIO.HIGH)
 
 	def cleanup():
 		if RPi_GPIO._is_exist:
-			io.cleanup()
+			GPIO.cleanup()
 	
 	def output(channle, command):
 		if RPi_GPIO._is_exist == False:
 			return;
 
-		io.output(channle, command)
+		GPIO.output(channle, command)
 		
 class Connection(object):    
     clients = set()    
@@ -101,16 +101,16 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     def on_close(self):
         WebSocket.socket_handlers.remove(self)
     def on_message(self, message):
-        WebSocket.broadcast_message(message)
+        WebSocket.broadcast_messages(message)
 	
-    def broadcast_message(message):
+    def broadcast_messages(message):
         for handler in WebSocket.socket_handlers:
             try:
                 handler.write_message(message)
             except:
                 logging.error('Error sending message', exc_info=True)
 				
-    #向其它页面客户端广播状态消息
+    #向其它页面客户端广播状态消息(用于各客户端间同步，一个客户端发送命令，其它客户端同时此看到命令)
     def broadcast_lamp_status():
         str1 = '{\"event\": \"lamp\", \"data\":{'
  
@@ -123,7 +123,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             str1 += "\"%s\":\"%s\"" % (key, value['status'])
         str1 += '}}'
   
-        WebSocket.broadcast_message(str1) 
+        WebSocket.broadcast_messages(str1) 
 		
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):

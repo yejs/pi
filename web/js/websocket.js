@@ -18,14 +18,10 @@ function websocket(strHost, onmessage, onopen, onclose, onerror)
 	};
 	
 	this.ws.onopen = function(){
-		console.log("握手成功");
-		
 		if(onopen)
 			onopen();
 	};
 	this.ws.onclose = function(){
-		console.log("关闭");
-
 		if(onclose)
 			onclose();
 	};
