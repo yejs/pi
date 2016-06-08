@@ -9,7 +9,7 @@ __version__ = '1.0'
 __all__ = ["WebHandler", "RPi_GPIO"]
 
 import os
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import tornado.web
 import tornado.websocket
 from tornado.tcpserver import TCPServer 
@@ -18,7 +18,8 @@ import base64
 import logging
 
 #BOARD模式
-_LAMP_ = {'1':{'pin': '11', 'ip' : '192.168.1.101' , 'status' : 'off'}, '2':{'pin': '12', 'ip' : '192.168.1.111' , 'status' : 'off'}, '3':{'pin': '13', 'ip' : '192.168.1.111' , 'status' : 'off'}, '4':{'pin': '15', 'ip' : '192.168.1.111' , 'status' : 'off'}, '5':{'pin': '16', 'ip' : '192.168.1.111' , 'status' : 'off'}, '6':{'pin': '18', 'ip' : '192.168.1.111' , 'status' : 'off'}, '7':{'pin': '22', 'ip' : '192.168.1.111' , 'status' : 'off'}, '8':{'pin': '7', 'ip' : '192.168.1.111' , 'status' : 'off'}, '9':{'pin': '3', 'ip' : '192.168.1.111' , 'status' : 'off'}, '10':{'pin': '5', 'ip' : '192.168.1.111' , 'status' : 'off'}, '11':{'pin': '24', 'ip' : '192.168.1.111' , 'status' : 'off'}, '12':{'pin': '26', 'ip' : '192.168.1.111' , 'status' : 'off'}, '13':{'pin': '19', 'ip' : '192.168.1.111' , 'status' : 'off'}, '14':{'pin': '21', 'ip' : '192.168.1.111' , 'status' : 'off'}, '15':{'pin': '23', 'ip' : '192.168.1.111' , 'status' : 'off'}, '16':{'pin': '8', 'ip' : '192.168.1.111' , 'status' : 'off'}, '17':{'pin': '10', 'ip' : '192.168.1.111' , 'status' : 'off'}}
+_LAMP_ = {'1':{'pin': '11', 'ip' : '192.168.26.140' , 'status' : 'off'}, '2':{'pin': '12', 'ip' : '192.168.1.111' , 'status' : 'off'}, '3':{'pin': '13', 'ip' : '192.168.1.111' , 'status' : 'off'}, '4':{'pin': '15', 'ip' : '192.168.1.111' , 'status' : 'off'}, '5':{'pin': '16', 'ip' : '192.168.1.111' , 'status' : 'off'}, '6':{'pin': '18', 'ip' : '192.168.1.111' , 'status' : 'off'}, '7':{'pin': '22', 'ip' : '192.168.1.111' , 'status' : 'off'}, '8':{'pin': '7', 'ip' : '192.168.1.111' , 'status' : 'off'}, '9':{'pin': '3', 'ip' : '192.168.1.111' , 'status' : 'off'}, '10':{'pin': '5', 'ip' : '192.168.1.111' , 'status' : 'off'}, '11':{'pin': '24', 'ip' : '192.168.1.111' , 'status' : 'off'}, '12':{'pin': '26', 'ip' : '192.168.1.111' , 'status' : 'off'}, '13':{'pin': '19', 'ip' : '192.168.1.111' , 'status' : 'off'}, '14':{'pin': '21', 'ip' : '192.168.1.111' , 'status' : 'off'}, '15':{'pin': '23', 'ip' : '192.168.1.111' , 'status' : 'off'}, '16':{'pin': '8', 'ip' : '192.168.1.111' , 'status' : 'off'}, '17':{'pin': '10', 'ip' : '192.168.1.111' , 'status' : 'off'}}
+_all_ = {'pin': '', 'ip' : '' , 'status' : 'off'}
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 class RPi_GPIO():
 	_is_exist = False;
@@ -152,17 +153,17 @@ class WebHandler(tornado.web.RequestHandler):
             command = False
         elif post_data['command'][0] == 'off':
             command = True
-        RPi_GPIO.output(int(_LAMP_[id]['pin']), command)
-        if sock != None:
-            sock.output(_LAMP_[id]['ip'], post_data['command'][0])
-		
-        if id == '12':
+
+        if id == 'all':
             for k,v in _LAMP_.items():
                 RPi_GPIO.output(int(v['pin']), command)
                 if sock != None:
                     sock.output(v['ip'], post_data['command'][0])
                 v['status'] = post_data['command'][0]
         else:
+            RPi_GPIO.output(int(_LAMP_[id]['pin']), command)
+            if sock != None:
+                sock.output(_LAMP_[id]['ip'], post_data['command'][0])
             _LAMP_[id]['status'] = post_data['command'][0]
 			
         WebSocket.broadcast_lamp_status()

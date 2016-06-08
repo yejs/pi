@@ -1,7 +1,7 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/websocket.js"></script>');
 
-_LAMP_ = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0};//初始状态都为0（熄灭）
+_LAMP_ = {'1':0, '2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, '11':0, 'all':0};//初始状态都为0（熄灭）
 _lamp = null;
 _port = 8000;
 
@@ -26,33 +26,33 @@ function lamp()
 		
 		
 		if( json.event === "lamp" ){
-			//console.log(json.data);
+		//	console.log(JSON.stringify(json.data));
 			ret = json.data;
 			for(var i=1;i<12;i++){
 				if(ret[i.toString()] === 'on'){
-					_LAMP_[i] = 1;
+					_LAMP_[i.toString()] = 1;
 					document.getElementById(i.toString()).style.backgroundColor = '#e00';
 				}						
 				else{
-					_LAMP_[i] = 0;
+					_LAMP_[i.toString()] = 0;
 					document.getElementById(i.toString()).style.backgroundColor = '#0a0';
 				}
 			}
 
 			for(var i=1;i<12;i++){
-				if(_LAMP_[1] !== _LAMP_[i]){
-					_LAMP_[12] = 0;
-					document.getElementById('12').style.backgroundColor = '#0a0';
+				if(_LAMP_['1'] !== _LAMP_[i.toString()]){
+					_LAMP_['all'] = 0;
+					document.getElementById('all').style.backgroundColor = '#0a0';
 					return;
 				}
 			}
-			if(_LAMP_[1] === 1){
-				_LAMP_[12] = 1;
-				document.getElementById('12').style.backgroundColor = '#e00';		
+			if(_LAMP_['1'] === 1){
+				_LAMP_['all'] = 1;
+				document.getElementById('all').style.backgroundColor = '#e00';		
 			}				
 			else{
-				_LAMP_[12] = 0;
-				document.getElementById('12').style.backgroundColor = '#0a0';
+				_LAMP_['all'] = 0;
+				document.getElementById('all').style.backgroundColor = '#0a0';
 			}
 		} 
 		else if( json.event === "msg" ){
@@ -98,27 +98,31 @@ docommand = function(dev_id, id, command){
 	loadXMLDoc("/control",function()
 	{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200){
-			//console.log(base64decode(xmlhttp.responseText));	
+		//	console.log(base64decode(xmlhttp.responseText));	
 			var json = JSON.parse(base64decode(xmlhttp.responseText));
 			var command = json.command;
 			if('lamp' == dev_id){
-				var id = parseInt(json.id);
+				var id = json.id;//parseInt(json.id);
 				if(command === 'on'){
 					_LAMP_[id] = 1;
-					btn.style.backgroundColor = '#e00';
+					document.getElementById(id).style.backgroundColor = '#e00';
 				}						
 				else{
 					_LAMP_[id] = 0;
-					btn.style.backgroundColor = '#0a0';
+					document.getElementById(id).style.backgroundColor = '#0a0';
 				}
-				if(id === 12){
-					for(var i=1;i<13;i++){
+				if(id === 'all'){
+					for(var i=1;i<12;i++){
 						_LAMP_[i] = _LAMP_[id];
 						if(_LAMP_[id])
 							document.getElementById(i.toString()).style.backgroundColor = '#e00';
 						else
 							document.getElementById(i.toString()).style.backgroundColor = '#0a0';
 					}
+					if(_LAMP_[id])
+						document.getElementById(id).style.backgroundColor = '#e00';
+					else
+						document.getElementById(id).style.backgroundColor = '#0a0';
 				}
 			}
 			else if('car' == dev_id){

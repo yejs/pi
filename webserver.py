@@ -9,7 +9,7 @@ __version__ = '1.0'
 from myhandler import WebHandler, WebSocket, SocketServer
 from myhandler import RPi_GPIO 
 import os, threading
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 import tornado.httpserver
 import tornado.options
