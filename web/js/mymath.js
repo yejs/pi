@@ -55,6 +55,72 @@ function loadXMLDoc(url,cfunc,param){
 	}
 }
 
+function getWinRect() {   
+	var self = window;
+	if(window.parent != window)
+		self = window.parent;
+	var w = self.innerWidth;
+	var h = self.innerHeight;
+
+	if(!window.innerHeight)
+	{
+		if(document.compatMode == 'CSSICompat'){
+			h = document.documentElement.clientHeight;
+		}else{
+			h = document.body.clientHeight;
+		}
+	}
+	if(document.compatMode == 'CSSICompat'){
+		w = document.documentElement.clientWidth;
+	}else{
+		w = document.body.clientWidth;
+	}
+
+	if(document.compatMode == 'CSSICompat' && document.documentElement.style.maxWidth != undefined && document.documentElement.style.maxWidth.length>0){
+		w = Math.min(w, parseInt(document.documentElement.style.maxWidth));
+	}
+	else if(document.body.style.maxWidth != undefined && document.body.style.maxWidth.length>0){
+		w = Math.min(w, parseInt(document.body.style.maxWidth));
+	}
+
+  return {width:w, height:h};   
+}
+
+function isAndroid(){
+	var u = navigator.userAgent;
+	var Android = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+	return Android;
+}
+
+function isiOS(){
+	var u = navigator.userAgent;
+	var iOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+	return iOS;
+}
+
+function isPC(){
+	var PC = (false == isAndroid() && false == isiOS());
+	return PC;
+}
+
+function GetPageScroll() {   
+  var x, y;   
+  if(window.pageYOffset) {   
+    // all except IE   
+    y = window.pageYOffset;   
+    x = window.pageXOffset;   
+  } else if(document.documentElement    
+    && document.documentElement.scrollTop) {   
+    // IE 6 Strict   
+    y = document.documentElement.scrollTop;   
+    x = document.documentElement.scrollLeft;   
+  } else if(document.body) {   
+    // all other IE   
+    y = document.body.scrollTop;   
+    x = document.body.scrollLeft;    
+  }   
+  return {left:x, top:y};   
+}
 var base64encodechars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; 
 var base64decodechars = new Array( 
 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
