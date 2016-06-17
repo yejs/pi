@@ -2,20 +2,36 @@ document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/websocket.js"></script>');
 document.write('<script type="text/javascript" src="js/canvas.js"></script>');
 
-_LAMP_ = {'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}};//初始状态都为0（熄灭）
+_LAMP_ = {"normal":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "leave":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "night":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "getup":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "guests":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "diner":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}};//初始状态都为0（熄灭）
 _lamp = null;
 _port = 8000;
-
+mode = "normal";
+_MODE_SET_ = {'normal':'回家模式设定', 'leave':'离家模式设定', 'night':'睡眠模式设定', 'getup':'晨起模式设定', 'guests':'会客模式设定', 'diner':'用餐模式设定'}
 window.onload = function(){
 	if(document.getElementById('lamp')){
 		_lamp = new lamp();
 		_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
 	}
+	
+	var url = location.search;
+	pos = url.indexOf('mode');
+	if(pos>=0){
+		mode = url.substr(pos+5);
+		document.getElementById('title1').style.display = "block";	
+		document.getElementById('mmsg').innerText = _MODE_SET_[mode];
+		
+	}
 }
 
 window.onresize = function(){
 	_lamp.onresize();
-	console.log('onresize');
+}
+
+refresh = function(){
+	r = _LAMP_[mode][_lamp.id]['color']['r']*255/100, g = _LAMP_[mode][_lamp.id]['color']['g']*255/100, b = _LAMP_[mode][_lamp.id]['color']['b']*255/100;
+	color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+	docommand('lamp', _lamp.id, color)
+	
 }
 
 function lamp()
@@ -36,11 +52,11 @@ function lamp()
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.fillStyle = "rgb(220, 0, 0)";
-		this.contextReport.fillRect(this.bar1.x, this.bar1.y+this.bar1.height/2 - 2, this.bar1.width, 5);
+		this.contextReport.roundRect(this.bar1.x, this.bar1.y+this.bar1.height/2 - 4, this.bar1.width, 9, 4, 1, 0);
 		this.contextReport.fillStyle = "rgb(0, 220, 0)";
-		this.contextReport.fillRect(this.bar2.x, this.bar2.y+this.bar1.height/2 - 2, this.bar2.width, 5);
+		this.contextReport.roundRect(this.bar2.x, this.bar2.y+this.bar1.height/2 - 4, this.bar2.width, 9, 4, 1, 0);
 		this.contextReport.fillStyle = "rgb(0, 0, 220)";
-		this.contextReport.fillRect(this.bar3.x, this.bar3.y+this.bar1.height/2 - 2, this.bar3.width, 5);
+		this.contextReport.roundRect(this.bar3.x, this.bar3.y+this.bar1.height/2 - 4, this.bar3.width, 9, 4, 1, 0);
 		
 		
 		var r = this.bar1.height/2;
@@ -50,7 +66,6 @@ function lamp()
 		this.contextReport.roundRect(this.bar2.x + this.bar2.pos*this.bar2.width/100 - r, this.bar2.y, r*2, r*2, r, 1, 0);
 		this.contextReport.fillStyle = "rgba(0, 0, 120, 0.5)";
 		this.contextReport.roundRect(this.bar3.x + this.bar3.pos*this.bar3.width/100 - r, this.bar3.y, r*2, r*2, r, 1, 0);
-	//	console.log(_LAMP_[i.toString()]['color']['b']);
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	this.onresize = function()
@@ -74,10 +89,10 @@ function lamp()
 	}
 	this.setPos = function()
 	{
-		this.bar1.pos = _LAMP_[this.id]['color']['r'];
-		this.bar2.pos = _LAMP_[this.id]['color']['g'];
-		this.bar3.pos = _LAMP_[this.id]['color']['b'];
-		console.log(this.id);
+		this.bar1.pos = _LAMP_[mode][this.id]['color']['r'];
+		this.bar2.pos = _LAMP_[mode][this.id]['color']['g'];
+		this.bar3.pos = _LAMP_[mode][this.id]['color']['b'];
+	//	console.log(this.id);
 	}
 	
 	this.timer = null;
@@ -144,7 +159,7 @@ function lamp()
 
 		var loc = getPointOnCanvas(canvas, x, y); 
 
-		r = _LAMP_[this.id]['color']['r']*255/100, g = _LAMP_[this.id]['color']['g']*255/100, b = _LAMP_[this.id]['color']['b']*255/100;
+		r = _LAMP_[mode][this.id]['color']['r']*255/100, g = _LAMP_[mode][this.id]['color']['g']*255/100, b = _LAMP_[mode][this.id]['color']['b']*255/100;
 		
 		if(up){
 			this.bar1.isdown = false;
@@ -202,7 +217,7 @@ function lamp()
 		this.doDraw();
 		
 		color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-		console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
+	//	console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
 		docommand('lamp', this.id, color)
 	}
 
@@ -226,44 +241,40 @@ function lamp()
 		
 		if( json.event === "lamp" ){
 		//	console.log(JSON.stringify(json.data));
-			ret = json.data;//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
-							//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
-							//真正的命令信息是由ajax发出的（docommand）
-			for(var i=1;i<13;i++){
-				if(i == 12)
-					i = 'all';
-				_LAMP_[i.toString()]['status'] = ret[i.toString()]['status'];
-				_LAMP_[i.toString()]['color']['r'] = ret[i.toString()]['color']['r'];
-				_LAMP_[i.toString()]['color']['g'] = ret[i.toString()]['color']['g'];
-				_LAMP_[i.toString()]['color']['b'] = ret[i.toString()]['color']['b'];
-				
-				if(ret[i.toString()]['status'] === 'on'){
-					r = _LAMP_[i.toString()]['color']['r']*255/100, g = _LAMP_[i.toString()]['color']['g']*255/100, b = _LAMP_[i.toString()]['color']['b']*255/100;
+		//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
+		//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
+		//真正的命令信息是由ajax发出的（docommand）
+		/*	ret = json.data;
+			for(var key in ret){
+				for(var id in ret[key]){
+					_LAMP_[key][id]['status'] = ret[key][id]['status'];
+					_LAMP_[key][id]['color']['r'] = ret[key][id]['color']['r'];
+					_LAMP_[key][id]['color']['g'] = ret[key][id]['color']['g'];
+					_LAMP_[key][id]['color']['b'] = ret[key][id]['color']['b'];
+				}
+			}*/
+			_LAMP_ = json.data;
+			
+			for(var id in _LAMP_[mode]){
+				if(_LAMP_[mode][id]['status'] === 'on'){
+					r = _LAMP_[mode][id]['color']['r']*255/100, g = _LAMP_[mode][id]['color']['g']*255/100, b = _LAMP_[mode][id]['color']['b']*255/100;
 					color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-					document.getElementById(i.toString()).style.backgroundColor = color;	
+					document.getElementById(id).style.backgroundColor = color;	
+				//	console.log(color);
 				}					
 				else
-					document.getElementById(i.toString()).style.backgroundColor = '#aaa';
+					document.getElementById(id).style.backgroundColor = '#aaa';
 			}
 
-			for(var i=1;i<12;i++){
-				if(_LAMP_['1']['status'] !== _LAMP_[i.toString()]['status']){
-					_LAMP_['all']['status'] = 'off';
+			for(var id in _LAMP_[mode]){
+				if(id == "all")
+					break;
+				if(_LAMP_[mode]['1']['status'] !== _LAMP_[mode][id]['status']){
+					_LAMP_[mode]['all']['status'] = 'off';
 					document.getElementById('all').style.backgroundColor = '#aaa';
 					break;
 				}
 			}
-		/*	if(same){
-				_LAMP_['all']['status'] = _LAMP_['1']['status'];
-				if(_LAMP_['1']['status'] === 'on'){
-					i = 1;
-					r = _LAMP_[i.toString()]['color']['r']*255/100, g = _LAMP_[i.toString()]['color']['g']*255/100, b = _LAMP_[i.toString()]['color']['b']*255/100;
-					color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-					document.getElementById('all').style.backgroundColor = color;	
-				}				
-				else
-					document.getElementById('all').style.backgroundColor = '#aaa';
-			}*/
 		} 
 		_lamp.setPos();
 		_lamp.doDraw();
@@ -291,21 +302,26 @@ function lamp()
 docommand = function(dev_id, id, color){
 	var btn = document.getElementById(id.toString());
 
-	btn.style.backgroundColor = '#ee0';
+	
 	
 	if(color == undefined){
 		if('lamp' == dev_id){
-			if(_LAMP_[id]['status'] === 'on')
+			if(_LAMP_[mode][id]['status'] === 'on')
 				command = 'off';
 			else
 				command = 'on';
 		}
 		_lamp.setID(id);
-		param = "dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+		btn.style.backgroundColor = '#ee0';
 	}
 	else
-		param = "dev_id=" + dev_id + "&id=" + id + "&color=" + color;
-	
+		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
+
+	if(id == 'all')
+		document.getElementById('title2').innerText = '所有灯' + '调色调光';	
+	else
+		document.getElementById('title2').innerText = id + '号灯' + '调色调光';	
 	//页面ajax请求
 	loadXMLDoc("/control",function()
 	{
@@ -314,25 +330,6 @@ docommand = function(dev_id, id, color){
 			var json = JSON.parse(base64decode(xmlhttp.responseText));
 			var command = json.command;
 			if('lamp' == dev_id){
-			/*	var id = json.id;//parseInt(json.id);
-				_LAMP_[id]['status'] = command;
-				if(command === 'on')
-					document.getElementById(id).style.backgroundColor = '#e00';					
-				else
-					document.getElementById(id).style.backgroundColor = '#aaa';
-				if(id === 'all'){
-					for(var i=1;i<12;i++){
-						_LAMP_[i]['status'] = _LAMP_[id]['status'];
-						if(_LAMP_[id]['status'] == 'on')
-							document.getElementById(i.toString()).style.backgroundColor = '#e00';
-						else
-							document.getElementById(i.toString()).style.backgroundColor = '#aaa';
-					}
-					if(_LAMP_[id]['status'] == 'on')
-						document.getElementById(id).style.backgroundColor = '#e00';
-					else
-						document.getElementById(id).style.backgroundColor = '#aaa';
-				}*/
 			}
 			else if('car' == dev_id){
 				keys = ['car_1', 'car_2', 'car_3', 'car_4', 'car_5'];

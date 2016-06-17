@@ -18,9 +18,11 @@ import base64
 import logging
 
 #BOARD模式
-_LAMP_ = {'1':{'pin': '11', 'ip' : '192.168.228.49' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'pin': '12', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'pin': '13', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'pin': '15', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'pin': '16', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'pin': '18', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'pin': '22', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'pin': '7', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'pin': '3', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'pin': '5', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'pin': '24', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '12':{'pin': '26', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '13':{'pin': '19', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '14':{'pin': '21', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '15':{'pin': '23', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '16':{'pin': '8', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '17':{'pin': '10', 'ip' : '192.168.1.111' , 'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}
-_all_ = {'pin': '', 'ip' : '' , 'status' : 'off'}
+_DEVICE_ = {'1':{'pin': '11', 'ip' : '192.168.228.49'}, '2':{'pin': '12', 'ip' : '192.168.1.111'}, '3':{'pin': '13', 'ip' : '192.168.1.111'}, '4':{'pin': '15', 'ip' : '192.168.1.111'}, '5':{'pin': '16', 'ip' : '192.168.1.111'}, '6':{'pin': '18', 'ip' : '192.168.1.111'}, '7':{'pin': '22', 'ip' : '192.168.1.111'}, '8':{'pin': '7', 'ip' : '192.168.1.111'}, '9':{'pin': '3', 'ip' : '192.168.1.111'}, '10':{'pin': '5', 'ip' : '192.168.1.111'}, '11':{'pin': '24', 'ip' : '192.168.1.111'}}
+_LAMP_ = {"normal":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "leave":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "night":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "getup":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "guests":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "diner":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}}
+
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
+mode = "normal"
 class RPi_GPIO():
 	_is_exist = False;
 	
@@ -35,7 +37,7 @@ class RPi_GPIO():
 			print ("RPi.GPIO init...")
 			RPi_GPIO._is_exist = True
 			GPIO.setmode(GPIO.BOARD)
-			for k,v in _LAMP_.items():
+			for k,v in _DEVICE_.items():
 				GPIO.setup(int(v['pin']), GPIO.OUT)
 				GPIO.output(int(v['pin']), GPIO.HIGH)
 
@@ -54,19 +56,20 @@ class RPi_GPIO():
 		color = hex(int(r/16))[2:] + hex(int(r%16))[2:] + hex(int(g/16))[2:] + hex(int(g%16))[2:] + hex(int(b/16))[2:] + hex(int(b%16))[2:]
 		return color
 		
-	def output(channle, msg, value):
+	def output(pin, key, value):
 		if RPi_GPIO._is_exist == False:
 			return;
 
-		if msg == 'command':#开关指令
+		if key == 'command':#开关指令
 			if value == 'on':	
 				command = False
 			elif value == 'off':
 				command = True
-			GPIO.output(channle, command)
-		elif msg == 'color':#调光调色指令
+			GPIO.output(pin, command)
+		elif key == 'color':#调光调色指令
 			r, g, b = RPi_GPIO.get_color(value)
-		#	GPIO.output(channle, value)
+		#	GPIO.output(pin, value)
+
 		
 class Connection(object):    
     clients = set()    
@@ -98,10 +101,10 @@ class Connection(object):
         Connection.clients.remove(self)    
         print("connection num is:", len(Connection.clients))
 		
-    def output(self, item, msg, value):
+    def output(self, ip, item):
 
         for conn in Connection.clients:
-            if conn._address[0].find(item['ip']) != -1:
+            if conn._address[0].find(ip) != -1:
                 try:
                     msg = "{\"event\":\"msg\", \"status\":\"%s\", \"color\":\"%s\"}" %(item['status'], RPi_GPIO.get_colors(item))
                     conn._stream.write(msg.encode())
@@ -133,22 +136,16 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 				
     #向其它页面客户端广播状态消息(用于各客户端间同步，一个客户端发送命令，其它客户端同时此看到命令)
     def broadcast_lamp_status():
-        str1 = '{\"event\": \"lamp\", \"data\":{'
- 
-        first = True  
-        for key, value in _LAMP_.items():
-            if first:
-                first = False
-            else :
-                str1 += ","
-            str1 += "\"%s\":{\"status\":\"%s\", \"color\":{\"r\":%d, \"g\":%d, \"b\":%d}}" % (key, value['status'], value['color']['r'], value['color']['g'], value['color']['b'])
-        str1 += '}}'
-  
+        str1 = '{\"event\": \"lamp\", \"data\":'
+        str1 += json.dumps(_LAMP_)
+        str1 += '}'
+
         WebSocket.broadcast_messages(str1) 
 		
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         post_data = {}
+
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
         ''' 
@@ -158,11 +155,13 @@ class WebHandler(tornado.web.RequestHandler):
             WebHandler.lamp(post_data)
         elif post_data['dev_id'][0] == 'car':
             WebHandler.car(post_data) 
-			
+ 
         if WebHandler.has_key('command', post_data):#开关指令
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
         elif WebHandler.has_key('color', post_data):#调光调色指令
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
+        else :#模式指令
+            str1 = '{\"dev_id\":\"'+post_data['dev_id'][0] + '\"}'
         			
         self.write(base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
 		
@@ -172,34 +171,59 @@ class WebHandler(tornado.web.RequestHandler):
                 return True;
         return False;
 	
-    def output(item, msg, value):
+    def output(id, key, value):
         global sock
-        if msg == 'command':#开关指令
+        item = _LAMP_[mode][id]
+        if key == 'command':#开关指令
             item['status'] = value
-        elif msg == 'color':#调光调色指令
+        elif key == 'color':#调光调色指令
             r, g, b = RPi_GPIO.get_color(value)
             item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
             #print("get_colors: %s  %s  %d  %d" %(value, RPi_GPIO.get_colors(item), r, item['color']['r']))
-        if WebHandler.has_key('pin', item):
-            RPi_GPIO.output(int(item['pin']), msg, value)
+        elif key == None:    #模式指令
+            key = 'command'
+            value = item['status']
 			
-        if sock != None and WebHandler.has_key('ip', item):
-            sock.output(item, msg, value)
+        if WebHandler.has_key(id, _DEVICE_):
+            if WebHandler.has_key('pin', _DEVICE_[id]):
+                RPi_GPIO.output(int(_DEVICE_[id]['pin']), key, value)
+			
+            if sock != None and WebHandler.has_key('ip', _DEVICE_[id]):
+                sock.output(_DEVICE_[id]['ip'], item)
 
 		
     def lamp(post_data):
-        id = post_data['id'][0]
-        if WebHandler.has_key('command', post_data):#开关指令
-            msg = 'command'
-        elif WebHandler.has_key('color', post_data):#调光调色指令
-            msg = 'color'
+        global mode
+        id = None
+        key = None
+        value = None
+		
+        if WebHandler.has_key('id', post_data):
+            id = post_data['id'][0]
 			
-        if id == 'all':
-            for k,v in _LAMP_.items():
-                WebHandler.output(v, msg, post_data[msg][0])
-        #else:
-        WebHandler.output(_LAMP_[id], msg, post_data[msg][0])
- 
+        if WebHandler.has_key('command', post_data):#开关指令
+            key = 'command'
+        elif WebHandler.has_key('color', post_data):#调光调色指令
+            key = 'color'
+
+        if key != None:		
+            value = post_data[key][0]
+ 	
+        if WebHandler.has_key('mode', post_data):		
+            mode = post_data['mode'][0]
+        else:
+            mode = "normal"
+			
+        if WebHandler.has_key(mode, _LAMP_) == False:		
+            return
+			
+        if id == 'all' or key == None:
+            for k in _LAMP_[mode].keys():
+                WebHandler.output(k, key, value)
+				
+        if id != None:
+            WebHandler.output(id, key, value)
+        #print("%s : %s" %(mode, json.dumps(_LAMP_[mode])))
         WebSocket.broadcast_lamp_status()
 				
     def car(post_data):

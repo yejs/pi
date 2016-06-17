@@ -334,8 +334,8 @@ div.item  input.mybtn
 	.btn
 	{
 		margin: 0px 5px 0px 5px;
-		width: 200px;
-		height: 200px;line-height:200px;
+		width: 5.5em;/*200px*/
+		height: 2.5em;line-height:2.5em;
 		border-top-left-radius:3em;
 		border-top-right-radius:3em;
 		border-bottom-left-radius:3em;
@@ -346,3 +346,13 @@ div.item  input.mybtn
 		font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:32px;
 	}
 	.btn:active{outline:none;}
+	#0{
+		height: 2em;line-height:2em;
+		border-top-left-radius:5px;
+		border-top-right-radius:5px;
+		border-bottom-left-radius:5px;
+		border-bottom-right-radius:5px;
+		background-color: #0a0;float:right;
+	}
+	
+	.title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;}

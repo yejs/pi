@@ -18,7 +18,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['灯光', '小车', '视频监控'];
+			var _title = ['灯光控制', '场景模式', '小车', '视频监控'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -51,21 +51,34 @@
 		
 			if(0 == i){
 				document.getElementById("lamp").style.display="block";
+				document.getElementById("scene").style.display="none";
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="none";
 				elem_child[0].src = "";
+				window.frames['flamp'].window.location.reload();//refresh();//location.reload();
 			}
 			else if(1 == i){
 				document.getElementById("lamp").style.display="none";
-				document.getElementById("car").style.display="block";
+				document.getElementById("scene").style.display="block";
+				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="none";
 				elem_child[0].src = "";
+				window.frames['fscene'].window.location.reload();//refresh();//location.reload();
 			}
 			else if(2 == i){
 				document.getElementById("lamp").style.display="none";
+				document.getElementById("scene").style.display="none";
+				document.getElementById("car").style.display="block";
+				document.getElementById("video").style.display="none";
+				elem_child[0].src = "";
+			//	window.frames['fcar'].window.refresh();//location.reload();
+			}
+			else if(3 == i){
+				document.getElementById("lamp").style.display="none";
+				document.getElementById("scene").style.display="none";
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="block";
-				
+
 				var src = window.location.host;
 				var npos = src.indexOf(":");
 
@@ -85,13 +98,16 @@
 		</ul>
 	</div>
 	<div id="lamp" style="display:block">
-		<iframe src='lamp.html' class="myframe"></iframe>
+		<iframe name="flamp" src='lamp.html' class="myframe"></iframe>
+	</div>
+	<div id="scene" style="display:none">
+		<iframe name="fscene" src='scene.html?param=work' class="myframe"></iframe>
 	</div>
 	<div id="car" style="display:none">
-		<iframe src='car.html' class="myframe"></iframe>
+		<iframe name="fcar" src='car.html' class="myframe"></iframe>
 	</div>
 	<div id="video" style="display:none">
-		<iframe src='' class="myframe"></iframe>
+		<iframe name="fvideo" src='' class="myframe"></iframe>
 	</div>
 </div>
 </body>
