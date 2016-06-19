@@ -18,11 +18,12 @@ import base64
 import logging
 
 #BOARD模式
-_DEVICE_ = {'1':{'pin': '11', 'ip' : '192.168.228.49'}, '2':{'pin': '12', 'ip' : '192.168.1.111'}, '3':{'pin': '13', 'ip' : '192.168.1.111'}, '4':{'pin': '15', 'ip' : '192.168.1.111'}, '5':{'pin': '16', 'ip' : '192.168.1.111'}, '6':{'pin': '18', 'ip' : '192.168.1.111'}, '7':{'pin': '22', 'ip' : '192.168.1.111'}, '8':{'pin': '7', 'ip' : '192.168.1.111'}, '9':{'pin': '3', 'ip' : '192.168.1.111'}, '10':{'pin': '5', 'ip' : '192.168.1.111'}, '11':{'pin': '24', 'ip' : '192.168.1.111'}}
+_DEVICE_ = {'1':{'pin': '11', 'ip' : '192.168.1.101'}, '2':{'pin': '12', 'ip' : '192.168.1.111'}, '3':{'pin': '13', 'ip' : '192.168.1.111'}, '4':{'pin': '15', 'ip' : '192.168.1.111'}, '5':{'pin': '16', 'ip' : '192.168.1.111'}, '6':{'pin': '18', 'ip' : '192.168.1.111'}, '7':{'pin': '22', 'ip' : '192.168.1.111'}, '8':{'pin': '7', 'ip' : '192.168.1.111'}, '9':{'pin': '3', 'ip' : '192.168.1.111'}, '10':{'pin': '5', 'ip' : '192.168.1.111'}, '11':{'pin': '24', 'ip' : '192.168.1.111'}}
 _LAMP_ = {"normal":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "leave":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "night":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "getup":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "guests":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "diner":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}}
 
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
-mode = "normal"
+mode = 'normal'
+id = '1'
 class RPi_GPIO():
 	_is_exist = False;
 	
@@ -136,9 +137,15 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 				
     #向其它页面客户端广播状态消息(用于各客户端间同步，一个客户端发送命令，其它客户端同时此看到命令)
     def broadcast_lamp_status():
+        global mode
+        global id
         str1 = '{\"event\": \"lamp\", \"data\":'
         str1 += json.dumps(_LAMP_)
-        str1 += '}'
+        str1 += ', \"mode\":\"'
+        str1 += mode
+        str1 += '\", \"id\":\"'
+        str1 += id
+        str1 += '\"}'
 
         WebSocket.broadcast_messages(str1) 
 		
@@ -151,10 +158,7 @@ class WebHandler(tornado.web.RequestHandler):
         ''' 
         post 参数示例: /control?dev_id=lamp&id=1&command=on
         '''
-        if post_data['dev_id'][0] == 'lamp':
-            WebHandler.lamp(post_data)
-        elif post_data['dev_id'][0] == 'car':
-            WebHandler.car(post_data) 
+        
  
         if WebHandler.has_key('command', post_data):#开关指令
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
@@ -164,6 +168,11 @@ class WebHandler(tornado.web.RequestHandler):
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0] + '\"}'
         			
         self.write(base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
+		
+        if post_data['dev_id'][0] == 'lamp':
+            WebHandler.lamp(post_data)
+        elif post_data['dev_id'][0] == 'car':
+            WebHandler.car(post_data) 
 		
     def has_key(key, dict):
         for k in dict.keys():
@@ -194,6 +203,7 @@ class WebHandler(tornado.web.RequestHandler):
 		
     def lamp(post_data):
         global mode
+        global id
         id = None
         key = None
         value = None
@@ -223,6 +233,8 @@ class WebHandler(tornado.web.RequestHandler):
 				
         if id != None:
             WebHandler.output(id, key, value)
+        else:
+            id = '1'
         #print("%s : %s" %(mode, json.dumps(_LAMP_[mode])))
         WebSocket.broadcast_lamp_status()
 				

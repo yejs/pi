@@ -12,9 +12,9 @@
 </head>
 <body>
 <div class="lamp" id ="lamp">
-	<div class="title" id="title1" style="display:none;">
-		<span class="title" id="mmsg">回家模式设定</span>
-		<button id="0" class="btn" onclick="javascript:history.back(-1);">返回</button>
+	<div class="title">
+		<span class="title" id="scene_title">回家模式设定</span>
+		<button id="ret_btn" class="btn" onclick="javascript:history.back(-1);" style="width: 5em;height: 1.5em;line-height:1.5em;">返回</button>
 	</div>
 	
 	<div class="wrap">
@@ -34,10 +34,10 @@
 	</div>
 	<div class="wrap">
 		<button id="10" class="btn" onclick="docommand('lamp', '10')">灯10</button>
-		<button id="all" class="btn" onclick="docommand('lamp', 'all')">所有</button>
+		<button id="all" class="btn" onclick="docommand('lamp', 'all')">所有灯</button>
 		<button id="11" class="btn" onclick="docommand('lamp', '11')">灯11</button>
 	</div>
-	<div class="title" id="title2">1号灯调色调光</div>
+	<div class="title" id="color_title">1号灯调色调光</div>
 	<div><canvas id="msg" align="left"></canvas></div>
 </div>
 

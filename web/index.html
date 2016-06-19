@@ -55,7 +55,7 @@
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="none";
 				elem_child[0].src = "";
-				window.frames['flamp'].window.location.reload();//refresh();//location.reload();
+				window.frames['flamp'].window.refresh();//location.reload();
 			}
 			else if(1 == i){
 				document.getElementById("lamp").style.display="none";
@@ -63,7 +63,7 @@
 				document.getElementById("car").style.display="none";
 				document.getElementById("video").style.display="none";
 				elem_child[0].src = "";
-				window.frames['fscene'].window.location.reload();//refresh();//location.reload();
+				window.frames['fscene'].window.refresh();//location.reload();
 			}
 			else if(2 == i){
 				document.getElementById("lamp").style.display="none";
@@ -71,7 +71,6 @@
 				document.getElementById("car").style.display="block";
 				document.getElementById("video").style.display="none";
 				elem_child[0].src = "";
-			//	window.frames['fcar'].window.refresh();//location.reload();
 			}
 			else if(3 == i){
 				document.getElementById("lamp").style.display="none";
@@ -88,6 +87,12 @@
 				elem_child[0].src = "http://" + src;
 			}
 		}
+		var mode='normal';
+		window.addEventListener('message',function(e){
+			if('getmode'!==e.data)
+				mode=e.data;
+			window.frames['fscene'].postMessage(mode,'*');
+		},false);
     </script>
 </head>
 <body>
@@ -96,7 +101,7 @@
 	<div class="menu" id = "news" align="left">
 		<ul id = "news_ul">
 		</ul>
-	</div>
+	</div><br/>
 	<div id="lamp" style="display:block">
 		<iframe name="flamp" src='lamp.html' class="myframe"></iframe>
 	</div>

@@ -42,7 +42,7 @@ src:url("http://www.apple.com/wss/fonts/PingHei/v1/PingHei-light.woff") format("
 /* ul li以横排显示 */
 div.menu 
 {
-    overflow:auto;position:relative; width: 100%;max-width:100%;height:auto;
+    overflow:auto;position:fixed; width: 100%;max-width:100%;height:auto;z-index:100;top: 0px;
     margin: 0px; /* 与外界元素的距离为0 */
     padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
 	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:32px;
@@ -327,32 +327,25 @@ div.item  input.mybtn
 }
 
 
-	.wrap
-	{
-		margin: 0px 0px 25px 0px;text-align:center;
-	}
-	.btn
-	{
-		margin: 0px 5px 0px 5px;
-		width: 5.5em;/*200px*/
-		height: 2.5em;line-height:2.5em;
-		border-top-left-radius:3em;
-		border-top-right-radius:3em;
-		border-bottom-left-radius:3em;
-		border-bottom-right-radius:3em;
-		background-color: #0a0;
-		border: 1px solid #D7D7D7;
-		outline:none;
-		font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:32px;
-	}
-	.btn:active{outline:none;}
-	#0{
-		height: 2em;line-height:2em;
-		border-top-left-radius:5px;
-		border-top-right-radius:5px;
-		border-bottom-left-radius:5px;
-		border-bottom-right-radius:5px;
-		background-color: #0a0;float:right;
-	}
-	
-	.title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;}
+.wrap
+{
+	margin: 0px 0px 25px 0px;text-align:center;
+}
+.btn
+{
+	margin: 0px 10px 0px 10px;
+	width: 7em;/*200px*/
+	height: 2.5em;line-height:2.5em;
+	border-top-left-radius:13px;
+	border-top-right-radius:13px;
+	border-bottom-left-radius:13px;
+	border-bottom-right-radius:13px;
+	background-color: #0a0;
+	border: 1px solid #D7D7D7;
+	outline:none;
+	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:40px;
+}
+.btn:active{outline:none;}
+
+
+.title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;}

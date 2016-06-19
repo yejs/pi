@@ -6,21 +6,29 @@ _LAMP_ = {"normal":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 
 _lamp = null;
 _port = 8000;
 mode = "normal";
-_MODE_SET_ = {'normal':'回家模式设定', 'leave':'离家模式设定', 'night':'睡眠模式设定', 'getup':'晨起模式设定', 'guests':'会客模式设定', 'diner':'用餐模式设定'}
+is_mode_set = false;
+_MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
+
 	if(document.getElementById('lamp')){
 		_lamp = new lamp();
 		_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
+		
 	}
+	
+	
 	
 	var url = location.search;
 	pos = url.indexOf('mode');
 	if(pos>=0){
+		is_mode_set = true;
 		mode = url.substr(pos+5);
-		document.getElementById('title1').style.display = "block";	
-		document.getElementById('mmsg').innerText = _MODE_SET_[mode];
 		
+		document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '设定';
+	//	document.getElementById('ret_btn').style.display = "block";	
 	}
+	else
+		document.getElementById('ret_btn').style.display = "none";	
 }
 
 window.onresize = function(){
@@ -28,10 +36,11 @@ window.onresize = function(){
 }
 
 refresh = function(){
-	r = _LAMP_[mode][_lamp.id]['color']['r']*255/100, g = _LAMP_[mode][_lamp.id]['color']['g']*255/100, b = _LAMP_[mode][_lamp.id]['color']['b']*255/100;
-	color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-	docommand('lamp', _lamp.id, color)
+//	r = _LAMP_[mode][_lamp.id]['color']['r']*255/100, g = _LAMP_[mode][_lamp.id]['color']['g']*255/100, b = _LAMP_[mode][_lamp.id]['color']['b']*255/100;
+//	color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+//	docommand('lamp', _lamp.id, color)
 	
+	location.reload();
 }
 
 function lamp()
@@ -42,11 +51,7 @@ function lamp()
 			return true;
 		return false;
 	}
-	this.getPos = function(x, bar)
-	{
-		return parseInt((x - bar.x)*100/bar.width);
-	}
-	
+
 	this.doDraw = function()
 	{
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
@@ -59,26 +64,26 @@ function lamp()
 		this.contextReport.roundRect(this.bar3.x, this.bar3.y+this.bar1.height/2 - 4, this.bar3.width, 9, 4, 1, 0);
 		
 		
-		var r = this.bar1.height/2;
+		var r = this.bar1.height/4;
 		this.contextReport.fillStyle = "rgba(120, 0, 0, 0.5)";
-		this.contextReport.roundRect(this.bar1.x + this.bar1.pos*this.bar1.width/100 - r, this.bar1.y, r*2, r*2, r, 1, 0);
+		this.contextReport.roundRect(this.bar1.x + this.bar1.pos*this.bar1.width/100 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
 		this.contextReport.fillStyle = "rgba(0, 120, 0, 0.5)";
-		this.contextReport.roundRect(this.bar2.x + this.bar2.pos*this.bar2.width/100 - r, this.bar2.y, r*2, r*2, r, 1, 0);
+		this.contextReport.roundRect(this.bar2.x + this.bar2.pos*this.bar2.width/100 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
 		this.contextReport.fillStyle = "rgba(0, 0, 120, 0.5)";
-		this.contextReport.roundRect(this.bar3.x + this.bar3.pos*this.bar3.width/100 - r, this.bar3.y, r*2, r*2, r, 1, 0);
+		this.contextReport.roundRect(this.bar3.x + this.bar3.pos*this.bar3.width/100 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	this.onresize = function()
 	{
 		this.rect = getWinRect();
-		this.rect.height = '300';
+		this.rect.height = '420';
 		this.canvas.width = this.canvasReport.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.rect.height;
-		offset = 60;
+		offset = 20;
 		var width = this.rect.width-offset*2;
-		this.bar1 = {x:offset, y: 10, width:width, height:80, pos:0, isdown:false};
-		this.bar2 = {x:offset, y: 110, width:width, height:80, pos:50, isdown:false};
-		this.bar3 = {x:offset, y: 210, width:width, height:80, pos:0, isdown:false};
+		this.bar1 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
+		this.bar2 = {x:offset, y: 105, width:width, height:90, pos:50, isdown:false};
+		this.bar3 = {x:offset, y: 205, width:width, height:90, pos:0, isdown:false};
 		this.contextReport = this.canvasReport.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
 		this.doDraw();
@@ -107,7 +112,7 @@ function lamp()
 	this.canvas = document.getElementById('msg');//显示画布
 	this.onresize();
 	
-//	if(isPC())
+	if(isPC())
 	{
 		this.canvas.addEventListener('mousedown', function(event) { 
 			_lamp.doMouseDown(event, true);//不能用this
@@ -119,7 +124,7 @@ function lamp()
 		    _lamp.doMouseMove(event, true);
 			}, false);
 	}
-/*	else{
+	else{
 		this.canvas.addEventListener('touchstart', function(event) { 
 			event.preventDefault();
 			if (event.targetTouches.length == 1) { 
@@ -140,11 +145,28 @@ function lamp()
 			_lamp.doMouseMove(event, false);
 			} 
 			}, false);
-	}*/
+	}
 
+	this.doColor = function(x, bar, down) { 
+		if(down)
+			bar.isdown = true;
 
+		var pos = parseInt((x - bar.x)*100/bar.width);
+		if(pos == bar.pos || !bar.isdown)
+			return -1;
+
+		bar.pos = pos;
+
+		return pos*255/100;
+	}
 	
 	this.doMouse = function(event, mouse, down, up) { 
+		if(up){
+			this.bar1.isdown = false;
+			this.bar2.isdown = false;
+			this.bar3.isdown = false;
+			return;
+		}
 		if(mouse){
 			var x = event.pageX; 
 			var y = event.pageY; 
@@ -158,60 +180,22 @@ function lamp()
 		}
 
 		var loc = getPointOnCanvas(canvas, x, y); 
+		
+		if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
+			return;
 
 		r = _LAMP_[mode][this.id]['color']['r']*255/100, g = _LAMP_[mode][this.id]['color']['g']*255/100, b = _LAMP_[mode][this.id]['color']['b']*255/100;
 		
-		if(up){
-			this.bar1.isdown = false;
-			this.bar2.isdown = false;
-			this.bar3.isdown = false;
-		}
-		
-		if(this.isOnBar(loc.x, loc.y, this.bar1)){
-			if(down)
-				this.bar1.isdown = true;
-			
-			var pos = this.getPos(loc.x, this.bar1);
-			if(pos == this.bar1.pos)
-				return;
-			if(this.bar1.isdown){
-				this.bar1.pos = pos;
-				r = pos*255/100;
-			}
-			else
-				return;
-		}
-		else if(this.isOnBar(loc.x, loc.y, this.bar2)){
-			if(down)
-				this.bar2.isdown = true;
-
-			var pos = this.getPos(loc.x, this.bar2);
-			if(pos == this.bar2.pos)
-				return;
-			
-			if(this.bar2.isdown){
-				this.bar2.pos = pos;
-				g = pos*255/100;
-			}
-			else
-				return;
-		}
-		else if(this.isOnBar(loc.x, loc.y, this.bar3)){
-			if(down)
-				this.bar3.isdown = true;
-
-			var pos = this.getPos(loc.x, this.bar3);
-			if(pos == this.bar3.pos)
-				return;
-			
-			if(this.bar3.isdown){
-				this.bar3.pos = pos;
-				b = pos*255/100;
-			}
-			else
-				return;
-		}
+		if((this.isOnBar(loc.x, loc.y, this.bar1) && !this.bar2.isdown && !this.bar3.isdown) || this.bar1.isdown)
+			r = this.doColor(loc.x, this.bar1, down);
+		else if((this.isOnBar(loc.x, loc.y, this.bar2) && !this.bar1.isdown && !this.bar3.isdown) || this.bar2.isdown)
+			g = this.doColor(loc.x, this.bar2, down);
+		else if((this.isOnBar(loc.x, loc.y, this.bar3) && !this.bar1.isdown && !this.bar2.isdown) || this.bar3.isdown)
+			b = this.doColor(loc.x, this.bar3, down);
 		else
+			return;
+		
+		if(-1 == r || -1 == g || -1 == b)
 			return;
 		
 		this.doDraw();
@@ -244,16 +228,20 @@ function lamp()
 		//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
 		//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
 		//真正的命令信息是由ajax发出的（docommand）
-		/*	ret = json.data;
-			for(var key in ret){
-				for(var id in ret[key]){
-					_LAMP_[key][id]['status'] = ret[key][id]['status'];
-					_LAMP_[key][id]['color']['r'] = ret[key][id]['color']['r'];
-					_LAMP_[key][id]['color']['g'] = ret[key][id]['color']['g'];
-					_LAMP_[key][id]['color']['b'] = ret[key][id]['color']['b'];
-				}
-			}*/
+
 			_LAMP_ = json.data;
+			
+			if(!is_mode_set){
+				mode = json.mode;
+				document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+			}
+			if(mode == json.mode)
+			{
+				_lamp.setID(json.id);
+				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + '\" 调色调光';	
+			}
+			
+			window.parent.postMessage(json.mode,'*');
 			
 			for(var id in _LAMP_[mode]){
 				if(_LAMP_[mode][id]['status'] === 'on'){
@@ -311,17 +299,14 @@ docommand = function(dev_id, id, color){
 			else
 				command = 'on';
 		}
-		_lamp.setID(id);
+	//	_lamp.setID(id);
 		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 		btn.style.backgroundColor = '#ee0';
 	}
 	else
 		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
 
-	if(id == 'all')
-		document.getElementById('title2').innerText = '所有灯' + '调色调光';	
-	else
-		document.getElementById('title2').innerText = id + '号灯' + '调色调光';	
+
 	//页面ajax请求
 	loadXMLDoc("/control",function()
 	{
