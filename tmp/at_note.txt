@@ -38,3 +38,18 @@ AT+CIPSEND=4
 >dgfy			;输入dgfy,无需回车
 
 
+uint8 wifi_get_opmode (void)		;获取 wifi 工作模式，其中 0x01 时为 STATION_MODE，0x02 时为 SOFTAP_MODE，0x03 时为 STATIONAP_MODE
+bool wifi_set_opmode (uint8 opmode) 	；设置 wifi 工作模式
+
+bool wifi_station_get_config (struct station_config *config)；获取 wifi 的 station 接口参数 
+bool wifi_station_set_config (struct station_config *config) ；设置 wifi 的 station 接口参数 AT+CWJAP = "SSID","PWD"
+bool wifi_station_connect(void) ；wifi 的 station 接口连接所配置的路由 如果连接过路由，请先 wifi_station_disconnect，再调用 wifi_station_connect。 
+bool wifi_station_disconnect(void) ：wifi 的 station 接口断开所连接的路由 
+uint8 wifi_station_get_connect_status (void) 获取 wifi station 接口连接 AP 的状态 enum{ 
+ STATION_IDLE = 0, 
+ STATION_CONNECTING, 
+ STATION_WRONG_PASSWORD, 
+ STATION_NO_AP_FOUND, 
+ STATION_CONNECT_FAIL, 
+ STATION_GOT_IP 
+}; 
