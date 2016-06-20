@@ -56,21 +56,44 @@ function lamp()
 	{
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
-		this.contextReport.fillStyle = "rgb(220, 0, 0)";
-		this.contextReport.roundRect(this.bar1.x, this.bar1.y+this.bar1.height/2 - 4, this.bar1.width, 9, 4, 1, 0);
-		this.contextReport.fillStyle = "rgb(0, 220, 0)";
-		this.contextReport.roundRect(this.bar2.x, this.bar2.y+this.bar1.height/2 - 4, this.bar2.width, 9, 4, 1, 0);
-		this.contextReport.fillStyle = "rgb(0, 0, 220)";
-		this.contextReport.roundRect(this.bar3.x, this.bar3.y+this.bar1.height/2 - 4, this.bar3.width, 9, 4, 1, 0);
+
+		var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
+		var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
+		this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
+		this.contextReport.roundRect(this.bar2.x, this.bar2.y+offset, pos2, h, r, 1, 0);
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
+		this.contextReport.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
+		
+		this.contextReport.fillStyle = "rgb(220, 220, 220)";
+		this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
+		this.contextReport.roundRect(this.bar2.x + pos2, this.bar2.y+offset, this.bar2.width - pos2, h, r, 1, 0);
+		this.contextReport.roundRect(this.bar3.x + pos3, this.bar3.y+offset, this.bar3.width - pos3, h, r, 1, 0);
 		
 		
-		var r = this.bar1.height/4;
-		this.contextReport.fillStyle = "rgba(120, 0, 0, 0.5)";
-		this.contextReport.roundRect(this.bar1.x + this.bar1.pos*this.bar1.width/100 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
-		this.contextReport.fillStyle = "rgba(0, 120, 0, 0.5)";
-		this.contextReport.roundRect(this.bar2.x + this.bar2.pos*this.bar2.width/100 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
-		this.contextReport.fillStyle = "rgba(0, 0, 120, 0.5)";
-		this.contextReport.roundRect(this.bar3.x + this.bar3.pos*this.bar3.width/100 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
+		r = this.bar1.height/4;
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		this.contextReport.roundRect(this.bar2.x + pos2 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		this.contextReport.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
+		
+
+		this.contextReport.beginPath();
+		for(var i=0;i<45;i++)
+			this.contextReport.roundRect2(this.bar3.x + i*20, 10, 16, 80, 8, 0, 0);
+		this.contextReport.closePath();
+		var grd=this.contextReport.createLinearGradient(this.bar3.x,10,900,0); //颜色渐变的起始坐标和终点坐标
+		grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
+		grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
+		grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
+		grd.addColorStop(0.75, "rgba(0, 255, 255, 1)");
+		grd.addColorStop(1, "rgba(0, 0, 255, 1)");
+		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
+		this.contextReport.fill();
+		
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	this.onresize = function()
@@ -81,9 +104,9 @@ function lamp()
 		this.canvas.height = this.canvasReport.height = this.rect.height;
 		offset = 20;
 		var width = this.rect.width-offset*2;
-		this.bar1 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
-		this.bar2 = {x:offset, y: 105, width:width, height:90, pos:50, isdown:false};
-		this.bar3 = {x:offset, y: 205, width:width, height:90, pos:0, isdown:false};
+		this.bar1 = {x:offset, y: 105, width:width, height:90, pos:0, isdown:false};
+		this.bar2 = {x:offset, y: 205, width:width, height:90, pos:50, isdown:false};
+		this.bar3 = {x:offset, y: 305, width:width, height:90, pos:0, isdown:false};
 		this.contextReport = this.canvasReport.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
 		this.doDraw();
@@ -161,6 +184,9 @@ function lamp()
 	}
 	
 	this.doMouse = function(event, mouse, down, up) { 
+		if(_LAMP_[mode][this.id]['status'] === 'off')
+			return;
+		
 		if(up){
 			this.bar1.isdown = false;
 			this.bar2.isdown = false;
@@ -238,7 +264,7 @@ function lamp()
 			if(mode == json.mode)
 			{
 				_lamp.setID(json.id);
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + '\" 调色调光';	
+				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 			}
 			
 			window.parent.postMessage(json.mode,'*');
@@ -294,8 +320,14 @@ docommand = function(dev_id, id, color){
 	
 	if(color == undefined){
 		if('lamp' == dev_id){
-			if(_LAMP_[mode][id]['status'] === 'on')
-				command = 'off';
+			if(_LAMP_[mode][id]['status'] === 'on'){
+				if(_lamp.id != id){
+					_lamp.id = id;
+					command = 'on';
+				}
+				else
+					command = 'off';
+			}
 			else
 				command = 'on';
 		}

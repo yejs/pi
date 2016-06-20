@@ -45,7 +45,7 @@ div.menu
     overflow:auto;position:fixed; width: 100%;max-width:100%;height:auto;z-index:100;top: 0px;
     margin: 0px; /* 与外界元素的距离为0 */
     padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
-	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:32px;
+	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:42px;
 }
 
 /* 所有class为menu的div中的ul样式 */
@@ -59,7 +59,7 @@ div.menu ul
 	white-space:nowrap;
 	position:relative; 
 	overflow:visible;
-	background-color:#ebebeb;
+	background-color:#2ba4eb;
 	outline:none;
 	border-bottom-color:#FFF;
 }
@@ -72,11 +72,11 @@ div.menu ul li
 	padding: 0px 1px;
 	outline:none;
 	border-color:#FFF;
-	background-color:#ebebeb;
+	background-color:#2ba4eb;
 }
 div.menu ul li:hover
 {
-    background-color: #ddd; /* 背景色 */
+    background-color: #2ba4ff; /* 背景色 */
 }
 /* 所有class为menu的div中的ul中的a样式(包括尚未点击的和点击过的样式) */
 div.menu ul li a
@@ -84,32 +84,14 @@ div.menu ul li a
     background-color: transparent; /* 背景色 */
     border: 0px #4e667d solid; /* 边框 */
 
-    color: #000; /* 文字颜色 */
+    color: #fff; /* 文字颜色 */
     display: block; /* 此元素将显示为块级元素，此元素前后会带有换行符 */
-    line-height: 1.65em; /* 行高 */
+    line-height: 1.55em; /* 行高 */
     padding: 4px 20px; /* 内部填充的距离 */
     text-decoration: none; /* 不显示超链接下划线 */
     white-space: nowrap; /* 对于文本内的空白处，不会换行，文本会在在同一行上继续，直到遇到 <br> 标签为止。 */
 }
 
-div.menu ul li a:visited
-{
-    background-color: transparent; /* 背景色 */
-    color: #000; /* 文字颜色 */
-}
-
-/* 所有class为menu的div中的ul中的a样式(鼠标移动到元素中的样式) */
-div.menu ul li a:hover
-{
-    background-color: transparent; /* 背景色 */
-    color: #000; /* 文字颜色 */
-}
-/* 所有class为menu的div中的ul中的a样式(鼠标点击元素时的样式) */
-div.menu ul li a:active
-{
-    background-color: transparent; /* 背景色 */
-    color: #000; /* 文字颜色 */
-}
 
 
 div.news_content 
@@ -345,7 +327,7 @@ div.item  input.mybtn
 	outline:none;
 	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:40px;
 }
-.btn:active{outline:none;}
+.btn:active{border: 3px solid #888;}
 
 
 .title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;}

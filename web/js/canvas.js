@@ -175,6 +175,18 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r, fill, st
 	this.restore(); 
 }
 
+CanvasRenderingContext2D.prototype.roundRect2 = function (x, y, w, h, r) {
+    this.save(); 
+	this.translate(0.5,0.5); 
+
+    this.moveTo(parseInt(x), parseInt(y+r));
+    this.arcTo(parseInt(x), parseInt(y), parseInt(x+w), parseInt(y), parseInt(r));
+	this.arcTo(parseInt(x+w), parseInt(y), parseInt(x+w), parseInt(y+h), parseInt(r));
+    this.arcTo(parseInt(x+w), parseInt(y+h), parseInt(x), parseInt(y+h), parseInt(r));
+    this.arcTo(parseInt(x), parseInt(y+h), parseInt(x), parseInt(y), parseInt(r));
+	this.restore(); 
+}
+
 CanvasRenderingContext2D.prototype.roundRectEx = function (x, y, w, h, r, fill, stroke, left_top, right_top, right_bottom, left_bottom) {
 	this.save(); 
 	this.translate(0.5,0.5); 
