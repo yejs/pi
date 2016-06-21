@@ -10,7 +10,7 @@
 	<link rel="stylesheet" type="text/css"href="css/menu.css"/>
 
 	<style type="text/css">
-		.myframe {width:100%;height:100vh;border:none;}
+		.myframe {width:100%;height:95vh;border:none;}
 	</style>
 	<script type="text/javascript" src="js/mymath.js"></script>
 	
@@ -29,6 +29,16 @@
 			}
 			setTimeout(function() {onNewsTitle(0);},20);
 			
+		}
+		
+		var titles = ["lamp", "scene", "car", "video"];
+		showPage = function(title){
+			for(var i in titles){
+				if(titles[i] === title)
+					document.getElementById(titles[i]).style.display="block";
+				else
+					document.getElementById(titles[i]).style.display="none";
+			}
 		}
 		
 		onNewsTitle = function(i){
@@ -53,31 +63,21 @@
 				document.getElementById("lamp").style.display="block";
 				document.getElementById("scene").style.display="none";
 				document.getElementById("car").style.display="none";
-				document.getElementById("video").style.display="none";
+				showPage("lamp");
 				elem_child[0].src = "";
 				window.frames['flamp'].window.refresh();//location.reload();
 			}
 			else if(1 == i){
-				document.getElementById("lamp").style.display="none";
-				document.getElementById("scene").style.display="block";
-				document.getElementById("car").style.display="none";
-				document.getElementById("video").style.display="none";
+				showPage("scene");
 				elem_child[0].src = "";
 				window.frames['fscene'].window.refresh();//location.reload();
 			}
 			else if(2 == i){
-				document.getElementById("lamp").style.display="none";
-				document.getElementById("scene").style.display="none";
-				document.getElementById("car").style.display="block";
-				document.getElementById("video").style.display="none";
+				showPage("car");
 				elem_child[0].src = "";
 			}
 			else if(3 == i){
-				document.getElementById("lamp").style.display="none";
-				document.getElementById("scene").style.display="none";
-				document.getElementById("car").style.display="none";
-				document.getElementById("video").style.display="block";
-
+				showPage("video");
 				var src = window.location.host;
 				var npos = src.indexOf(":");
 
@@ -89,9 +89,14 @@
 		}
 		var mode='normal';
 		window.addEventListener('message',function(e){
-			if('getmode'!==e.data)
-				mode=e.data;
-			window.frames['fscene'].postMessage(mode,'*');
+			if('http://' + window.location.host !== e.origin)
+				return;
+				
+			if('mode'===e.data.msg || 'getmode'===e.data.msg){
+				if('mode'===e.data.msg)
+					mode=e.data.data;
+				window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
+			}
 		},false);
     </script>
 </head>

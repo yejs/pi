@@ -15,15 +15,15 @@ import tornado.websocket
 from tornado.tcpserver import TCPServer 
 import json
 import base64
+import urllib
 import logging
-
-#BOARD模式
-_DEVICE_ = {'1':{'pin': '11', 'ip' : '192.168.1.101'}, '2':{'pin': '12', 'ip' : '192.168.1.111'}, '3':{'pin': '13', 'ip' : '192.168.1.111'}, '4':{'pin': '15', 'ip' : '192.168.1.111'}, '5':{'pin': '16', 'ip' : '192.168.1.111'}, '6':{'pin': '18', 'ip' : '192.168.1.111'}, '7':{'pin': '22', 'ip' : '192.168.1.111'}, '8':{'pin': '7', 'ip' : '192.168.1.111'}, '9':{'pin': '3', 'ip' : '192.168.1.111'}, '10':{'pin': '5', 'ip' : '192.168.1.111'}, '11':{'pin': '24', 'ip' : '192.168.1.111'}}
-_LAMP_ = {"normal":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "leave":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "night":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "getup":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "guests":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}, "diner":{'1':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '2':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '3':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '4':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '5':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '6':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '7':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '8':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '9':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '10':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, '11':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}, 'all':{'status' : 'off', 'color' : {'r' : 100, 'g' : 100, 'b' : 100}}}}
+from data import _DEVICE_, _LAMP_ 
+import threading
 
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
 id = '1'
+
 class RPi_GPIO():
 	_is_exist = False;
 	
@@ -38,7 +38,7 @@ class RPi_GPIO():
 			print ("RPi.GPIO init...")
 			RPi_GPIO._is_exist = True
 			GPIO.setmode(GPIO.BOARD)
-			for k,v in _DEVICE_.items():
+			for k,v in _DEVICE_['lamp'].items():
 				GPIO.setup(int(v['pin']), GPIO.OUT)
 				GPIO.output(int(v['pin']), GPIO.HIGH)
 
@@ -140,7 +140,9 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         global mode
         global id
         str1 = '{\"event\": \"lamp\", \"data\":'
-        str1 += json.dumps(_LAMP_)
+        str1 += json.dumps(_LAMP_[mode])
+        str1 += ', \"device\":'
+        str1 += json.dumps(_DEVICE_['lamp'])
         str1 += ', \"mode\":\"'
         str1 += mode
         str1 += '\", \"id\":\"'
@@ -158,21 +160,34 @@ class WebHandler(tornado.web.RequestHandler):
         ''' 
         post 参数示例: /control?dev_id=lamp&id=1&command=on
         '''
-        
- 
-        if WebHandler.has_key('command', post_data):#开关指令
+        #print(json.dumps(post_data))
+        if WebHandler.has_key('device_set', post_data):	#设定指令
+            str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"device_set\":'+post_data['device_set'][0]+'}'
+        elif WebHandler.has_key('command', post_data):	#开关指令
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
-        elif WebHandler.has_key('color', post_data):#调光调色指令
+        elif WebHandler.has_key('color', post_data):	#调光调色指令
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
         else :#模式指令
             str1 = '{\"dev_id\":\"'+post_data['dev_id'][0] + '\"}'
         			
-        self.write(base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
-		
-        if post_data['dev_id'][0] == 'lamp':
-            WebHandler.lamp(post_data)
-        elif post_data['dev_id'][0] == 'car':
-            WebHandler.car(post_data) 
+        self.write(str1)#base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
+
+        if WebHandler.has_key('device_set', post_data) == False:
+            if post_data['dev_id'][0] == 'lamp':
+                WebHandler.lamp(post_data)
+            elif post_data['dev_id'][0] == 'car':
+                WebHandler.car(post_data) 
+            timer = threading.Timer(5, WebHandler.perform_save)#延时5秒保存
+            timer.start()
+        elif WebHandler.has_key('device_set', post_data) == True:
+            WebHandler.device_set(post_data)
+            WebHandler.perform_save()
+
+    def perform_save(): 
+        f = open('data.py','w')            
+        f.write('_DEVICE_ = ' + json.dumps(_DEVICE_) + '\n')  
+        f.write('_LAMP_ = ' + json.dumps(_LAMP_) + '\n')  
+        f.close
 		
     def has_key(key, dict):
         for k in dict.keys():
@@ -180,6 +195,7 @@ class WebHandler(tornado.web.RequestHandler):
                 return True;
         return False;
 	
+    #硬件层输出（GPIO 或 socket到硬件终端）
     def output(id, key, value):
         global sock
         item = _LAMP_[mode][id]
@@ -193,12 +209,12 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'command'
             value = item['status']
 			
-        if WebHandler.has_key(id, _DEVICE_):
-            if WebHandler.has_key('pin', _DEVICE_[id]):
-                RPi_GPIO.output(int(_DEVICE_[id]['pin']), key, value)
+        if WebHandler.has_key(id, _DEVICE_['lamp']):
+            if WebHandler.has_key('pin', _DEVICE_['lamp'][id]):
+                RPi_GPIO.output(int(_DEVICE_['lamp'][id]['pin']), key, value)
 			
-            if sock != None and WebHandler.has_key('ip', _DEVICE_[id]):
-                sock.output(_DEVICE_[id]['ip'], item)
+            if sock != None and WebHandler.has_key('ip', _DEVICE_['lamp'][id]):
+                sock.output(_DEVICE_['lamp'][id]['ip'], item)
 
 		
     def lamp(post_data):
@@ -257,5 +273,13 @@ class WebHandler(tornado.web.RequestHandler):
             RPi_GPIO.output(_CAR_['INT3'], False)
             RPi_GPIO.output(_CAR_['INT4'], False)
 
+    def device_set(post_data):
+        if WebHandler.has_key('dev_id', post_data) == False or WebHandler.has_key('id', post_data) == False:
+            return
+        obj = json.loads(post_data['device_set'][0])
+        obj['name'] = urllib.parse.unquote(obj['name'])
+        _DEVICE_[post_data['dev_id'][0]][post_data['id'][0]] = obj
+        WebSocket.broadcast_lamp_status()
+			
 if __name__ == "__main__":
     pass

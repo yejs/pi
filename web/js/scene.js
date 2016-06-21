@@ -1,5 +1,6 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/websocket.js"></script>');
+document.write('<script type="text/javascript" src="js/data.js"></script>');
 var param=null;//work, set
 
 window.onload = function(){
@@ -14,7 +15,7 @@ window.onload = function(){
 		btn.style.backgroundColor = '#aaa';
 	}
 	
-	window.parent.postMessage('getmode','*');
+	window.parent.postMessage({'msg':'getmode'},'*');
 }
 
 refresh = function(){
@@ -23,12 +24,13 @@ refresh = function(){
 _SCENE_ = {'1':'normal', '2':'leave', '3':'night', '4':'getup', '5':'guests', '6':'diner'}
 
 window.addEventListener('message',function(e){
-	var mode=e.data;
-	
-	for(var id in _SCENE_){
-		if(_SCENE_[id] == mode){
-			setFocus(id);
+	if('mode'===e.data.msg){
+		for(var id in _SCENE_){
+			if(_SCENE_[id] == e.data.data){
+				setFocus(id);
+			}
 		}
+	//	console.log(e.origin);
 	}
 },false);
 
@@ -43,22 +45,21 @@ setFocus = function(id){
 }
 
 domodel = function(id){
-	if(parseInt(id) < 7){
-		setFocus(id);
-		
-		params = "mode=" + _SCENE_[id] + "&dev_id=lamp";
-		//页面ajax请求
-		loadXMLDoc("/control",function()
-		{
-			if (xmlhttp.readyState==4 && xmlhttp.status==200){
-			//	console.log(base64decode(xmlhttp.responseText));	
-				var json = JSON.parse(base64decode(xmlhttp.responseText));
-			}	
-			xmlhttp.oncallback(xmlhttp.readyState);	
-		}, params);
-	}
-	else{
+	if(parseInt(id) >= 7){
 		window.location.href = 'scene_set.html?mode=' + _SCENE_[(parseInt(id) - 6).toString()];
+		id = (parseInt(id) - 6).toString();
 	}
-
+	
+	setFocus(id);
+		
+	params = "mode=" + _SCENE_[id] + "&dev_id=lamp";
+	//页面ajax请求
+	loadXMLDoc("/control",function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200){
+		//	console.log(base64decode(xmlhttp.responseText));	
+			var json = JSON.parse((xmlhttp.responseText));
+		}	
+		xmlhttp.oncallback(xmlhttp.readyState);	
+	}, params);
 }

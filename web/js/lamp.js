@@ -1,8 +1,8 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/websocket.js"></script>');
 document.write('<script type="text/javascript" src="js/canvas.js"></script>');
+document.write('<script type="text/javascript" src="js/data.js"></script>');
 
-_LAMP_ = {"normal":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "leave":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "night":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "getup":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "guests":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}, "diner":{'1':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '2':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '3':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '4':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '5':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '6':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '7':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '8':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '9':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '10':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, '11':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}, 'all':{'status' : 'off', 'color' : {'r' : 50, 'g' : 50, 'b' : 50}}}};//初始状态都为0（熄灭）
 _lamp = null;
 _port = 8000;
 mode = "normal";
@@ -82,10 +82,11 @@ function lamp()
 		
 
 		this.contextReport.beginPath();
+		var width = this.bar0.width/45;
 		for(var i=0;i<45;i++)
-			this.contextReport.roundRect2(this.bar3.x + i*20, 10, 16, 80, 8, 0, 0);
+			this.contextReport.roundRect2(this.bar0.x + i*width, this.bar0.y, width - 4, this.bar0.height, 8, 0, 0);
 		this.contextReport.closePath();
-		var grd=this.contextReport.createLinearGradient(this.bar3.x,10,900,0); //颜色渐变的起始坐标和终点坐标
+		var grd=this.contextReport.createLinearGradient(this.bar0.x,this.bar0.y,this.bar0.width,0); //颜色渐变的起始坐标和终点坐标
 		grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
 		grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
 		grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
@@ -104,6 +105,7 @@ function lamp()
 		this.canvas.height = this.canvasReport.height = this.rect.height;
 		offset = 20;
 		var width = this.rect.width-offset*2;
+		this.bar0 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
 		this.bar1 = {x:offset, y: 105, width:width, height:90, pos:0, isdown:false};
 		this.bar2 = {x:offset, y: 205, width:width, height:90, pos:50, isdown:false};
 		this.bar3 = {x:offset, y: 305, width:width, height:90, pos:0, isdown:false};
@@ -126,6 +128,7 @@ function lamp()
 	this.timer = null;
 	this.ws = null;
 	this.rect = null;
+	this.bar0 = null;
 	this.bar1 = null;
 	this.bar2 = null;
 	this.bar3 = null;
@@ -135,8 +138,7 @@ function lamp()
 	this.canvas = document.getElementById('msg');//显示画布
 	this.onresize();
 	
-	if(isPC())
-	{
+	if(isPC()){
 		this.canvas.addEventListener('mousedown', function(event) { 
 			_lamp.doMouseDown(event, true);//不能用this
 			}, false);
@@ -182,12 +184,38 @@ function lamp()
 
 		return pos*255/100;
 	}
+	this.doColors = function(x, bar, down) { 
+		if(down)
+			bar.isdown = true;
+
+		var pos = parseInt((x - bar.x)*100/bar.width);
+		if(pos == bar.pos || !bar.isdown)
+			return -1;
+		
+		bar.pos = pos;
+		color = {r:0, g:0, b:0};
+		if(pos>=0 && pos<25){
+			color.r = 255, color.g = pos*255/25, color.b = 0; 
+		}
+		else if(pos>=25 && pos<50){
+			color.r = (50-pos)*255/25, color.g = 255, color.b = 0; 
+		}
+		else if(pos>=50 && pos<75){
+			color.r = 0, color.g = 255, color.b = (pos-50)*255/25; 
+		}
+		else if(pos>=75 && pos<=100){
+			color.r = 0, color.g = (100-pos)*255/25, color.b = 255; 
+		}
+
+		return color;
+	}
 	
 	this.doMouse = function(event, mouse, down, up) { 
 		if(_LAMP_[mode][this.id]['status'] === 'off')
 			return;
 		
 		if(up){
+			this.bar0.isdown = false;
 			this.bar1.isdown = false;
 			this.bar2.isdown = false;
 			this.bar3.isdown = false;
@@ -212,11 +240,17 @@ function lamp()
 
 		r = _LAMP_[mode][this.id]['color']['r']*255/100, g = _LAMP_[mode][this.id]['color']['g']*255/100, b = _LAMP_[mode][this.id]['color']['b']*255/100;
 		
-		if((this.isOnBar(loc.x, loc.y, this.bar1) && !this.bar2.isdown && !this.bar3.isdown) || this.bar1.isdown)
+		if((this.isOnBar(loc.x, loc.y, this.bar0) && !this.bar1.isdown && !this.bar2.isdown && !this.bar3.isdown) || this.bar0.isdown){
+			color = this.doColors(loc.x, this.bar0, down);
+			if(-1 == color)
+				return;
+			r = color.r, g = color.g, b = color.b;
+		}
+		else if((this.isOnBar(loc.x, loc.y, this.bar1) && !this.bar0.isdown && !this.bar2.isdown && !this.bar3.isdown) || this.bar1.isdown)
 			r = this.doColor(loc.x, this.bar1, down);
-		else if((this.isOnBar(loc.x, loc.y, this.bar2) && !this.bar1.isdown && !this.bar3.isdown) || this.bar2.isdown)
+		else if((this.isOnBar(loc.x, loc.y, this.bar2) && !this.bar0.isdown && !this.bar1.isdown && !this.bar3.isdown) || this.bar2.isdown)
 			g = this.doColor(loc.x, this.bar2, down);
-		else if((this.isOnBar(loc.x, loc.y, this.bar3) && !this.bar1.isdown && !this.bar2.isdown) || this.bar3.isdown)
+		else if((this.isOnBar(loc.x, loc.y, this.bar3) && !this.bar0.isdown && !this.bar1.isdown && !this.bar2.isdown) || this.bar3.isdown)
 			b = this.doColor(loc.x, this.bar3, down);
 		else
 			return;
@@ -250,12 +284,13 @@ function lamp()
 		
 		
 		if( json.event === "lamp" ){
-		//	console.log(JSON.stringify(json.data));
+		//	console.log('onmessage:' + JSON.stringify(json));
 		//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
 		//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
 		//真正的命令信息是由ajax发出的（docommand）
 
-			_LAMP_ = json.data;
+			_LAMP_[json.mode] = json.data;
+			_DEVICE_['lamp'] = json.device;
 			
 			if(!is_mode_set){
 				mode = json.mode;
@@ -267,9 +302,11 @@ function lamp()
 				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 			}
 			
-			window.parent.postMessage(json.mode,'*');
+			window.parent.postMessage({'msg':'mode' , 'data':json.mode},'*');
 			
 			for(var id in _LAMP_[mode]){
+				document.getElementById(id).innerText = _DEVICE_['lamp'][id]['name'];	
+				
 				if(_LAMP_[mode][id]['status'] === 'on'){
 					r = _LAMP_[mode][id]['color']['r']*255/100, g = _LAMP_[mode][id]['color']['g']*255/100, b = _LAMP_[mode][id]['color']['b']*255/100;
 					color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
@@ -280,6 +317,7 @@ function lamp()
 					document.getElementById(id).style.backgroundColor = '#aaa';
 			}
 
+			//检查是不是所有灯的状态一样且为全开，如是则‘所有’灯的状态设为全开，否则为关的状态
 			for(var id in _LAMP_[mode]){
 				if(id == "all")
 					break;
@@ -316,8 +354,6 @@ function lamp()
 docommand = function(dev_id, id, color){
 	var btn = document.getElementById(id.toString());
 
-	
-	
 	if(color == undefined){
 		if('lamp' == dev_id){
 			if(_LAMP_[mode][id]['status'] === 'on'){
@@ -330,22 +366,30 @@ docommand = function(dev_id, id, color){
 			}
 			else
 				command = 'on';
+			
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+			btn.style.backgroundColor = '#ee0';
 		}
-	//	_lamp.setID(id);
-		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
-		btn.style.backgroundColor = '#ee0';
 	}
-	else
-		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
+	else{
+		if('set' != color)
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
+		else{
+			_DEVICE_[dev_id][id]['name'] = encodeURIComponent('灯117'); 
+			param = "device_set=" + (JSON.stringify(_DEVICE_[dev_id][id])) + "&dev_id=" + dev_id + "&id=" + id;
+		//	console.log(param);
+		}
+	}
 
 
 	//页面ajax请求
 	loadXMLDoc("/control",function()
 	{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200){
-		//	console.log(base64decode(xmlhttp.responseText));	
-			var json = JSON.parse(base64decode(xmlhttp.responseText));
-			var command = json.command;
+			str = ((xmlhttp.responseText))	
+			var json = JSON.parse(str);
+		//	var device_set = json.device_set;
+		//	console.log(decodeURIComponent(device_set.name));
 			if('lamp' == dev_id){
 			}
 			else if('car' == dev_id){
