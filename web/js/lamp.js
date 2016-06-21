@@ -372,13 +372,12 @@ docommand = function(dev_id, id, color){
 		}
 	}
 	else{
-		if('set' != color)
-			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
-		else{
-			_DEVICE_[dev_id][id]['name'] = encodeURIComponent('灯117'); 
+		if('set' === color){
+			_DEVICE_[dev_id][id]['name'] = encodeURIComponent('灯11'); 
 			param = "device_set=" + (JSON.stringify(_DEVICE_[dev_id][id])) + "&dev_id=" + dev_id + "&id=" + id;
-		//	console.log(param);
 		}
+		else//调光调色
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
 	}
 
 
