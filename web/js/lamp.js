@@ -15,9 +15,7 @@ window.onload = function(){
 		_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
 		
 	}
-	
-	
-	
+
 	var url = location.search;
 	pos = url.indexOf('mode');
 	if(pos>=0){
@@ -282,16 +280,33 @@ function lamp()
 		if(!json)
 			return;
 		
-		
-		if( json.event === "lamp" ){
-		//	console.log('onmessage:' + JSON.stringify(json));
+		if( json.event === "device" ){
+		//	console.log('device:' + JSON.stringify(json));
+			_DEVICE_ = json.data;
+			
+			for(var i=0;i<20;i++){
+				if(document.getElementById(i.toString())){
+					if(!_DEVICE_["lamp"].hasOwnProperty(i.toString()))
+						document.getElementById(i.toString()).style.display = 'none';
+					else
+						document.getElementById(i.toString()).innerText = _DEVICE_['lamp'][i.toString()]['name'];	
+				}
+			}
+			if(document.getElementById('all')){
+				if(_DEVICE_["lamp"].hasOwnProperty('all'))
+					document.getElementById('all').innerText = _DEVICE_["lamp"]['all']['name'];
+				else
+					document.getElementById('all').style.display = 'none';
+			}
+		} 
+		else if( json.event === "lamp" ){
+		//	console.log('lamp:' + JSON.stringify(json));
 		//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
 		//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
 		//真正的命令信息是由ajax发出的（docommand）
 
 			_LAMP_[json.mode] = json.data;
-			_DEVICE_['lamp'] = json.device;
-			
+
 			if(!is_mode_set){
 				mode = json.mode;
 				document.getElementById('scene_title').innerText = _MODE_SET_[mode];
@@ -305,16 +320,15 @@ function lamp()
 			window.parent.postMessage({'msg':'mode' , 'data':json.mode},'*');
 			
 			for(var id in _LAMP_[mode]){
-				document.getElementById(id).innerText = _DEVICE_['lamp'][id]['name'];	
-				
-				if(_LAMP_[mode][id]['status'] === 'on'){
-					r = _LAMP_[mode][id]['color']['r']*255/100, g = _LAMP_[mode][id]['color']['g']*255/100, b = _LAMP_[mode][id]['color']['b']*255/100;
-					color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-					document.getElementById(id).style.backgroundColor = color;	
-				//	console.log(color);
-				}					
-				else
-					document.getElementById(id).style.backgroundColor = '#aaa';
+				if(_DEVICE_["lamp"].hasOwnProperty(id.toString())){
+					if(_LAMP_[mode][id]['status'] === 'on'){
+						r = _LAMP_[mode][id]['color']['r']*255/100, g = _LAMP_[mode][id]['color']['g']*255/100, b = _LAMP_[mode][id]['color']['b']*255/100;
+						color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+						document.getElementById(id).style.backgroundColor = color;	
+					}					
+					else
+						document.getElementById(id).style.backgroundColor = '#aaa';
+				}
 			}
 
 			//检查是不是所有灯的状态一样且为全开，如是则‘所有’灯的状态设为全开，否则为关的状态
@@ -345,6 +359,7 @@ function lamp()
 		
 		if(_lamp.timer)
 			clearInterval(_lamp.timer);
+		
 		_lamp.timer = setInterval(function(){
 			_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
 			}, 5000);
@@ -372,12 +387,8 @@ docommand = function(dev_id, id, color){
 		}
 	}
 	else{
-		if('set' === color){
-			_DEVICE_[dev_id][id]['name'] = encodeURIComponent('灯11'); 
-			param = "device_set=" + (JSON.stringify(_DEVICE_[dev_id][id])) + "&dev_id=" + dev_id + "&id=" + id;
-		}
-		else//调光调色
-			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
+		//调光调色
+		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
 	}
 
 

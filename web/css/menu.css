@@ -45,7 +45,7 @@ div.menu
     overflow:auto;position:fixed; width: 100%;max-width:100%;height:auto;z-index:100;top: 0px;
     margin: 0px; /* 与外界元素的距离为0 */
     padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
-	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:42px;
+	font-family:'Hiragino Sans GB','Microsoft Yahei','Helvetica','STHeiti';font-weight:600;font-style:normal;font-size:42px;
 }
 
 /* 所有class为menu的div中的ul样式 */
@@ -286,12 +286,16 @@ div.item span
 	font-family:'Arial Regular', 'Arial';font-weight:400;font-style:normal;font-size:12px;
 }
 
-div.item  input, .select-text
+div  input, .select-text
 {
-    width: 80%;
-	height: 20px;line-height:20px;
+    width: 70%;
+	height: 65px;line-height:65px;
+	margin: 15px 30px 0px 0px;
+	padding: 0px 0px 0px 10px;
 	float:right;
 	white-space:normal;
+	border-width:1px;border-color:black;
+	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:left;
 }
 
 div.item  input.mybtn
@@ -330,4 +334,12 @@ div.item  input.mybtn
 .btn:active{border: 3px solid #888;}
 
 
-.title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;}
+.title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;color:#aaa}
+
+.myframe {width:100%;height:95vh;border:none;}
+		
+#footer {position: fixed;
+		margin-top: -65px; 
+		height: 80px;
+		clear:both;
+		background:#fff}

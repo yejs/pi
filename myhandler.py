@@ -122,6 +122,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     def open(self):
         #print( "%s" % (self.request))#.method, self.request.uri, self.request.remote_ip))
         WebSocket.socket_handlers.add(self)
+        WebSocket.broadcast_device()
         WebSocket.broadcast_lamp_status()
     def on_close(self):
         WebSocket.socket_handlers.remove(self)
@@ -136,13 +137,20 @@ class WebSocket(tornado.websocket.WebSocketHandler):
                 logging.error('Error sending message', exc_info=True)
 				
     #向其它页面客户端广播状态消息(用于各客户端间同步，一个客户端发送命令，其它客户端同时此看到命令)
+    def broadcast_device():
+        global mode
+        global id
+        str1 = '{\"event\": \"device\", \"data\":'
+        str1 += json.dumps(_DEVICE_)
+        str1 += '}'
+
+        WebSocket.broadcast_messages(str1) 
+		
     def broadcast_lamp_status():
         global mode
         global id
         str1 = '{\"event\": \"lamp\", \"data\":'
         str1 += json.dumps(_LAMP_[mode])
-        str1 += ', \"device\":'
-        str1 += json.dumps(_DEVICE_['lamp'])
         str1 += ', \"mode\":\"'
         str1 += mode
         str1 += '\", \"id\":\"'
@@ -196,9 +204,14 @@ class WebHandler(tornado.web.RequestHandler):
         return False;
 	
     #硬件层输出（GPIO 或 socket到硬件终端）
-    def output(id, key, value):
+    def output(dev_id, id, key, value):
         global sock
-        item = _LAMP_[mode][id]
+		
+        if dev_id == 'lamp':
+            item = _LAMP_[mode][id]
+        else:#TODO:其它设备待完成
+            return;
+			
         if key == 'command':#开关指令
             item['status'] = value
         elif key == 'color':#调光调色指令
@@ -209,12 +222,12 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'command'
             value = item['status']
 			
-        if WebHandler.has_key(id, _DEVICE_['lamp']):
-            if WebHandler.has_key('pin', _DEVICE_['lamp'][id]):
-                RPi_GPIO.output(int(_DEVICE_['lamp'][id]['pin']), key, value)
+        if WebHandler.has_key(id, _DEVICE_[dev_id]):
+            if WebHandler.has_key('pin', _DEVICE_[dev_id][id]):
+                RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
 			
-            if sock != None and WebHandler.has_key('ip', _DEVICE_['lamp'][id]):
-                sock.output(_DEVICE_['lamp'][id]['ip'], item)
+            if sock != None and WebHandler.has_key('ip', _DEVICE_[dev_id][id]):
+                sock.output(_DEVICE_[dev_id][id]['ip'], item)
 
 		
     def lamp(post_data):
@@ -245,10 +258,10 @@ class WebHandler(tornado.web.RequestHandler):
 			
         if id == 'all' or key == None:
             for k in _LAMP_[mode].keys():
-                WebHandler.output(k, key, value)
+                WebHandler.output('lamp', k, key, value)
 				
         if id != None:
-            WebHandler.output(id, key, value)
+            WebHandler.output('lamp', id, key, value)
         else:
             id = '1'
         #print("%s : %s" %(mode, json.dumps(_LAMP_[mode])))
@@ -279,7 +292,7 @@ class WebHandler(tornado.web.RequestHandler):
         obj = json.loads(post_data['device_set'][0])
         obj['name'] = urllib.parse.unquote(obj['name'])
         _DEVICE_[post_data['dev_id'][0]][post_data['id'][0]] = obj
-        WebSocket.broadcast_lamp_status()
+        WebSocket.broadcast_device()
 			
 if __name__ == "__main__":
     pass

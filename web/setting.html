@@ -14,7 +14,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['灯光控制', '场景模式', '小车', '视频监控'];
+			var _title = ['灯光设置', '窗帘设置', '空调设置', '电视设置'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -25,14 +25,16 @@
 			}
 			setTimeout(function() {onNewsTitle(0);},20);
 			
-			doInitNavi('msg', 0);
+			doInitNavi('msg', 1);
 		}
 		
-		var titles = ["lamp", "scene", "car", "video"];
+		var titles = ["lamp", "curtain", "air_conditioner", "TV"];
 		showPage = function(title){
 			for(var i in titles){
-				if(titles[i] === title)
+				if(titles[i] === title){
 					document.getElementById(titles[i]).style.display="block";
+					window.frames['f' + titles[i]].window.refresh();
+				}
 				else
 					document.getElementById(titles[i]).style.display="none";
 			}
@@ -53,45 +55,21 @@
 					a.style.background = 'transparent';
 				}
 			}
-			var news=document.getElementById("video");
-			var elem_child = news.getElementsByTagName("iframe"); 
-		
+
 			if(0 == i){
 				showPage("lamp");
-				elem_child[0].src = "";
-				window.frames['flamp'].window.refresh();//location.reload();
 			}
 			else if(1 == i){
-				showPage("scene");
-				elem_child[0].src = "";
-				window.frames['fscene'].window.refresh();//location.reload();
+				showPage("curtain");
 			}
 			else if(2 == i){
-				showPage("car");
-				elem_child[0].src = "";
+				showPage("air_conditioner");
 			}
 			else if(3 == i){
-				showPage("video");
-				var src = window.location.host;
-				var npos = src.indexOf(":");
-
-				if(npos >= 0)
-					src = src.substr(0,npos);
-				src += ":8080/javascript_simple.html";
-				elem_child[0].src = "http://" + src;
+				showPage("TV");
 			}
 		}
-		var mode='normal';
-		window.addEventListener('message',function(e){
-			if('http://' + window.location.host !== e.origin)
-				return;
-				
-			if('mode'===e.data.msg || 'getmode'===e.data.msg){
-				if('mode'===e.data.msg)
-					mode=e.data.data;
-				window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
-			}
-		},false);
+
     </script>
 </head>
 <body>
@@ -102,16 +80,16 @@
 		</ul>
 	</div><br/><br/><br/>
 	<div id="lamp" style="display:block">
-		<iframe name="flamp" src='lamp.html' class="myframe"></iframe>
+		<iframe name="flamp" src='dev_set.html?dev_id=lamp' class="myframe"></iframe>
 	</div>
-	<div id="scene" style="display:none">
-		<iframe name="fscene" src='scene.html?param=work' class="myframe"></iframe>
+	<div id="curtain" style="display:none">
+		<iframe name="fcurtain" src='dev_set.html?dev_id=curtain' class="myframe"></iframe>
 	</div>
-	<div id="car" style="display:none">
-		<iframe name="fcar" src='car.html' class="myframe"></iframe>
+	<div id="air_conditioner" style="display:none">
+		<iframe name="fair_conditioner" src='dev_set.html?dev_id=air_conditioner' class="myframe"></iframe>
 	</div>
-	<div id="video" style="display:none">
-		<iframe name="fvideo" src='' class="myframe"></iframe>
+	<div id="TV" style="display:none">
+		<iframe name="fTV" src='dev_set.html?dev_id=TV' class="myframe"></iframe>
 	</div>
 	<div id="footer"><canvas id="msg" align="left"></canvas></div>
 </div>
