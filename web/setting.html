@@ -31,10 +31,8 @@
 		var titles = ["lamp", "curtain", "air_conditioner", "TV"];
 		showPage = function(title){
 			for(var i in titles){
-				if(titles[i] === title){
+				if(titles[i] === title)
 					document.getElementById(titles[i]).style.display="block";
-					window.frames['f' + titles[i]].window.refresh();
-				}
 				else
 					document.getElementById(titles[i]).style.display="none";
 			}

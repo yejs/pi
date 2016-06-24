@@ -34,11 +34,9 @@ window.onresize = function(){
 }
 
 refresh = function(){
-//	r = _LAMP_[mode][_lamp.id]['color']['r']*255/100, g = _LAMP_[mode][_lamp.id]['color']['g']*255/100, b = _LAMP_[mode][_lamp.id]['color']['b']*255/100;
-//	color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-//	docommand('lamp', _lamp.id, color)
-	
-	location.reload();
+	_LAMP_[mode][_lamp.id]['status'] = _LAMP_[mode][_lamp.id]['status'] == 'on' ? 'off' : 'on';
+	docommand('lamp', _lamp.id);
+//	location.reload();
 }
 
 function lamp()
