@@ -6,7 +6,7 @@
 __author__ = 'yejs'
 __version__ = '1.0'
 
-from myhandler import WebHandler, WebSocket, SocketServer
+from myhandler import WebHandler, WebSocket, SocketServer, Connection
 from myhandler import RPi_GPIO 
 import os, threading
 #import RPi.GPIO as GPIO
@@ -61,6 +61,10 @@ if __name__ == "__main__":
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:
         tornado.ioloop.IOLoop.instance().stop()
+        if Connection.timer != None:
+            Connection.timer.cancel()
     finally:
         RPi_GPIO.cleanup()
         tornado.ioloop.IOLoop.instance().stop()
+        if Connection.timer != None:
+            Connection.timer.cancel()

@@ -19,6 +19,7 @@ import urllib
 import logging
 from data import _DEVICE_, _LAMP_ 
 import threading
+import time
 
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
@@ -73,7 +74,10 @@ class RPi_GPIO():
 
 		
 class Connection(object):    
+    heart_beat_init = False
+    timer = None
     clients = set()    
+    output_param = {"ip": "", "pin": "", "item": None, "time_tick":0, "timer":None}
     def __init__(self, stream, address):   
         global sock
         sock = self
@@ -83,7 +87,11 @@ class Connection(object):
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         print("New connection: %s, " % address[0])
-		
+
+        if False == Connection.heart_beat_init:
+            Connection.heart_beat_init = True
+            Connection.heart_beat()
+  
     def read_message(self):    
         #self._stream.read_until('\n', self.broadcast_messages)    
         self._stream.read_bytes(1024, self.broadcast_messages, partial=True)
@@ -98,19 +106,53 @@ class Connection(object):
         self._stream.write(data)   
             
     def on_close(self):    
-        print("%s closed." % self._address[0])  
         Connection.clients.remove(self)    
-        print("connection num is:", len(Connection.clients))
+        print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
+        for k,v in _DEVICE_['lamp'].items():
+            if WebHandler.has_key('ip', v) and v['ip'] == self._address[0]:
+                _LAMP_[mode][k]['status'] = 'off'
+
+        WebSocket.broadcast_lamp_status()
 		
-    def output(self, ip, item):
+    def output(self, ip, pin, item):
+        Connection.output_param['ip'] = ip
+        Connection.output_param['pin'] = pin
+        Connection.output_param['item'] = item
+
+        if time.time() - Connection.output_param['time_tick'] > 1:
+            Connection.output_ex()
+        else :
+            if Connection.output_param['timer']:
+                Connection.output_param['timer'].cancel()
+            Connection.output_param['timer'] = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
+            Connection.output_param['timer'].start()
+
+    def output_ex():
+        Connection.output_param['time_tick'] = time.time()
+        Connection.output_param['timer'] = None
+        msg = "{\"event\":\"msg\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(Connection.output_param['pin'], Connection.output_param['item']['status'], RPi_GPIO.get_colors(Connection.output_param['item']))
 
         for conn in Connection.clients:
-            if conn._address[0].find(ip) != -1:
+            if conn._address[0].find(Connection.output_param['ip']) != -1:
                 try:
-                    msg = "{\"event\":\"msg\", \"status\":\"%s\", \"color\":\"%s\"}" %(item['status'], RPi_GPIO.get_colors(item))
                     conn._stream.write(msg.encode())
                 except:
-                    logging.error('Error sending message', exc_info=True)       
+                    logging.error('Error sending message', exc_info=True)	
+		
+    def heart_beat():
+        if Connection.timer != None:
+            Connection.timer.cancel()
+        Connection.timer = threading.Timer(5, Connection.heart_beat)#5秒心跳输出
+        Connection.timer.start()
+		
+        msg = "{\"event\":\"heart_beat\"}"
+
+        for conn in Connection.clients:
+            try:
+                conn._stream.write(msg.encode())
+            except:
+                logging.error('Error sending message', exc_info=True)	
+
     
 class SocketServer(TCPServer):    
     def handle_stream(self, stream, address):   
@@ -227,7 +269,7 @@ class WebHandler(tornado.web.RequestHandler):
                 RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
 			
             if sock != None and WebHandler.has_key('ip', _DEVICE_[dev_id][id]):
-                sock.output(_DEVICE_[dev_id][id]['ip'], item)
+                sock.output(_DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
 
 		
     def lamp(post_data):
