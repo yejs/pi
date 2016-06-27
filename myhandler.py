@@ -118,7 +118,7 @@ class Connection(object):
         Connection.output_param['ip'] = ip
         Connection.output_param['pin'] = pin
         Connection.output_param['item'] = item
-
+        #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
         if time.time() - Connection.output_param['time_tick'] > 1:
             Connection.output_ex()
         else :
@@ -139,6 +139,7 @@ class Connection(object):
                 except:
                     logging.error('Error sending message', exc_info=True)	
 		
+    #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
     def heart_beat():
         if Connection.timer != None:
             Connection.timer.cancel()
