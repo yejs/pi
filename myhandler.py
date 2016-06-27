@@ -24,6 +24,7 @@ import time
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
 id = '1'
+dev_id = 'lamp'
 
 class RPi_GPIO():
 	_is_exist = False;
@@ -108,7 +109,7 @@ class Connection(object):
     def on_close(self):    
         Connection.clients.remove(self)    
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
-        for k,v in _DEVICE_['lamp'].items():
+        for k,v in _DEVICE_['lamp'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
             if WebHandler.has_key('ip', v) and v['ip'] == self._address[0]:
                 _LAMP_[mode][k]['status'] = 'off'
 
@@ -204,29 +205,42 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 		
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
+        global dev_id
+        global id
+
         post_data = {}
 
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
+			
+        if WebHandler.has_key('dev_id', post_data) == True:
+            dev_id = post_data['dev_id'][0]
+        else :
+            dev_id = 'lamp'
+			
+        if WebHandler.has_key('id', post_data):
+            id = post_data['id'][0]
+        else :
+            id = '1'
         ''' 
         post 参数示例: /control?dev_id=lamp&id=1&command=on
         '''
         #print(json.dumps(post_data))
         if WebHandler.has_key('device_set', post_data):	#设定指令
-            str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"device_set\":'+post_data['device_set'][0]+'}'
+            str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"device_set\":'+post_data['device_set'][0]+'}'
         elif WebHandler.has_key('command', post_data):	#开关指令
-            str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
+            str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
         elif WebHandler.has_key('color', post_data):	#调光调色指令
-            str1 = '{\"dev_id\":\"'+post_data['dev_id'][0]+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
+            str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
         else :#模式指令
-            str1 = '{\"dev_id\":\"'+post_data['dev_id'][0] + '\"}'
+            str1 = '{\"dev_id\":\"'+dev_id + '\"}'
         			
         self.write(str1)#base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
 
         if WebHandler.has_key('device_set', post_data) == False:
-            if post_data['dev_id'][0] == 'lamp':
+            if dev_id == 'lamp':
                 WebHandler.lamp(post_data)
-            elif post_data['dev_id'][0] == 'car':
+            elif dev_id == 'car':
                 WebHandler.car(post_data) 
             timer = threading.Timer(5, WebHandler.perform_save)#延时5秒保存
             timer.start()
@@ -276,13 +290,10 @@ class WebHandler(tornado.web.RequestHandler):
     def lamp(post_data):
         global mode
         global id
-        id = None
+
         key = None
         value = None
-		
-        if WebHandler.has_key('id', post_data):
-            id = post_data['id'][0]
-			
+
         if WebHandler.has_key('command', post_data):#开关指令
             key = 'command'
         elif WebHandler.has_key('color', post_data):#调光调色指令
@@ -302,11 +313,9 @@ class WebHandler(tornado.web.RequestHandler):
         if id == 'all' or key == None:
             for k in _LAMP_[mode].keys():
                 WebHandler.output('lamp', k, key, value)
-				
-        if id != None:
-            WebHandler.output('lamp', id, key, value)
-        else:
-            id = '1'
+
+        WebHandler.output('lamp', id, key, value)
+
         #print("%s : %s" %(mode, json.dumps(_LAMP_[mode])))
         WebSocket.broadcast_lamp_status()
 				

@@ -58,20 +58,22 @@
 			}
 			var news=document.getElementById("video");
 			var elem_child = news.getElementsByTagName("iframe"); 
-		
 			if(0 == i){
 				showPage("lamp");
-				elem_child[0].src = "";
+				if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
+					elem_child[0].src = "fake.html";
 				window.frames['flamp'].window.refresh();//location.reload();
 			}
 			else if(1 == i){
 				showPage("scene");
-				elem_child[0].src = "";
+				if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
+					elem_child[0].src = "fake.html";
 				window.frames['fscene'].window.refresh();//location.reload();
 			}
 			else if(2 == i){
 				showPage("car");
-				elem_child[0].src = "";
+				if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
+					elem_child[0].src = "fake.html";
 			}
 			else if(3 == i){
 				showPage("video");
