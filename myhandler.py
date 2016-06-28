@@ -125,7 +125,7 @@ class Connection(object):
         else :
             if Connection.output_param['timer']:
                 Connection.output_param['timer'].cancel()
-            Connection.output_param['timer'] = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
+            Connection.output_param['timer'] = threading.Timer(0.3, Connection.output_ex)#延时0.3秒输出
             Connection.output_param['timer'].start()
 
     def output_ex():
