@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
- 命令处理模块  https://item.taobao.com/item.htm?spm=a1z10.5-c.w4002-13621160198.15.zeZ1Gq&id=528586251425
+ 命令处理模块 
 """
 __author__ = 'yejs'
 __version__ = '1.0'
