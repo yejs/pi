@@ -255,7 +255,7 @@ function lamp()
 			return;
 		
 		this.doDraw();
-		
+
 		color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
 	//	console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
 		docommand('lamp', this.id, color)

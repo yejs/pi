@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
- 命令处理模块
+ 命令处理模块  https://item.taobao.com/item.htm?spm=a1z10.5-c.w4002-13621160198.15.zeZ1Gq&id=528586251425
 """
 __author__ = 'yejs'
 __version__ = '1.0'
@@ -119,12 +119,12 @@ class Connection(object):
         Connection.output_param['ip'] = ip
         Connection.output_param['pin'] = pin
         Connection.output_param['item'] = item
+        if Connection.output_param['timer']:
+            Connection.output_param['timer'].cancel()
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
-        if time.time() - Connection.output_param['time_tick'] > 1:
+        if time.time() - Connection.output_param['time_tick'] > 2:
             Connection.output_ex()
         else :
-            if Connection.output_param['timer']:
-                Connection.output_param['timer'].cancel()
             Connection.output_param['timer'] = threading.Timer(0.3, Connection.output_ex)#延时0.3秒输出
             Connection.output_param['timer'].start()
 
