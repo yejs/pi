@@ -26,6 +26,30 @@ mode = 'normal'
 id = '1'
 dev_id = 'lamp'
 
+def get_dev_item(ip):    
+    for dev in _DEVICE_:
+        for id in _DEVICE_[dev]:    
+            if WebHandler.has_key('ip', _DEVICE_[dev][id]) and _DEVICE_[dev][id]['ip'] == ip:
+                return _DEVICE_[dev][id]
+    return None
+	
+def get_dev_index(ip):    
+    for dev in _DEVICE_:
+        for id in _DEVICE_[dev]:    
+            if WebHandler.has_key('ip', _DEVICE_[dev][id]) and _DEVICE_[dev][id]['ip'] == ip:
+                return dev, id
+    return None, None
+	
+def get_status_item(ip):    
+    global mode
+    dev, id = get_dev_index(ip)
+    if dev and id:
+        if dev == 'lamp':
+            return _LAMP_[mode][id]
+        elif dev == 'curtain':#TODO
+            return None
+    return None
+				
 class RPi_GPIO():
 	_is_exist = False;
 	
@@ -94,18 +118,22 @@ class Connection(object):
             Connection.heart_beat()
   
     def read_message(self):    
-        #self._stream.read_until('\n', self.broadcast_messages)    
-        self._stream.read_bytes(1024, self.broadcast_messages, partial=True)
+        self._stream.read_bytes(1024, self.doRecv, partial=True)
 
+    def doRecv(self, data):    
+        dev_item = get_dev_item(self._address[0])
+        status_item = get_status_item(self._address[0])
+        if dev_item and status_item:    
+            print("recv from %s: %s, name: %s, status: %s" % (self._address[0], data[:-1].decode(), dev_item['name'], json.dumps(status_item)))  
+        self._stream.write(data)  	
+        self.read_message()
+		
+    '''
     def broadcast_messages(self, data):    
         print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         for conn in Connection.clients:    
-            conn.send_message(data)  	
-        self.read_message()    
-        
-    def send_message(self, data):    
-        self._stream.write(data)   
-            
+            conn._stream.write(data)  	
+    '''
     def on_close(self):    
         Connection.clients.remove(self)    
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
