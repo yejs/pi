@@ -71,13 +71,15 @@ class RPi_GPIO():
 	def cleanup():
 		if RPi_GPIO._is_exist:
 			GPIO.cleanup()
-	
+			
+	# '7f7f7f'字符串转为 {'r' : 50, 'g' : 50, 'b' : 50}
 	def get_color(color):
 		r = int('0x' + color[0:2], 16)
 		g = int('0x' + color[2:4], 16)
 		b = int('0x' + color[4:6], 16)
 		return r, g, b
 		
+	#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
 	def get_colors(item):
 		r, g, b = int(item['color']['r']*255/100), int(item['color']['g']*255/100), int(item['color']['b']*255/100)
 		color = hex(int(r/16))[2:] + hex(int(r%16))[2:] + hex(int(g/16))[2:] + hex(int(g%16))[2:] + hex(int(b/16))[2:] + hex(int(b%16))[2:]
@@ -157,10 +159,18 @@ class Connection(object):
             Connection.output_param['timer'].start()
 
     def output_ex():
+        global dev_id
         Connection.output_param['time_tick'] = time.time()
         Connection.output_param['timer'] = None
-        msg = "{\"event\":\"msg\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(Connection.output_param['pin'], Connection.output_param['item']['status'], RPi_GPIO.get_colors(Connection.output_param['item']))
-
+		
+        pin = Connection.output_param['pin']
+        status = Connection.output_param['item']['status']
+        if dev_id.find('lamp') != -1:
+            color = RPi_GPIO.get_colors(Connection.output_param['item'])#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, color)
+        else:
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\"}" %(dev_id, pin, status)
+			
         for conn in Connection.clients:
             if conn._address[0].find(Connection.output_param['ip']) != -1:
                 try:
