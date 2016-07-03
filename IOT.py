@@ -61,10 +61,10 @@ if __name__ == "__main__":
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:
         tornado.ioloop.IOLoop.instance().stop()
-        if Connection.timer != None:
-            Connection.timer.cancel()
+        if Connection.heart_beat_timer != None:
+            Connection.heart_beat_timer.cancel()
     finally:
         RPi_GPIO.cleanup()
         tornado.ioloop.IOLoop.instance().stop()
-        if Connection.timer != None:
-            Connection.timer.cancel()
+        if Connection.heart_beat_timer != None:
+            Connection.heart_beat_timer.cancel()

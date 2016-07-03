@@ -5,28 +5,23 @@ document.write('<script type="text/javascript" src="js/data.js"></script>');
 
 _lamp = null;
 _port = 8000;
+dev_id = 'lamp';
 mode = "normal";
-is_mode_set = false;
+
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
 
 	if(document.getElementById('lamp')){
 		_lamp = new lamp();
-		_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
+		
 		
 	}
 
 	var url = location.search;
-	pos = url.indexOf('mode');
+	pos = url.indexOf('dev_id');
 	if(pos>=0){
-		is_mode_set = true;
-		mode = url.substr(pos+5);
-		
-		document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '设定';
-	//	document.getElementById('ret_btn').style.display = "block";	
+		dev_id = url.substr(pos+7);
 	}
-	else
-		document.getElementById('ret_btn').style.display = "none";	
 }
 
 window.onresize = function(){
@@ -34,10 +29,22 @@ window.onresize = function(){
 }
 
 refresh = function(){
-	_LAMP_[mode][_lamp.id]['status'] = _LAMP_[mode][_lamp.id]['status'] == 'on' ? 'off' : 'on';
-	docommand('lamp', _lamp.id);
-//	location.reload();
+	if(this.getmessaged){
+		if("lamp" == dev_id)
+			_LAMP_[mode][_lamp.id]['status'] = _LAMP_[mode][_lamp.id]['status'] == 'on' ? 'off' : 'on';
+		else
+			_CURTAIN_[mode][_lamp.id]['status'] = _CURTAIN_[mode][_lamp.id]['status'] == 'on' ? 'off' : 'on';
+		
+		_lamp.docommand(_lamp.id);
+	}
 }
+
+window.addEventListener('message',function(e){
+	if('onmessage'===e.data.msg){
+		_lamp.onmessage(e.data.data);
+	//	console.log(e.data.data);
+	}
+},false);
 
 function lamp()
 {
@@ -53,44 +60,45 @@ function lamp()
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 
-		var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
-		var offset = this.bar1.height/2 - 5, r = 5, h = 10;
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
-		this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
-		this.contextReport.roundRect(this.bar2.x, this.bar2.y+offset, pos2, h, r, 1, 0);
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
-		this.contextReport.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
-		
-		this.contextReport.fillStyle = "rgb(220, 220, 220)";
-		this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
-		this.contextReport.roundRect(this.bar2.x + pos2, this.bar2.y+offset, this.bar2.width - pos2, h, r, 1, 0);
-		this.contextReport.roundRect(this.bar3.x + pos3, this.bar3.y+offset, this.bar3.width - pos3, h, r, 1, 0);
-		
-		
-		r = this.bar1.height/4;
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
-		this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
-		this.contextReport.roundRect(this.bar2.x + pos2 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
-		this.contextReport.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
-		
+		if("lamp" == dev_id){
+			var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
+			var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
+			this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
+			this.contextReport.roundRect(this.bar2.x, this.bar2.y+offset, pos2, h, r, 1, 0);
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
+			this.contextReport.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
+			
+			this.contextReport.fillStyle = "rgb(220, 220, 220)";
+			this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
+			this.contextReport.roundRect(this.bar2.x + pos2, this.bar2.y+offset, this.bar2.width - pos2, h, r, 1, 0);
+			this.contextReport.roundRect(this.bar3.x + pos3, this.bar3.y+offset, this.bar3.width - pos3, h, r, 1, 0);
+			
+			
+			r = this.bar1.height/4;
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+			this.contextReport.roundRect(this.bar2.x + pos2 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
+			this.contextReport.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
+			
 
-		this.contextReport.beginPath();
-		var width = this.bar0.width/45;
-		for(var i=0;i<45;i++)
-			this.contextReport.roundRect2(this.bar0.x + i*width, this.bar0.y, width - 4, this.bar0.height, 8, 0, 0);
-		this.contextReport.closePath();
-		var grd=this.contextReport.createLinearGradient(this.bar0.x,this.bar0.y,this.bar0.width,0); //颜色渐变的起始坐标和终点坐标
-		grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
-		grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
-		grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
-		grd.addColorStop(0.75, "rgba(0, 255, 255, 1)");
-		grd.addColorStop(1, "rgba(0, 0, 255, 1)");
-		this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
-		this.contextReport.fill();
-		
+			this.contextReport.beginPath();
+			var width = this.bar0.width/45;
+			for(var i=0;i<45;i++)
+				this.contextReport.roundRect2(this.bar0.x + i*width, this.bar0.y, width - 4, this.bar0.height, 8, 0, 0);
+			this.contextReport.closePath();
+			var grd=this.contextReport.createLinearGradient(this.bar0.x,this.bar0.y,this.bar0.width,0); //颜色渐变的起始坐标和终点坐标
+			grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
+			grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
+			grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
+			grd.addColorStop(0.75, "rgba(0, 255, 255, 1)");
+			grd.addColorStop(1, "rgba(0, 0, 255, 1)");
+			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
+			this.contextReport.fill();
+		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	this.onresize = function()
@@ -121,14 +129,13 @@ function lamp()
 	//	console.log(this.id);
 	}
 	
-	this.timer = null;
-	this.ws = null;
 	this.rect = null;
 	this.bar0 = null;
 	this.bar1 = null;
 	this.bar2 = null;
 	this.bar3 = null;
 	this.id = '1';
+	this.getmessaged = false;
 	//创建双缓存
 	this.canvasReport = document.createElement("canvas");
 	this.canvas = document.getElementById('msg');//显示画布
@@ -231,34 +238,36 @@ function lamp()
 
 		var loc = getPointOnCanvas(canvas, x, y); 
 		
-		if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
-			return;
-
-		r = _LAMP_[mode][this.id]['color']['r']*255/100, g = _LAMP_[mode][this.id]['color']['g']*255/100, b = _LAMP_[mode][this.id]['color']['b']*255/100;
-		
-		if((this.isOnBar(loc.x, loc.y, this.bar0) && !this.bar1.isdown && !this.bar2.isdown && !this.bar3.isdown) || this.bar0.isdown){
-			color = this.doColors(loc.x, this.bar0, down);
-			if(-1 == color)
+		if("lamp" == dev_id){
+			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
 				return;
-			r = color.r, g = color.g, b = color.b;
+
+			r = _LAMP_[mode][this.id]['color']['r']*255/100, g = _LAMP_[mode][this.id]['color']['g']*255/100, b = _LAMP_[mode][this.id]['color']['b']*255/100;
+			
+			if((this.isOnBar(loc.x, loc.y, this.bar0) && !this.bar1.isdown && !this.bar2.isdown && !this.bar3.isdown) || this.bar0.isdown){
+				color = this.doColors(loc.x, this.bar0, down);
+				if(-1 == color)
+					return;
+				r = color.r, g = color.g, b = color.b;
+			}
+			else if((this.isOnBar(loc.x, loc.y, this.bar1) && !this.bar0.isdown && !this.bar2.isdown && !this.bar3.isdown) || this.bar1.isdown)
+				r = this.doColor(loc.x, this.bar1, down);
+			else if((this.isOnBar(loc.x, loc.y, this.bar2) && !this.bar0.isdown && !this.bar1.isdown && !this.bar3.isdown) || this.bar2.isdown)
+				g = this.doColor(loc.x, this.bar2, down);
+			else if((this.isOnBar(loc.x, loc.y, this.bar3) && !this.bar0.isdown && !this.bar1.isdown && !this.bar2.isdown) || this.bar3.isdown)
+				b = this.doColor(loc.x, this.bar3, down);
+			else
+				return;
+			
+			if(-1 == r || -1 == g || -1 == b)
+				return;
+			
+			color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+		//	console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
+			this.docommand(this.id, color)
 		}
-		else if((this.isOnBar(loc.x, loc.y, this.bar1) && !this.bar0.isdown && !this.bar2.isdown && !this.bar3.isdown) || this.bar1.isdown)
-			r = this.doColor(loc.x, this.bar1, down);
-		else if((this.isOnBar(loc.x, loc.y, this.bar2) && !this.bar0.isdown && !this.bar1.isdown && !this.bar3.isdown) || this.bar2.isdown)
-			g = this.doColor(loc.x, this.bar2, down);
-		else if((this.isOnBar(loc.x, loc.y, this.bar3) && !this.bar0.isdown && !this.bar1.isdown && !this.bar2.isdown) || this.bar3.isdown)
-			b = this.doColor(loc.x, this.bar3, down);
-		else
-			return;
-		
-		if(-1 == r || -1 == g || -1 == b)
-			return;
 		
 		this.doDraw();
-
-		color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
-	//	console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
-		docommand('lamp', this.id, color)
 	}
 
 	this.doMouseDown = function(event, mouse) { 
@@ -274,25 +283,34 @@ function lamp()
 	//websocket 处理函数
 	this.onmessage = function(evt)
 	{
-		var json = JSON.parse(evt.data);
+		this.getmessaged = true;
+		
+		var json = JSON.parse(evt);
 		if(!json)
 			return;
 		
 		if( json.event === "device" ){
 		//	console.log('device:' + JSON.stringify(json));
 			_DEVICE_ = json.data;
-			
+
+			var index = -1;
 			for(var i=0;i<20;i++){
 				if(document.getElementById(i.toString())){
-					if(!_DEVICE_["lamp"].hasOwnProperty(i.toString()))
-						document.getElementById(i.toString()).style.display = 'none';
+					if(!_DEVICE_[dev_id].hasOwnProperty(i.toString()) || (_DEVICE_[dev_id].hasOwnProperty(i.toString()) && _DEVICE_[dev_id][i.toString()]['hide'] === 'true')){
+						if(-1 == index || (i-1)%3 == 0)
+							index = i-1;
+						if(index % 3 == 0)
+							document.getElementById(i.toString()).style.display = 'none';
+						else
+							document.getElementById(i.toString()).style.visibility = 'hidden';
+					}
 					else
-						document.getElementById(i.toString()).innerText = _DEVICE_['lamp'][i.toString()]['name'];	
+						document.getElementById(i.toString()).innerText = _DEVICE_[dev_id][i.toString()]['name'];	
 				}
 			}
 			if(document.getElementById('all')){
-				if(_DEVICE_["lamp"].hasOwnProperty('all'))
-					document.getElementById('all').innerText = _DEVICE_["lamp"]['all']['name'];
+				if(_DEVICE_[dev_id].hasOwnProperty('all') && _DEVICE_[dev_id]['all']['hide'] === 'false')
+					document.getElementById('all').innerText = _DEVICE_[dev_id]['all']['name'];
 				else
 					document.getElementById('all').style.display = 'none';
 			}
@@ -305,18 +323,15 @@ function lamp()
 
 			_LAMP_[json.mode] = json.data;
 
-			if(!is_mode_set){
-				mode = json.mode;
-				document.getElementById('scene_title').innerText = _MODE_SET_[mode];
-			}
+			mode = json.mode;
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+
 			if(mode == json.mode)
 			{
 				_lamp.setID(json.id);
 				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 			}
-			
-			window.parent.postMessage({'msg':'mode' , 'data':json.mode},'*');
-			
+
 			for(var id in _LAMP_[mode]){
 				if(_DEVICE_["lamp"].hasOwnProperty(id.toString())){
 					if(_LAMP_[mode][id]['status'] === 'on'){
@@ -340,38 +355,72 @@ function lamp()
 				}
 			}
 		} 
+		else if( json.event === "curtain" ){
+
+			_CURTAIN_[json.mode] = json.data;
+
+			mode = json.mode;
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+
+			if(mode == json.mode)
+			{
+				_lamp.setID(json.id);
+				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_CURTAIN_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
+			}
+
+			for(var id in _CURTAIN_[mode]){
+				if(_DEVICE_["curtain"].hasOwnProperty(id.toString())){
+					if(_CURTAIN_[mode][id]['status'] === 'on')
+						document.getElementById(id).style.backgroundColor = '#e00';						
+					else
+						document.getElementById(id).style.backgroundColor = '#aaa';
+				}
+			}
+
+			//检查是不是所有灯的状态一样且为全开，如是则‘所有’灯的状态设为全开，否则为关的状态
+			for(var id in _CURTAIN_[mode]){
+				if(id == "all")
+					break;
+				if(_CURTAIN_[mode]['1']['status'] !== _CURTAIN_[mode][id]['status']){
+					_CURTAIN_[mode]['all']['status'] = 'off';
+					document.getElementById('all').style.backgroundColor = '#aaa';
+					break;
+				}
+			}
+		} 
 		_lamp.setPos();
 		_lamp.doDraw();
 	}
-	this.onopen = function()
-	{
-		if(_lamp.timer)
-			clearInterval(_lamp.timer);
-		
-		_lamp.ws.handshake = true;
-	}
 	
-	this.onclose = function()
-	{
-		_lamp.ws.handshake = false;
-		
-		if(_lamp.timer)
-			clearInterval(_lamp.timer);
-		
-		_lamp.timer = setInterval(function(){
-			_lamp.ws = websocket.prototype.connect(document.domain, _port, _lamp.onmessage, _lamp.onopen, _lamp.onclose, null);
-			}, 5000);
-	}
-}
+	this.docommand = function(id, color){
+		var btn = document.getElementById(id.toString());
 
-docommand = function(dev_id, id, color){
-	var btn = document.getElementById(id.toString());
-
-	if(color == undefined){
 		if('lamp' == dev_id){
-			if(_LAMP_[mode][id]['status'] === 'on'){
-				if(_lamp.id != id){
-					_lamp.id = id;
+			if(color == undefined){
+				if(_LAMP_[mode][id]['status'] === 'on'){
+					if(this.id != id){
+						this.id = id;
+						command = 'on';
+					}
+					else
+						command = 'off';
+				}
+				else
+					command = 'on';
+				
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+				btn.style.backgroundColor = '#ee0';
+			}
+			else{
+				//调光调色
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
+				
+			}
+		}
+		else if('curtain' == dev_id){
+			if(_CURTAIN_[mode][id]['status'] === 'on'){
+				if(this.id != id){
+					this.id = id;
 					command = 'on';
 				}
 				else
@@ -383,32 +432,20 @@ docommand = function(dev_id, id, color){
 			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 			btn.style.backgroundColor = '#ee0';
 		}
-	}
-	else{
-		//调光调色
-		param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
-	}
 
 
-	//页面ajax请求
-	loadXMLDoc("/control",function()
-	{
-		if (xmlhttp.readyState==4 && xmlhttp.status==200){
-			str = ((xmlhttp.responseText))	
-			var json = JSON.parse(str);
-		//	var device_set = json.device_set;
-		//	console.log(decodeURIComponent(device_set.name));
-			if('lamp' == dev_id){
-			}
-			else if('car' == dev_id){
-				keys = ['car_1', 'car_2', 'car_3', 'car_4', 'car_5'];
-				for(index in keys){
-					if(keys[index] != json.id){
-						document.getElementById(keys[index]).style.backgroundColor = '#0a0';
-					}
-				}
-			}
-		}	
-		xmlhttp.oncallback(xmlhttp.readyState);	
-	}, param);
+		//页面ajax请求
+		loadXMLDoc("/control",function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200){
+				str = ((xmlhttp.responseText))	
+				var json = JSON.parse(str);
+			//	var device_set = json.device_set;
+			//	console.log(decodeURIComponent(device_set.name));
+
+			}	
+			xmlhttp.oncallback(xmlhttp.readyState);	
+		}, param);
+	}
 }
+

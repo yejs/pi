@@ -11,6 +11,7 @@ function websocket(strHost, onmessage, onopen, onclose, onerror)
     this.ws.binaryType="arraybuffer";
 
 	this.handshake = false;
+	this.timer = null;
 	
 	this.send = function(string){
 		if(this.handshake)

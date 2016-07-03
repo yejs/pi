@@ -17,26 +17,24 @@ import json
 import base64
 import urllib
 import logging
-from data import _DEVICE_, _LAMP_ 
+from data import _DEVICE_, _LAMP_ , _CURTAIN_
 import threading
 import time
 
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
 id = '1'
-dev_id = 'lamp'
 
-def get_dev_item(ip):    
-    for dev in _DEVICE_:
-        for id in _DEVICE_[dev]:    
-            if WebHandler.has_key('ip', _DEVICE_[dev][id]) and _DEVICE_[dev][id]['ip'] == ip:
-                return _DEVICE_[dev][id]
+def set_dev_item(dev, ip, status):    
+    for id in _DEVICE_[dev]:    
+        if _DEVICE_[dev][id].get('ip') == ip:
+            _DEVICE_[dev][id]['status'] = status
     return None
 	
 def get_dev_index(ip):    
     for dev in _DEVICE_:
         for id in _DEVICE_[dev]:    
-            if WebHandler.has_key('ip', _DEVICE_[dev][id]) and _DEVICE_[dev][id]['ip'] == ip:
+            if _DEVICE_[dev][id].get('ip') == ip:
                 return dev, id
     return None, None
 	
@@ -102,9 +100,11 @@ class RPi_GPIO():
 		
 class Connection(object):    
     heart_beat_init = False
-    timer = None
+    heart_beat_timer = None
     clients = set()    
-    output_param = {"ip": "", "pin": "", "item": None, "time_tick":0, "timer":None}
+    output_param = list()#{"ip": "", "pin": "", "item": None}
+    time_tick = 0
+    timer = None
     def __init__(self, stream, address):   
         global sock
         sock = self
@@ -123,11 +123,12 @@ class Connection(object):
         self._stream.read_bytes(1024, self.doRecv, partial=True)
 
     def doRecv(self, data):    
-        dev_item = get_dev_item(self._address[0])
-        status_item = get_status_item(self._address[0])
-        if dev_item and status_item:    
-            print("recv from %s: %s, name: %s, status: %s" % (self._address[0], data[:-1].decode(), dev_item['name'], json.dumps(status_item)))  
-        self._stream.write(data)  	
+        obj = json.loads(data[:-1].decode())
+        if obj and obj.get('event') == 'report':    
+            set_dev_item(obj['dev_id'], self._address[0], obj['status'])
+            print("recv from %s: %s" % (self._address[0], data[:-1].decode()))   
+            WebSocket.broadcast_device();
+        #self._stream.write(data)  	
         self.read_message()
 		
     '''
@@ -140,50 +141,72 @@ class Connection(object):
         Connection.clients.remove(self)    
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
         for k,v in _DEVICE_['lamp'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
-            if WebHandler.has_key('ip', v) and v['ip'] == self._address[0]:
+            if v.get('ip') == self._address[0]:
                 _LAMP_[mode][k]['status'] = 'off'
 
         WebSocket.broadcast_lamp_status()
-		
-    def output(self, ip, pin, item):
-        Connection.output_param['ip'] = ip
-        Connection.output_param['pin'] = pin
-        Connection.output_param['item'] = item
-        if Connection.output_param['timer']:
-            Connection.output_param['timer'].cancel()
+        WebSocket.broadcast_curtain_status()
+	
+    def check_output():
+        l = len(Connection.output_param)
+        if l > 10:
+            Connection.output_param = Connection.output_param[l-4:-1]
+			
+    def output(self, dev_id, ip, pin, item):
+        param = {"dev_id": dev_id, "ip": ip, "pin": pin, "item": item}
+        Connection.output_param.append(param)  
+
+        if Connection.timer:
+            Connection.timer.cancel()
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
-        if time.time() - Connection.output_param['time_tick'] > 2:
+        if time.time() - Connection.time_tick > 2:
             Connection.output_ex()
         else :
-            Connection.output_param['timer'] = threading.Timer(0.3, Connection.output_ex)#延时0.3秒输出
-            Connection.output_param['timer'].start()
+            Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
+            Connection.timer.start()
+
 
     def output_ex():
-        global dev_id
-        Connection.output_param['time_tick'] = time.time()
-        Connection.output_param['timer'] = None
-		
-        pin = Connection.output_param['pin']
-        status = Connection.output_param['item']['status']
+        Connection.time_tick = time.time()
+
+        if len(Connection.output_param) == 0:
+            Connection.timer.cancel()
+            Connection.timer = None
+            return;
+			
+        Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
+        Connection.timer.start()
+        param = Connection.output_param.pop()
+        dev_id = param['dev_id']
+        ip = param['ip']
+        pin = param['pin']
+        status = param['item']['status']
         if dev_id.find('lamp') != -1:
-            color = RPi_GPIO.get_colors(Connection.output_param['item'])#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
+            color = RPi_GPIO.get_colors(param['item'])#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
+        else:
+            color = None
+	
+        l = len(Connection.output_param)
+
+        if color:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, color)
         else:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\"}" %(dev_id, pin, status)
 			
         for conn in Connection.clients:
-            if conn._address[0].find(Connection.output_param['ip']) != -1:
+            if conn._address[0].find(ip) != -1:
                 try:
+                    print('outputex: %s , len: %d' % (pin, l))
                     conn._stream.write(msg.encode())
                 except:
                     logging.error('Error sending message', exc_info=True)	
 		
     #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
     def heart_beat():
-        if Connection.timer != None:
-            Connection.timer.cancel()
-        Connection.timer = threading.Timer(5, Connection.heart_beat)#5秒心跳输出
-        Connection.timer.start()
+        if Connection.heart_beat_timer != None:
+            Connection.heart_beat_timer.cancel()
+        Connection.heart_beat_timer = threading.Timer(5, Connection.heart_beat)#5秒心跳输出
+        Connection.heart_beat_timer.start()
 		
         msg = "{\"event\":\"heart_beat\"}"
 
@@ -206,6 +229,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         WebSocket.socket_handlers.add(self)
         WebSocket.broadcast_device()
         WebSocket.broadcast_lamp_status()
+        WebSocket.broadcast_curtain_status()
     def on_close(self):
         WebSocket.socket_handlers.remove(self)
     def on_message(self, message):
@@ -241,9 +265,22 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
         WebSocket.broadcast_messages(str1) 
 		
+    def broadcast_curtain_status():
+        global mode
+        global id
+        str1 = '{\"event\": \"curtain\", \"data\":'
+        str1 += json.dumps(_CURTAIN_[mode])
+        str1 += ', \"mode\":\"'
+        str1 += mode
+        str1 += '\", \"id\":\"'
+        str1 += id
+        str1 += '\"}'
+
+        WebSocket.broadcast_messages(str1) 
+		
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
-        global dev_id
+        global mode
         global id
 
         post_data = {}
@@ -251,12 +288,17 @@ class WebHandler(tornado.web.RequestHandler):
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
 			
-        if WebHandler.has_key('dev_id', post_data) == True:
+        if post_data.get('mode'):		
+            mode = post_data['mode'][0]
+        else:
+            mode = "normal"
+			
+        if post_data.get('dev_id'):
             dev_id = post_data['dev_id'][0]
         else :
-            dev_id = 'lamp'
+            dev_id = None
 			
-        if WebHandler.has_key('id', post_data):
+        if post_data.get('id'):
             id = post_data['id'][0]
         else :
             id = '1'
@@ -264,39 +306,42 @@ class WebHandler(tornado.web.RequestHandler):
         post 参数示例: /control?dev_id=lamp&id=1&command=on
         '''
         #print(json.dumps(post_data))
-        if WebHandler.has_key('device_set', post_data):	#设定指令
+        if post_data.get('device_set'):	#设定指令
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"device_set\":'+post_data['device_set'][0]+'}'
-        elif WebHandler.has_key('command', post_data):	#开关指令
+        elif post_data.get('command'):	#开关指令
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
-        elif WebHandler.has_key('color', post_data):	#调光调色指令
+        elif post_data.get('color'):	#调光调色指令
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
-        else :#模式指令
-            str1 = '{\"dev_id\":\"'+dev_id + '\"}'
+        elif dev_id == None:			#模式指令
+            str1 = '{\"mode\":\"'+mode + '\"}'
         			
         self.write(str1)#base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
 
-        if WebHandler.has_key('device_set', post_data) == False:
+        if post_data.get('device_set') == None:
             if dev_id == 'lamp':
                 WebHandler.lamp(post_data)
+            elif dev_id == 'curtain':
+                WebHandler.curtain(post_data) 
             elif dev_id == 'car':
                 WebHandler.car(post_data) 
+            elif dev_id == None:
+                WebHandler.lamp(post_data)
+                WebHandler.curtain(post_data)
+                print('dev_id is none')
             timer = threading.Timer(5, WebHandler.perform_save)#延时5秒保存
             timer.start()
-        elif WebHandler.has_key('device_set', post_data) == True:
+        else:
             WebHandler.device_set(post_data)
             WebHandler.perform_save()
+        post_data.clear()
 
     def perform_save(): 
         f = open('data.py','w')            
         f.write('_DEVICE_ = ' + json.dumps(_DEVICE_) + '\n')  
         f.write('_LAMP_ = ' + json.dumps(_LAMP_) + '\n')  
+        f.write('_CURTAIN_ = ' + json.dumps(_CURTAIN_) + '\n')  
         f.close
 		
-    def has_key(key, dict):
-        for k in dict.keys():
-            if k == key:
-                return True;
-        return False;
 	
     #硬件层输出（GPIO 或 socket到硬件终端）
     def output(dev_id, id, key, value):
@@ -304,25 +349,29 @@ class WebHandler(tornado.web.RequestHandler):
 		
         if dev_id == 'lamp':
             item = _LAMP_[mode][id]
+        elif dev_id == 'curtain':
+            item = _CURTAIN_[mode][id]
         else:#TODO:其它设备待完成
             return;
 			
-        if key == 'command':#开关指令
+        if key == 'command':							#开关指令
             item['status'] = value
-        elif key == 'color':#调光调色指令
+        elif key == 'color' and dev_id == 'lamp':		#调光调色指令
             r, g, b = RPi_GPIO.get_color(value)
             item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
             #print("get_colors: %s  %s  %d  %d" %(value, RPi_GPIO.get_colors(item), r, item['color']['r']))
-        elif key == None:    #模式指令
+        elif key == None:    							#模式指令
             key = 'command'
             value = item['status']
-			
-        if WebHandler.has_key(id, _DEVICE_[dev_id]):
-            if WebHandler.has_key('pin', _DEVICE_[dev_id][id]):
+		
+        Connection.check_output()
+        if _DEVICE_[dev_id].get(id):
+	
+            if _DEVICE_[dev_id][id].get('pin'):
                 RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
-			
-            if sock != None and WebHandler.has_key('ip', _DEVICE_[dev_id][id]):
-                sock.output(_DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
+
+            if sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
+                sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
 
 		
     def lamp(post_data):
@@ -332,20 +381,17 @@ class WebHandler(tornado.web.RequestHandler):
         key = None
         value = None
 
-        if WebHandler.has_key('command', post_data):#开关指令
+        if post_data.get('command'):#开关指令
             key = 'command'
-        elif WebHandler.has_key('color', post_data):#调光调色指令
+        elif post_data.get('color'):#调光调色指令
             key = 'color'
 
         if key != None:		
             value = post_data[key][0]
  	
-        if WebHandler.has_key('mode', post_data):		
-            mode = post_data['mode'][0]
-        else:
-            mode = "normal"
+
 			
-        if WebHandler.has_key(mode, _LAMP_) == False:		
+        if None == _LAMP_.get(mode):		
             return
 			
         if id == 'all' or key == None:
@@ -354,8 +400,31 @@ class WebHandler(tornado.web.RequestHandler):
 
         WebHandler.output('lamp', id, key, value)
 
-        #print("%s : %s" %(mode, json.dumps(_LAMP_[mode])))
         WebSocket.broadcast_lamp_status()
+		
+    def curtain(post_data):
+        global mode
+        global id
+
+        key = None
+        value = None
+
+        if post_data.get('command'):#开关指令
+            key = 'command'
+
+        if key != None:		
+            value = post_data[key][0]
+			
+        if None == _LAMP_.get(mode):		
+            return
+			
+        if id == 'all' or key == None:
+            for k in _CURTAIN_[mode].keys():
+                WebHandler.output('curtain', k, key, value)
+
+        WebHandler.output('curtain', id, key, value)
+
+        WebSocket.broadcast_curtain_status()
 				
     def car(post_data):
         command = post_data['command'][0]
@@ -377,7 +446,7 @@ class WebHandler(tornado.web.RequestHandler):
             RPi_GPIO.output(_CAR_['INT4'], False)
 
     def device_set(post_data):
-        if WebHandler.has_key('dev_id', post_data) == False or WebHandler.has_key('id', post_data) == False:
+        if post_data.get('dev_id') == None or post_data.get('id') == None:
             return
         obj = json.loads(post_data['device_set'][0])
         obj['name'] = urllib.parse.unquote(obj['name'])

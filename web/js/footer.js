@@ -1,6 +1,6 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/canvas.js"></script>');
-var _navi = null;
+var _footer = null;
 
 var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
 
@@ -14,24 +14,23 @@ var _font16 = "16px " + _font_family;
 var _font14 = "14px " + _font_family;
 var _font12 = "12px " + _font_family;
 
-title = ['首页', '设置', '关于'];
+footer_title = ['首页', '设置', '关于'];
 
-doInitNavi = function(canvas, index)
+doInitFooter = function(canvas, index)
 {
-	_navi = new navi(index);
-	_navi.doInit(canvas);	
+	_footer = new footer(index);
+	_footer.doInit(canvas);	
+	
 }
 
-window.onresize = function(){
-	_navi.onresize();
-}
-function navi(index)
+
+function footer(index)
 {
 	this.rect;
 	this.canvasReport = this.canvas = this.contextReport = this.ctx = null;
 	this.index = index;
 	this.arrayBtn = new Array();
-//	console.log('navi' + this.index);
+//	console.log('footer' + this.index);
 	this.doInit = function(canvas)
 	{
 		this.canvasReport = document.createElement("canvas");
@@ -39,41 +38,42 @@ function navi(index)
 		
 		if(isPC()){
 			this.canvas.addEventListener('mousedown', function(event) { 
-				_navi.doMouseDown(event, true);//不能用this
+				_footer.doMouseDown(event, true);//不能用this
 				}, false);
 			this.canvas.addEventListener('mouseup', function(event) { 
-				_navi.doMouseUp(event, true);
+				_footer.doMouseUp(event, true);
 				}, false);
 			this.canvas.addEventListener('mousemove', function(event) { 
-				_navi.doMouseMove(event, true);
+				_footer.doMouseMove(event, true);
 				}, false);
 		}
 		else{
 			this.canvas.addEventListener('touchstart', function(event) { 
 				event.preventDefault();
 				if (event.targetTouches.length == 1) { 
-				_navi.doMouseDown(event, false);
+				_footer.doMouseDown(event, false);
 				} 
 				}, false);
 			this.canvas.addEventListener('touchend', function(event) { 
 				event.preventDefault();
-				_navi.doMouseUp(event, false);
+				_footer.doMouseUp(event, false);
 				}, false);
 			this.canvas.addEventListener('touchcancel', function(event) { 
 				event.preventDefault();
-				_navi.doMouseUp(event, false);
+				_footer.doMouseUp(event, false);
 				}, false);
 			this.canvas.addEventListener('touchmove', function(event) { 
 				event.preventDefault();
 				if (event.targetTouches.length == 1) { 
-				_navi.doMouseMove(event, false);
+				_footer.doMouseMove(event, false);
 				} 
 				}, false);
 		}
 		
-		for(var i=0;i<title.length;i++){
+		for(var i=0;i<footer_title.length;i++){
 			btn=new tagRECT(0,0,0,0);
 			this.arrayBtn.push(btn);
+			
 		}
 		
 		this.onresize();
@@ -89,8 +89,8 @@ function navi(index)
 		this.contextReport = this.canvasReport.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
 		
-		var width = (this.rect.width-2)/title.length;
-		for(var i=0;i<title.length;i++){
+		var width = (this.rect.width-2)/footer_title.length;
+		for(var i=0;i<footer_title.length;i++){
 			this.arrayBtn[i].doResize(i*width,0,(i+1)*width,this.rect.height);
 		}
 		
@@ -105,27 +105,23 @@ function navi(index)
 		this.contextReport.fillStyle = "rgb(43, 164, 235)";
 		this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);
 
-		var width = (this.rect.width-2)/title.length;
+		var width = (this.rect.width-2)/footer_title.length;
 		this.contextReport.fillStyle = "rgb(255, 255, 255)";
 		this.contextReport.strokeStyle = "rgb(220, 0, 0)";
 		this.contextReport.lineWidth = 4;
 		this.contextReport.fillRect(this.index*width, 0, width, this.rect.height);
 		this.contextReport.drawLine(this.index*width, this.rect.height-4, (this.index+1)*width, this.rect.height-4);
-	/*	
-		this.contextReport.strokeRectEx(0, 1, this.rect.width-2, this.rect.height-3);
-		
-		for(var i=1;i<title.length;i++){
-			this.contextReport.drawLine(i*width, 0, i*width, this.rect.height);
-		}*/
+
 		this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(255, 255, 255)";
 		this.contextReport.font = _font42;
 		this.contextReport.textBaseline="middle";
-		for(var i=0;i<title.length;i++){
+		for(var i=0;i<footer_title.length;i++){
+			
 			if(i == this.index)
 				this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(255, 0, 0)";
 			else
 				this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(255, 255, 255)";
-			this.contextReport.fillText(title[i], i*width + width/2 - this.contextReport.measureText(title[i]).width/2, this.rect.height/2);
+			this.contextReport.fillText(footer_title[i], i*width + width/2 - this.contextReport.measureText(footer_title[i]).width/2, this.rect.height/2);
 		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
@@ -145,7 +141,7 @@ function navi(index)
 		}
 		var loc = getPointOnCanvas(canvas, x, y); 
 		
-		for(var i=0;i<title.length;i++){
+		for(var i=0;i<footer_title.length;i++){
 			if(this.arrayBtn[i].IsInRect(loc, 0) && this.index != i){
 				console.log(i);
 				if(i == 0)

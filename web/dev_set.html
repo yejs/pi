@@ -17,27 +17,30 @@
 	</div-->
 	<br/><br/>
 	<div class="wrap">
-		<button id="1" class="btn" onclick="docommand('1')">灯1</button>
-		<button id="2" class="btn" onclick="docommand('2')">灯2</button>
-		<button id="3" class="btn" onclick="docommand('3')">灯3</button>
+		<button id="1" class="btn" onclick="_dev_set.docommand('1')">灯1</button>
+		<button id="2" class="btn" onclick="_dev_set.docommand('2')">灯2</button>
+		<button id="3" class="btn" onclick="_dev_set.docommand('3')">灯3</button>
 	</div>
 	<div class="wrap">
-		<button id="4" class="btn" onclick="docommand('4')">灯4</button>
-		<button id="5" class="btn" onclick="docommand('5')">灯5</button>
-		<button id="6" class="btn" onclick="docommand('6')">灯6</button>
+		<button id="4" class="btn" onclick="_dev_set.docommand('4')">灯4</button>
+		<button id="5" class="btn" onclick="_dev_set.docommand('5')">灯5</button>
+		<button id="6" class="btn" onclick="_dev_set.docommand('6')">灯6</button>
 	</div>
 	<div class="wrap">
-		<button id="7" class="btn" onclick="docommand('7')">灯7</button>
-		<button id="8" class="btn" onclick="docommand('8')">灯8</button>
-		<button id="9" class="btn" onclick="docommand('9')">灯9</button>
+		<button id="7" class="btn" onclick="_dev_set.docommand('7')">灯7</button>
+		<button id="8" class="btn" onclick="_dev_set.docommand('8')">灯8</button>
+		<button id="9" class="btn" onclick="_dev_set.docommand('9')">灯9</button>
 	</div>
 	<div class="wrap">
-		<button id="10" class="btn" onclick="docommand('10')">灯10</button>
-		<button id="all" class="btn" onclick="docommand('all')">所有灯</button>
-		<button id="11" class="btn" onclick="docommand('11')">灯11</button>
+		<button id="10" class="btn" onclick="_dev_set.docommand('10')">灯10</button>
+		<button id="11" class="btn" onclick="_dev_set.docommand('11')">灯11</button>
+		<button id="12" class="btn" onclick="_dev_set.docommand('12')">灯11</button>
+	</div>
+	<div class="wrap">
+		<button id="all" class="btn" onclick="_dev_set.docommand('all')">所有灯</button>
 	</div>
 
-	<div class="title" id="dev_title">设置</div><br/>
+	<!--div class="title" id="dev_title">设置</div><br/-->
 	<div class="wrap">	
 		<span class="title">设备名</span>
 		<input id="name" type="text" placeholder="请输入设备名"/>
@@ -50,8 +53,12 @@
 		<span class="title">GPIO设置</span>
 		<input id="GPIO" type="text" placeholder="请输入GPIO"/>
 	</div>
+	<div class="wrap">	
+		<span class="title">是否隐藏</span>
+		<input id="hide" type="checkbox" name="vehicle" value="Bike"/>
+	</div>
 	<div class="wrap">
-		<button id="submits" class="btn" onclick="dosubmit()">提交</button>
+		<button id="submits" class="btn" onclick="_dev_set.dosubmit()">提交</button>
 	</div>
 </div>
 

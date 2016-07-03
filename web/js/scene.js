@@ -12,7 +12,8 @@ window.onload = function(){
 	
 	for(var i=1;i<13;i++){
 		var btn = document.getElementById(i.toString());
-		btn.style.backgroundColor = '#aaa';
+		if(btn)
+			btn.style.backgroundColor = '#aaa';
 	}
 	
 	window.parent.postMessage({'msg':'getmode'},'*');
@@ -45,14 +46,11 @@ setFocus = function(id){
 }
 
 domodel = function(id){
-	if(parseInt(id) >= 7){
-		window.location.href = 'scene_set.html?mode=' + _SCENE_[(parseInt(id) - 6).toString()];
-		id = (parseInt(id) - 6).toString();
-	}
-	
+
 	setFocus(id);
 		
-	params = "mode=" + _SCENE_[id] + "&dev_id=lamp";
+	params = "mode=" + _SCENE_[id]// + "&dev_id=lamp";
+//	console.log('222:' + params);
 	//页面ajax请求
 	loadXMLDoc("/control",function()
 	{
