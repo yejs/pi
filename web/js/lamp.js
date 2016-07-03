@@ -326,11 +326,8 @@ function lamp()
 			mode = json.mode;
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
-			if(mode == json.mode)
-			{
-				_lamp.setID(json.id);
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
-			}
+			_lamp.setID(json.id);
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 
 			for(var id in _LAMP_[mode]){
 				if(_DEVICE_["lamp"].hasOwnProperty(id.toString())){
@@ -356,17 +353,19 @@ function lamp()
 			}
 		} 
 		else if( json.event === "curtain" ){
-
 			_CURTAIN_[json.mode] = json.data;
+			
+			var id = json.id;
+			if(!_DEVICE_["curtain"].hasOwnProperty(json.id)){
+				id = '1';
+				console.log(json.id);
+			}
 
 			mode = json.mode;
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
-			if(mode == json.mode)
-			{
-				_lamp.setID(json.id);
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_CURTAIN_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
-			}
+			_lamp.setID(id);
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + (_CURTAIN_[mode][id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
 
 			for(var id in _CURTAIN_[mode]){
 				if(_DEVICE_["curtain"].hasOwnProperty(id.toString())){
