@@ -28,6 +28,8 @@ window.onload = function(){
 	window.onresize();
 	
 	ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
+	
+
 }
 
 var titles = ["lamp", "curtain", "scene", "car", "video"];

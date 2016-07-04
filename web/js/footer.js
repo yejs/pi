@@ -1,5 +1,4 @@
-document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/canvas.js"></script>');
+
 var _footer = null;
 
 var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";

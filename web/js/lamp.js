@@ -1,5 +1,4 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/websocket.js"></script>');
 document.write('<script type="text/javascript" src="js/canvas.js"></script>');
 document.write('<script type="text/javascript" src="js/data.js"></script>');
 

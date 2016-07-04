@@ -43,9 +43,9 @@ src:url("http://www.apple.com/wss/fonts/PingHei/v1/PingHei-light.woff") format("
 		top: 0px;
 		clear:both;
 		background:#fff}
-		
+
 #div_footer {position: fixed;
-		margin-top: -120px; /*(15  + 180) -80*/
+		bottom:0px;
 		height: 80px;
 		clear:both;
 		background:#fff}
