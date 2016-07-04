@@ -3,7 +3,7 @@ var _footer = null;
 
 var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
 
-var _font42 = "42px " + _font_family;
+var _font42 = "bold  42px " + _font_family;
 var _font30 = "30px " + _font_family;
 var _font25 = "25px " + _font_family;
 var _font23 = "23px " + _font_family;

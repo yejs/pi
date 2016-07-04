@@ -154,7 +154,7 @@ class Connection(object):
 	
     def check_output():
         l = len(Connection.output_param)
-        if l > 10:
+        if l > 20:
             Connection.output_param = Connection.output_param[l-4:-1]
 			
     def output(self, dev_id, ip, pin, item):
@@ -192,7 +192,7 @@ class Connection(object):
             color = None
 	
         l = len(Connection.output_param)
-
+ 
         if color:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, color)
         else:
@@ -391,8 +391,6 @@ class WebHandler(tornado.web.RequestHandler):
 
         if key != None:		
             value = post_data[key][0]
- 	
-
 			
         if None == _LAMP_.get(mode):		
             return

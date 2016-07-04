@@ -9,7 +9,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['灯光控制', '窗帘', '场景模式', '小车', '视频监控'];
+	var _title = ['灯光控制', '窗帘控制', '场景模式', '小车', '视频监控', '空调控制', '电视控制'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -133,7 +133,7 @@ window.addEventListener('message',function(e){
 			_LAMP_[json.mode] = json.data;
 
 			mode = json.mode;
-			
+
 			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else if( json.event === "curtain" ){

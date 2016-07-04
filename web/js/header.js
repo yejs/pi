@@ -7,7 +7,7 @@ var _header = null;
 
 var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
 
-var _font56 = "56px " + _font_family;
+var _font56 = "bold 56px " + _font_family;
 var _font36 = "36px " + _font_family;
 var _font25 = "25px " + _font_family;
 var _font23 = "23px " + _font_family;
@@ -126,7 +126,10 @@ function header(index)
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
 		ctx.font = _font36;
-		title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1;
+		if(_w.d2 + _w.p1 !== _w.d1 + _w.p1)
+			title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1;
+		else
+			title = _w.d1 + _w.p1;
 		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 150);
 		
 	

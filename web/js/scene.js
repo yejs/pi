@@ -16,7 +16,7 @@ window.onload = function(){
 			btn.style.backgroundColor = '#aaa';
 	}
 	
-	window.parent.postMessage({'msg':'getmode'},'*');
+	setTimeout(function() {window.parent.postMessage({'msg':'getmode'},'*');},200);
 }
 
 refresh = function(){

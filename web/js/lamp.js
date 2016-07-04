@@ -366,7 +366,7 @@ function lamp()
 			_lamp.setID(id);
 			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + (_CURTAIN_[mode][id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
 
-			for(var id in _CURTAIN_[mode]){
+		/*	for(var id in _CURTAIN_[mode]){
 				if(_DEVICE_["curtain"].hasOwnProperty(id.toString())){
 					if(_CURTAIN_[mode][id]['status'] === 'on')
 						document.getElementById(id).style.backgroundColor = '#e00';						
@@ -383,6 +383,17 @@ function lamp()
 					_CURTAIN_[mode]['all']['status'] = 'off';
 					document.getElementById('all').style.backgroundColor = '#aaa';
 					break;
+				}
+			}*/
+			
+			for(var i=0;i<20;i++){
+				if(document.getElementById(i.toString())){
+					if(i.toString() === id){
+						document.getElementById(i).style.backgroundColor = '#e00';
+						document.getElementById('all').style.backgroundColor = '#aaa';
+					}
+					else
+						document.getElementById(i).style.backgroundColor = '#aaa';	
 				}
 			}
 		} 
@@ -416,7 +427,7 @@ function lamp()
 			}
 		}
 		else if('curtain' == dev_id){
-			if(_CURTAIN_[mode][id]['status'] === 'on'){
+		/*	if(_CURTAIN_[mode][id]['status'] === 'on'){
 				if(this.id != id){
 					this.id = id;
 					command = 'on';
@@ -428,7 +439,18 @@ function lamp()
 				command = 'on';
 			
 			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
-			btn.style.backgroundColor = '#ee0';
+			btn.style.backgroundColor = '#ee0';*/
+			for(var i=0;i<20;i++){
+				if(document.getElementById(i.toString())){
+					if(i.toString() === id){
+						document.getElementById(i).style.backgroundColor = '#e00';
+						document.getElementById('all').style.backgroundColor = '#aaa';
+					}
+					else
+						document.getElementById(i).style.backgroundColor = '#aaa';	
+				}
+			}
+			return;
 		}
 
 
