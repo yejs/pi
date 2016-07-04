@@ -23,7 +23,8 @@ import time
 
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
-id = '1'
+lamp_id = '1'
+curtain_id = '1'
 
 def set_dev_item(dev, ip, status):    
     for id in _DEVICE_[dev]:    
@@ -88,9 +89,9 @@ class RPi_GPIO():
 			return;
 
 		if key == 'command':#开关指令
-			if value == 'on':	
+			if value == 'on' or value == 'open':	
 				command = False
-			elif value == 'off':
+			elif value == 'off' or value == 'close':
 				command = True
 			GPIO.output(pin, command)
 		elif key == 'color':#调光调色指令
@@ -143,6 +144,10 @@ class Connection(object):
         for k,v in _DEVICE_['lamp'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
             if v.get('ip') == self._address[0]:
                 _LAMP_[mode][k]['status'] = 'off'
+				
+        for k,v in _DEVICE_['curtain'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
+            if v.get('ip') == self._address[0]:
+                _CURTAIN_[mode][k]['status'] = 'close'
 
         WebSocket.broadcast_lamp_status()
         WebSocket.broadcast_curtain_status()
@@ -244,8 +249,6 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 				
     #向其它页面客户端广播状态消息(用于各客户端间同步，一个客户端发送命令，其它客户端同时此看到命令)
     def broadcast_device():
-        global mode
-        global id
         str1 = '{\"event\": \"device\", \"data\":'
         str1 += json.dumps(_DEVICE_)
         str1 += '}'
@@ -254,26 +257,26 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 		
     def broadcast_lamp_status():
         global mode
-        global id
+        global lamp_id
         str1 = '{\"event\": \"lamp\", \"data\":'
         str1 += json.dumps(_LAMP_[mode])
         str1 += ', \"mode\":\"'
         str1 += mode
         str1 += '\", \"id\":\"'
-        str1 += id
+        str1 += lamp_id
         str1 += '\"}'
 
         WebSocket.broadcast_messages(str1) 
 		
     def broadcast_curtain_status():
         global mode
-        global id
+        global curtain_id
         str1 = '{\"event\": \"curtain\", \"data\":'
         str1 += json.dumps(_CURTAIN_[mode])
         str1 += ', \"mode\":\"'
         str1 += mode
         str1 += '\", \"id\":\"'
-        str1 += id
+        str1 += curtain_id
         str1 += '\"}'
 
         WebSocket.broadcast_messages(str1) 
@@ -281,8 +284,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         global mode
-        global id
-
+		
         post_data = {}
 
         for key in self.request.arguments:
@@ -298,10 +300,6 @@ class WebHandler(tornado.web.RequestHandler):
         else :
             dev_id = None
 			
-        if post_data.get('id'):
-            id = post_data['id'][0]
-        else :
-            id = '1'
         ''' 
         post 参数示例: /control?dev_id=lamp&id=1&command=on
         '''
@@ -376,7 +374,7 @@ class WebHandler(tornado.web.RequestHandler):
 		
     def lamp(post_data):
         global mode
-        global id
+        global lamp_id
 
         key = None
         value = None
@@ -385,6 +383,11 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'command'
         elif post_data.get('color'):#调光调色指令
             key = 'color'
+			
+        if post_data.get('id'):
+            lamp_id = post_data['id'][0]
+        else :
+            lamp_id = '1'
 
         if key != None:		
             value = post_data[key][0]
@@ -394,35 +397,40 @@ class WebHandler(tornado.web.RequestHandler):
         if None == _LAMP_.get(mode):		
             return
 			
-        if id == 'all' or key == None:
+        if lamp_id == 'all' or key == None:
             for k in _LAMP_[mode].keys():
                 WebHandler.output('lamp', k, key, value)
 
-        WebHandler.output('lamp', id, key, value)
+        WebHandler.output('lamp', lamp_id, key, value)
 
         WebSocket.broadcast_lamp_status()
 		
     def curtain(post_data):
         global mode
-        global id
+        global curtain_id
 
         key = None
         value = None
 
         if post_data.get('command'):#开关指令
             key = 'command'
-
+			
+        if post_data.get('id'):
+            curtain_id = post_data['id'][0]
+        else :
+            curtain_id = '1'
+			
         if key != None:		
             value = post_data[key][0]
 			
         if None == _LAMP_.get(mode):		
             return
 			
-        if id == 'all' or key == None:
+        if curtain_id == 'all' or key == None:
             for k in _CURTAIN_[mode].keys():
                 WebHandler.output('curtain', k, key, value)
 
-        WebHandler.output('curtain', id, key, value)
+        WebHandler.output('curtain', curtain_id, key, value)
 
         WebSocket.broadcast_curtain_status()
 				
