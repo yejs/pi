@@ -1,8 +1,8 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/canvas.js"></script>');
 document.write('<script type="text/javascript" src="js/data.js"></script>');
-
-_lamp = null;
+//这个文件是灯和窗帘合用的，分别用dev_id区别
+_device = null;
 _port = 8000;
 dev_id = 'lamp';
 mode = "normal";
@@ -10,42 +10,42 @@ mode = "normal";
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
 
-	if(document.getElementById('lamp')){
-		_lamp = new lamp();
-		
-		
-	}
-
+	if(document.getElementById('lamp'))
+		_device = new device();
+	
 	var url = location.search;
 	pos = url.indexOf('dev_id');
 	if(pos>=0){
 		dev_id = url.substr(pos+7);
+
 	}
 }
 
 window.onresize = function(){
-	_lamp.onresize();
+	_device.onresize();
 }
 
+//浏览器为了效率，在页面隐藏的情况下，节点元素值改变了，显示时不会反映到界面上来，
+//这里做了个简单处理，在页面显示时重新刷新下节点元素，但是，在改为中文时也会有些问题，
+//这里先刷为别的任意值，再改为真正的元素值，看来浏览器也不是万能的，谁让咱比较聪明呢
 refresh = function(){
-	if(this.getmessaged){
-		if("lamp" == dev_id)
-			_LAMP_[mode][_lamp.id]['status'] = _LAMP_[mode][_lamp.id]['status'] == 'on' ? 'off' : 'on';
-		else
-			_CURTAIN_[mode][_lamp.id]['status'] = _CURTAIN_[mode][_lamp.id]['status'] == 'on' ? 'off' : 'on';
-		
-		_lamp.docommand(_lamp.id);
+	if(_device.getmessaged){
+		document.getElementById('scene_title').innerText = mode;
+		document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+
+		document.getElementById('color_title').innerText = '';
+		document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
 	}
 }
 
 window.addEventListener('message',function(e){
 	if('onmessage'===e.data.msg){
-		_lamp.onmessage(e.data.data);
+		_device.onmessage(e.data.data);
 	//	console.log(e.data.data);
 	}
 },false);
 
-function lamp()
+function device()
 {
 	this.isOnBar = function(x, y, bar)
 	{
@@ -54,6 +54,19 @@ function lamp()
 		return false;
 	}
 
+	this.initDraw = function()
+	{
+		if('curtain' == dev_id){
+			var img=new Image();
+			img.src = 'images//curtain.png';
+			img.onload = function(){
+				var offset = _device.bar1.height/2 - 5
+				_device.contextImage.drawImage(img, 0, 0, img.width, img.height, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.width, 500);
+				_device.ctx.drawImage(_device.canvasImage, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.pos*_device.bar1.width/100, 500, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.pos*_device.bar1.width/100, 500);
+			};
+		}
+	}
+	
 	this.doDraw = function()
 	{
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
@@ -62,6 +75,7 @@ function lamp()
 		if("lamp" == dev_id){
 			var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
 			var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+			//滚动条的左半部分
 			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
 			this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
 			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
@@ -69,12 +83,13 @@ function lamp()
 			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
 			this.contextReport.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
 			
+			//滚动条的右半部分
 			this.contextReport.fillStyle = "rgb(220, 220, 220)";
 			this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
 			this.contextReport.roundRect(this.bar2.x + pos2, this.bar2.y+offset, this.bar2.width - pos2, h, r, 1, 0);
 			this.contextReport.roundRect(this.bar3.x + pos3, this.bar3.y+offset, this.bar3.width - pos3, h, r, 1, 0);
 			
-			
+			//滚动条的拖动按钮部分
 			r = this.bar1.height/4;
 			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
 			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
@@ -83,7 +98,7 @@ function lamp()
 			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
 			this.contextReport.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
 			
-
+			//七彩条状滚动条
 			this.contextReport.beginPath();
 			var width = this.bar0.width/45;
 			for(var i=0;i<45;i++)
@@ -98,22 +113,47 @@ function lamp()
 			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
 			this.contextReport.fill();
 		}
+		else if('curtain' == dev_id){
+			var pos1 = this.bar1.pos*this.bar1.width/100;
+			var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+			
+			//滚动条的左半部分
+			this.contextReport.fillStyle = "rgb(220, 0, 0)";
+			this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
+			
+			this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + 30 + offset, this.bar1.pos*this.bar1.width/100, 500, this.bar1.x, this.bar1.y + 30 + offset, this.bar1.pos*this.bar1.width/100, 500);
+
+			//滚动条的右半部分
+			this.contextReport.fillStyle = "rgb(220, 220, 220)";
+			this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
+
+			//滚动条的拖动按钮部分
+			r = this.bar1.height/4;
+			this.contextReport.fillStyle = "rgba(120, 0, 0, 0.5)";
+			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
+		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	this.onresize = function()
 	{
 		this.rect = getWinRect();
-		this.rect.height = '420';
-		this.canvas.width = this.canvasReport.width = this.rect.width;  
-		this.canvas.height = this.canvasReport.height = this.rect.height;
+		this.rect.height = '520';
+		this.canvas.width = this.canvasReport.width = this.canvasImage.width = this.rect.width;  
+		this.canvas.height = this.canvasReport.height = this.canvasImage.height = this.rect.height;
 		offset = 20;
 		var width = this.rect.width-offset*2;
 		this.bar0 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
-		this.bar1 = {x:offset, y: 105, width:width, height:90, pos:0, isdown:false};
+		if('lamp' == dev_id)
+			this.bar1 = {x:offset, y: 105, width:width, height:90, pos:0, isdown:false};
+		else if('curtain' == dev_id)
+			this.bar1 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
 		this.bar2 = {x:offset, y: 205, width:width, height:90, pos:50, isdown:false};
 		this.bar3 = {x:offset, y: 305, width:width, height:90, pos:0, isdown:false};
 		this.contextReport = this.canvasReport.getContext("2d");
+		this.contextImage = this.canvasImage.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
+		this.setPos();
+		this.initDraw();
 		this.doDraw();
 	}
 	this.setID = function(id)
@@ -122,10 +162,14 @@ function lamp()
 	}
 	this.setPos = function()
 	{
-		this.bar1.pos = _LAMP_[mode][this.id]['color']['r'];
-		this.bar2.pos = _LAMP_[mode][this.id]['color']['g'];
-		this.bar3.pos = _LAMP_[mode][this.id]['color']['b'];
-	//	console.log(this.id);
+		if('lamp' == dev_id){
+			this.bar1.pos = _LAMP_[mode][this.id]['color']['r'];
+			this.bar2.pos = _LAMP_[mode][this.id]['color']['g'];
+			this.bar3.pos = _LAMP_[mode][this.id]['color']['b'];
+		}
+		else if('curtain' == dev_id){
+			this.bar1.pos = _CURTAIN_[mode][this.id]['progress'];
+		}
 	}
 	
 	this.rect = null;
@@ -137,43 +181,55 @@ function lamp()
 	this.getmessaged = false;
 	//创建双缓存
 	this.canvasReport = document.createElement("canvas");
+	this.canvasImage = document.createElement("canvas");
 	this.canvas = document.getElementById('msg');//显示画布
 	this.onresize();
 	
 	if(isPC()){
 		this.canvas.addEventListener('mousedown', function(event) { 
-			_lamp.doMouseDown(event, true);//不能用this
+			_device.doMouseDown(event, true);//不能用this
 			}, false);
 		this.canvas.addEventListener('mouseup', function(event) { 
-		    _lamp.doMouseUp(event, true);
+		    _device.doMouseUp(event, true);
 			}, false);
 		this.canvas.addEventListener('mousemove', function(event) { 
-		    _lamp.doMouseMove(event, true);
+		    _device.doMouseMove(event, true);
 			}, false);
 	}
 	else{
 		this.canvas.addEventListener('touchstart', function(event) { 
 			event.preventDefault();
 			if (event.targetTouches.length == 1) { 
-			_lamp.doMouseDown(event, false);
+			_device.doMouseDown(event, false);
 			} 
 			}, false);
 		this.canvas.addEventListener('touchend', function(event) { 
 		    event.preventDefault();
-			_lamp.doMouseUp(event, false);
+			_device.doMouseUp(event, false);
 			}, false);
 		this.canvas.addEventListener('touchcancel', function(event) { 
 		    event.preventDefault();
-			_lamp.doMouseUp(event, false);
+			_device.doMouseUp(event, false);
 			}, false);
 		this.canvas.addEventListener('touchmove', function(event) { 
 		    event.preventDefault();
 			if (event.targetTouches.length == 1) { 
-			_lamp.doMouseMove(event, false);
+			_device.doMouseMove(event, false);
 			} 
 			}, false);
 	}
 
+	this.doProgress = function(x, bar, down) { 
+		if(down)
+			bar.isdown = true;
+
+		var pos = parseInt((x - bar.x)*100/bar.width);
+		if(pos == bar.pos || !bar.isdown)
+			return -1;
+
+		bar.pos = pos;
+		return pos;
+	}
 	this.doColor = function(x, bar, down) { 
 		if(down)
 			bar.isdown = true;
@@ -213,7 +269,7 @@ function lamp()
 	}
 	
 	this.doMouse = function(event, mouse, down, up) { 
-		if(_LAMP_[mode][this.id]['status'] === 'off')
+		if("lamp" == dev_id && _LAMP_[mode][this.id]['status'] === 'off')
 			return;
 		
 		if(up){
@@ -265,7 +321,19 @@ function lamp()
 		//	console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
 			this.docommand(this.id, color)
 		}
-		
+		else if('curtain' == dev_id){
+			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
+				return;
+
+			progress = _CURTAIN_[mode][this.id]['progress'];
+			
+			progress = this.doProgress(loc.x, this.bar1, down);
+			
+			if(-1 == progress)
+				return;
+
+			this.docommand(this.id, progress)
+		}
 		this.doDraw();
 	}
 
@@ -325,7 +393,7 @@ function lamp()
 			mode = json.mode;
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
-			_lamp.setID(json.id);
+			_device.setID(json.id);
 			document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 
 			for(var id in _LAMP_[mode]){
@@ -344,7 +412,7 @@ function lamp()
 			for(var id in _LAMP_[mode]){
 				if(id == "all")
 					break;
-				if(_LAMP_[mode]['1']['status'] !== _LAMP_[mode][id]['status']){
+				if(_LAMP_[mode]['1']['status'] !== _LAMP_[mode][id]['status'] && _DEVICE_[dev_id][id]['hide'] == 'false'){
 					_LAMP_[mode]['all']['status'] = 'off';
 					document.getElementById('all').style.backgroundColor = '#aaa';
 					break;
@@ -357,14 +425,13 @@ function lamp()
 			var id = json.id;
 			if(!_DEVICE_["curtain"].hasOwnProperty(json.id)){
 				id = '1';
-				console.log(json.id);
 			}
 
 			mode = json.mode;
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
-			_lamp.setID(id);
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + (_CURTAIN_[mode][id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
+			_device.setID(id);
+		//	document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + (_CURTAIN_[mode][id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
 
 		/*	for(var id in _CURTAIN_[mode]){
 				if(_DEVICE_["curtain"].hasOwnProperty(id.toString())){
@@ -397,8 +464,8 @@ function lamp()
 				}
 			}
 		} 
-		_lamp.setPos();
-		_lamp.doDraw();
+		_device.setPos();
+		_device.doDraw();
 	}
 	
 	this.docommand = function(id, color){
@@ -427,30 +494,41 @@ function lamp()
 			}
 		}
 		else if('curtain' == dev_id){
-		/*	if(_CURTAIN_[mode][id]['status'] === 'on'){
-				if(this.id != id){
-					this.id = id;
-					command = 'on';
-				}
-				else
-					command = 'off';
-			}
-			else
-				command = 'on';
-			
-			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
-			btn.style.backgroundColor = '#ee0';*/
-			for(var i=0;i<20;i++){
-				if(document.getElementById(i.toString())){
-					if(i.toString() === id){
-						document.getElementById(i).style.backgroundColor = '#e00';
-						document.getElementById('all').style.backgroundColor = '#aaa';
+			if(color == undefined){
+			/*	if(_CURTAIN_[mode][id]['status'] === 'on'){
+					if(this.id != id){
+						this.id = id;
+						command = 'on';
 					}
 					else
-						document.getElementById(i).style.backgroundColor = '#aaa';	
+						command = 'off';
 				}
+				else
+					command = 'on';
+				
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+				btn.style.backgroundColor = '#ee0';*/
+				
+				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节开合进度';
+				for(var i=0;i<20;i++){
+					if(document.getElementById(i.toString())){
+						if(i.toString() === id){
+							document.getElementById(i).style.backgroundColor = '#e00';
+							document.getElementById('all').style.backgroundColor = '#aaa';
+						}
+						else
+							document.getElementById(i).style.backgroundColor = '#aaa';	
+					}
+				}
+				this.setID(id);
+				this.setPos();
+				this.doDraw();
+				return;
 			}
-			return;
+			else{
+				//调窗帘开合进度
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&progress=" + color;
+			}
 		}
 
 

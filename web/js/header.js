@@ -155,7 +155,10 @@ function header(index)
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
 		ctx.font = _font36;
-		title = _w.s1 + "转" + _w.s2;
+		if(_w.s1 !== _w.s2)
+			title = _w.s1 + "转" + _w.s2;
+		else
+			title = _w.s1;
 		ctx.fillText(title, rect.width*3/4 - ctx.measureText(title).width/2, 150);
 	}
 }

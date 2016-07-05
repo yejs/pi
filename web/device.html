@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width"/>
+    <meta name="viewport" content="initial-scale=1.0"/>
+    <meta name="viewport" content="maximum-scale=1.0"/>
+    <meta name="viewport" content="user-scalable=1.0"/>
+    <title>树莓派GPIO测试</title>
+	<link rel="stylesheet" type="text/css"href="css/menu.css"/>
+	<script type="text/javascript" src="js/device.js"></script>
+</head>
+<body>
+<div class="lamp" id ="lamp">
+	<div class="title">
+		<span class="title" id="scene_title">回家模式设定</span>
+		<!--button id="ret_btn" class="btn" onclick="javascript:history.back(-1);" style="width: 5em;height: 1.5em;line-height:1.5em;">返回</button-->
+	</div>
+	
+	<div class="wrap">
+		<button id="1" class="btn" onclick="_device.docommand('1')">灯1</button>
+		<button id="2" class="btn" onclick="_device.docommand('2')">灯2</button>
+		<button id="3" class="btn" onclick="_device.docommand('3')">灯3</button>
+	</div>
+	<div class="wrap">
+		<button id="4" class="btn" onclick="_device.docommand('4')">灯4</button>
+		<button id="5" class="btn" onclick="_device.docommand('5')">灯5</button>
+		<button id="6" class="btn" onclick="_device.docommand('6')">灯6</button>
+	</div>
+	<div class="wrap">
+		<button id="7" class="btn" onclick="_device.docommand('7')">灯7</button>
+		<button id="8" class="btn" onclick="_device.docommand('8')">灯8</button>
+		<button id="9" class="btn" onclick="_device.docommand('9')">灯9</button>
+	</div>
+	<div class="wrap">
+		<button id="10" class="btn" onclick="_device.docommand('10')">灯10</button>
+		<button id="11" class="btn" onclick="_device.docommand('11')">灯11</button>
+		<button id="12" class="btn" onclick="_device.docommand('12')">灯12</button>
+	</div>
+	<div class="wrap">
+		<button id="all" class="btn" onclick="_device.docommand('all')">所有灯</button>
+	</div>
+	<div class="title" id="color_title">1号灯调色调光</div>
+	<div><canvas id="msg" align="left"></canvas></div>
+	<div><!--固定底部导航点位符-->
+		<canvas align="left" style="visibility:hidden;height: 80px;">
+	</div>
+</div>
+
+</body>
+</html>

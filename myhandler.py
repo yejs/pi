@@ -188,13 +188,18 @@ class Connection(object):
         status = param['item']['status']
         if dev_id.find('lamp') != -1:
             color = RPi_GPIO.get_colors(param['item'])#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
+        elif dev_id.find('curtain') != -1:
+            progress = param['item']['progress']
         else:
             color = None
+            progress = None
 	
         l = len(Connection.output_param)
  
         if color:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, color)
+        elif progress:
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, progress)
         else:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\"}" %(dev_id, pin, status)
 			
@@ -310,6 +315,8 @@ class WebHandler(tornado.web.RequestHandler):
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
         elif post_data.get('color'):	#调光调色指令
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
+        elif post_data.get('progress'):	#调光调色指令
+            str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['progress'][0]+'\"}'
         elif dev_id == None:			#模式指令
             str1 = '{\"mode\":\"'+mode + '\"}'
         			
@@ -325,7 +332,7 @@ class WebHandler(tornado.web.RequestHandler):
             elif dev_id == None:
                 WebHandler.lamp(post_data)
                 WebHandler.curtain(post_data)
-                print('dev_id is none')
+
             timer = threading.Timer(5, WebHandler.perform_save)#延时5秒保存
             timer.start()
         else:
@@ -358,6 +365,8 @@ class WebHandler(tornado.web.RequestHandler):
             r, g, b = RPi_GPIO.get_color(value)
             item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
             #print("get_colors: %s  %s  %d  %d" %(value, RPi_GPIO.get_colors(item), r, item['color']['r']))
+        elif key == 'progress' and dev_id == 'curtain':	#调窗帘分合进度指令
+            item['progress'] = int(value)
         elif key == None:    							#模式指令
             key = 'command'
             value = item['status']
@@ -412,6 +421,8 @@ class WebHandler(tornado.web.RequestHandler):
 
         if post_data.get('command'):#开关指令
             key = 'command'
+        elif post_data.get('progress'):#调节分合进度指令
+            key = 'progress'
 			
         if post_data.get('id'):
             curtain_id = post_data['id'][0]
@@ -421,7 +432,7 @@ class WebHandler(tornado.web.RequestHandler):
         if key != None:		
             value = post_data[key][0]
 			
-        if None == _LAMP_.get(mode):		
+        if None == _CURTAIN_.get(mode):		
             return
 			
         if curtain_id == 'all' or key == None:

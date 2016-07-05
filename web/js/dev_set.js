@@ -15,7 +15,8 @@ window.onload = function(){
 	pos = url.indexOf('dev_id');
 	if(pos>=0){
 		_dev_set.dev_id = url.substr(pos+7);
-	//	console.log('onload:' + location.search);
+		if(_dev_set.dev_id == 'curtain')
+			document.getElementById('d_length').style.display = 'block';
 	}
 }
 
@@ -44,7 +45,8 @@ function dev_set()
 		
 		if( json.event === "device" ){
 			_DEVICE_ = json.data;
-			window.parent.postMessage({'msg':'device' , 'data':json.data},'*');
+		//	window.parent.postMessage({'msg':'device' , 'data':json.data},'*');
+		//	console.log('device:' + JSON.stringify(_DEVICE_));
 			
 			if(_DEVICE_.hasOwnProperty(_dev_set.dev_id)){
 				for(var i=0;i<20;i++){
@@ -95,6 +97,11 @@ function dev_set()
 		else
 			document.getElementById('GPIO').value = '';
 		
+		if(_DEVICE_[this.dev_id][id].hasOwnProperty('length'))
+			document.getElementById('length').value = _DEVICE_[this.dev_id][id]['length'];
+		else
+			document.getElementById('length').value = '';
+		
 		ii = parseInt(id);
 		if((ii < (this.dev_id == 'lamp' ? 12 : 6) && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true'))
 			document.getElementById('hide').setAttribute("disabled","disabled");
@@ -128,6 +135,9 @@ function dev_set()
 		
 		if(document.getElementById('GPIO').value.length>0)
 			_DEVICE_[this.dev_id][this.id]['pin'] = document.getElementById('GPIO').value; 
+		
+		if(document.getElementById('length').value.length>0)
+			_DEVICE_[this.dev_id][this.id]['length'] = document.getElementById('length').value; 
 		
 		_DEVICE_[this.dev_id][this.id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
 		

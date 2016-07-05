@@ -146,7 +146,7 @@ window.addEventListener('message',function(e){
 		}
 
 		
-		window.frames['fscene'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+	//	window.frames['fscene'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 	}
 	onopen = function()
 	{
