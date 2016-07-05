@@ -13,6 +13,7 @@ import os
 import tornado.web
 import tornado.websocket
 from tornado.tcpserver import TCPServer 
+from tornado.options import define, options
 import json
 import base64
 import urllib
@@ -20,6 +21,8 @@ import logging
 from data import _DEVICE_, _LAMP_ , _CURTAIN_
 import threading
 import time
+
+define("MS_PER_METER", default=80, help="窗帘运行每米/100所需的毫秒数", type=int)
 
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
@@ -199,7 +202,7 @@ class Connection(object):
         if color:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, color)
         elif progress:
-            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, progress)
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"progress\":\"%s\"}" %(dev_id, pin, status, progress)
         else:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\"}" %(dev_id, pin, status)
 			
@@ -287,6 +290,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         WebSocket.broadcast_messages(str1) 
 		
 class WebHandler(tornado.web.RequestHandler):
+    _curtain_param = {'1' : None, '2' : None, '3' : None, '4' : None, '5' : None, '6' : None}
     def post(self, *args, **kwargs):
         global mode
 		
@@ -366,6 +370,19 @@ class WebHandler(tornado.web.RequestHandler):
             item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
             #print("get_colors: %s  %s  %d  %d" %(value, RPi_GPIO.get_colors(item), r, item['color']['r']))
         elif key == 'progress' and dev_id == 'curtain':	#调窗帘分合进度指令
+            if item['progress'] - int(value) > 0:
+                item['status'] = 'open'
+            elif item['progress'] - int(value) < 0:
+                item['status'] = 'close'
+            else :
+                return
+            ms = int(options.MS_PER_METER * abs(item['progress'] - int(value)) * float(_DEVICE_[dev_id][id]['length']))
+            if WebHandler._curtain_param[id] and WebHandler._curtain_param[id]['timer']:
+                WebHandler._curtain_param[id]['timer'].cancel()
+            WebHandler._curtain_param[id] = {"dev_id": dev_id, "id": id, "key": key, "item": item, "timer" : None}
+            #WebHandler._curtain_param[id]['timer'] = threading.Timer(ms, WebHandler.output_curtain)#延时n毫秒停止输出
+            #WebHandler._curtain_param[id]['timer'].start()
+            
             item['progress'] = int(value)
         elif key == None:    							#模式指令
             key = 'command'
@@ -380,7 +397,9 @@ class WebHandler(tornado.web.RequestHandler):
             if sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
                 sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
 
-		
+    def output_curtain():
+        global sock
+				
     def lamp(post_data):
         global mode
         global lamp_id

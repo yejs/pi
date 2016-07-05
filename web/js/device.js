@@ -62,9 +62,20 @@ function device()
 			img.onload = function(){
 				var offset = _device.bar1.height/2 - 5
 				_device.contextImage.drawImage(img, 0, 0, img.width, img.height, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.width, 500);
-				_device.ctx.drawImage(_device.canvasImage, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.pos*_device.bar1.width/100, 500, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.pos*_device.bar1.width/100, 500);
+				_device.drawImage();
 			};
 		}
+	}
+	
+	this.drawImage = function()
+	{
+		var w = this.bar1.pos*this.bar1.width/200;
+		var offset = this.bar1.height/2 + 25;
+			
+
+		this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, 500, this.bar1.x, this.bar1.y + offset, w, 500);
+			
+		this.ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, 500, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, 500);
 	}
 	
 	this.doDraw = function()
@@ -114,14 +125,12 @@ function device()
 			this.contextReport.fill();
 		}
 		else if('curtain' == dev_id){
-			var pos1 = this.bar1.pos*this.bar1.width/100;
+			var pos1 = this.bar1.pos*this.bar1.width/200;
 			var offset = this.bar1.height/2 - 5, r = 5, h = 10;
 			
 			//滚动条的左半部分
 			this.contextReport.fillStyle = "rgb(220, 0, 0)";
 			this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
-			
-			this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + 30 + offset, this.bar1.pos*this.bar1.width/100, 500, this.bar1.x, this.bar1.y + 30 + offset, this.bar1.pos*this.bar1.width/100, 500);
 
 			//滚动条的右半部分
 			this.contextReport.fillStyle = "rgb(220, 220, 220)";
@@ -130,6 +139,9 @@ function device()
 			//滚动条的拖动按钮部分
 			r = this.bar1.height/4;
 			this.contextReport.fillStyle = "rgba(120, 0, 0, 0.5)";
+			
+			this.drawImage();
+			
 			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
 		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
@@ -223,7 +235,11 @@ function device()
 		if(down)
 			bar.isdown = true;
 
-		var pos = parseInt((x - bar.x)*100/bar.width);
+		if(x < bar.x + bar.width/2)
+			var pos = parseInt((x - bar.x)*200/bar.width);
+		else
+			var pos = parseInt((bar.x + bar.width - x)*200/bar.width);
+			
 		if(pos == bar.pos || !bar.isdown)
 			return -1;
 

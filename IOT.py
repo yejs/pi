@@ -12,12 +12,11 @@ import os, threading
 #import RPi.GPIO as GPIO
 
 import tornado.httpserver
-import tornado.options
 import tornado.ioloop
 import tornado.web
 import signal
 import logging
-from tornado.options import options
+
 from tornado.options import define, options
 define("port", default=8000, help="run on the given port", type=int)
 
