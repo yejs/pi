@@ -22,8 +22,6 @@ from data import _DEVICE_, _LAMP_ , _CURTAIN_
 import threading
 import time
 
-define("MS_PER_METER", default=80, help="窗帘运行每米/100所需的毫秒数", type=int)
-
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
 lamp_id = '1'
@@ -191,18 +189,13 @@ class Connection(object):
         status = param['item']['status']
         if dev_id.find('lamp') != -1:
             color = RPi_GPIO.get_colors(param['item'])#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
-        elif dev_id.find('curtain') != -1:
-            progress = param['item']['progress']
         else:
             color = None
-            progress = None
 	
         l = len(Connection.output_param)
  
         if color:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, status, color)
-        elif progress:
-            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\", \"progress\":\"%s\"}" %(dev_id, pin, status, progress)
         else:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"status\":\"%s\"}" %(dev_id, pin, status)
 			
@@ -290,7 +283,6 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         WebSocket.broadcast_messages(str1) 
 		
 class WebHandler(tornado.web.RequestHandler):
-    _curtain_param = {'1' : None, '2' : None, '3' : None, '4' : None, '5' : None, '6' : None}
     def post(self, *args, **kwargs):
         global mode
 		
@@ -319,8 +311,6 @@ class WebHandler(tornado.web.RequestHandler):
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['command'][0]+'\"}'
         elif post_data.get('color'):	#调光调色指令
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
-        elif post_data.get('progress'):	#调光调色指令
-            str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['progress'][0]+'\"}'
         elif dev_id == None:			#模式指令
             str1 = '{\"mode\":\"'+mode + '\"}'
         			
@@ -369,21 +359,6 @@ class WebHandler(tornado.web.RequestHandler):
             r, g, b = RPi_GPIO.get_color(value)
             item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
             #print("get_colors: %s  %s  %d  %d" %(value, RPi_GPIO.get_colors(item), r, item['color']['r']))
-        elif key == 'progress' and dev_id == 'curtain':	#调窗帘分合进度指令
-            if item['progress'] - int(value) > 0:
-                item['status'] = 'open'
-            elif item['progress'] - int(value) < 0:
-                item['status'] = 'close'
-            else :
-                return
-            ms = int(options.MS_PER_METER * abs(item['progress'] - int(value)) * float(_DEVICE_[dev_id][id]['length']))
-            if WebHandler._curtain_param[id] and WebHandler._curtain_param[id]['timer']:
-                WebHandler._curtain_param[id]['timer'].cancel()
-            WebHandler._curtain_param[id] = {"dev_id": dev_id, "id": id, "key": key, "item": item, "timer" : None}
-            #WebHandler._curtain_param[id]['timer'] = threading.Timer(ms, WebHandler.output_curtain)#延时n毫秒停止输出
-            #WebHandler._curtain_param[id]['timer'].start()
-            
-            item['progress'] = int(value)
         elif key == None:    							#模式指令
             key = 'command'
             value = item['status']
@@ -397,8 +372,6 @@ class WebHandler(tornado.web.RequestHandler):
             if sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
                 sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
 
-    def output_curtain():
-        global sock
 				
     def lamp(post_data):
         global mode
@@ -440,13 +413,14 @@ class WebHandler(tornado.web.RequestHandler):
 
         if post_data.get('command'):#开关指令
             key = 'command'
-        elif post_data.get('progress'):#调节分合进度指令
-            key = 'progress'
 			
         if post_data.get('id'):
             curtain_id = post_data['id'][0]
         else :
             curtain_id = '1'
+			
+        if post_data.get('progress'):#前端通知当前窗帘开合进度
+            _CURTAIN_[mode][curtain_id]['progress'] = int(post_data['progress'][0])
 			
         if key != None:		
             value = post_data[key][0]
