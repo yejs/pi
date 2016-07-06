@@ -191,6 +191,10 @@ function device()
 	this.bar3 = null;
 	this.id = '1';
 	this.getmessaged = false;
+	this.Progress = {timer:null, tick:null, pos:0};
+	this.Progress_timer = null;
+	this.Progress_tick = null;
+
 	//创建双缓存
 	this.canvasReport = document.createElement("canvas");
 	this.canvasImage = document.createElement("canvas");
@@ -231,7 +235,7 @@ function device()
 			}, false);
 	}
 
-	this.doProgress = function(x, bar, down) { 
+	this.getCommand = function(x, bar, down) { 
 		if(down)
 			bar.isdown = true;
 
@@ -243,9 +247,48 @@ function device()
 		if(pos == bar.pos || !bar.isdown)
 			return -1;
 
-		bar.pos = pos;
-		return pos;
+		var command = null;
+		if(this.Progress.timer){//如果当前运行中，则中止
+			window.clearInterval(this.Progress.timer);
+			this.Progress.timer = null;
+			_CURTAIN_[mode][this.id]['progress'] = bar.pos = parseInt(bar.pos);
+			command = 'stop';
+		}
+		else{					//根据当前位置与点击位置判断是开还是关
+			if(bar.pos > pos)
+				command = 'open';
+			else
+				command  =  'close';
+
+			this.Progress.timer = setInterval(function() {_device.doProgress(bar, command);},40);
+			this.Progress.tick = (new Date()).getTime();
+			this.Progress.pos = bar.pos;
+			this.Progress.count = 0;
+		}
+		return command;
 	}
+	
+	//显示窗帘开关的进度
+	this.doProgress = function(bar, command) { 
+		//重要，此处是决定界面显示的进度是否与实际轨道运行是否同步的关键
+		var length = _DEVICE_['curtain'][this.id]['length'];//this.Progress_tick
+		var tick = (new Date()).getTime() - this.Progress.tick;
+		var me_per_ms = 0.0002;					//每秒20cm
+		var pos = tick * me_per_ms *100/length;
+
+		if(command == 'open' && bar.pos>0)
+			bar.pos = (this.Progress.pos >= pos ? this.Progress.pos - pos : 0);
+		else if(command == 'close' && bar.pos<100)
+			bar.pos = (this.Progress.pos + pos <= 100 ? this.Progress.pos + pos : 100);
+		if((command == 'open' && bar.pos<=0) || (command == 'close' && bar.pos>=100)){
+			window.clearInterval(this.Progress.timer);
+			this.Progress.timer = null;
+			_CURTAIN_[mode][this.id]['progress'] = bar.pos = parseInt(bar.pos);
+			this.docommand(this.id, 'stop');//将当前进度通知到其它客户端
+		}
+		this.doDraw();
+	}
+	
 	this.doColor = function(x, bar, down) { 
 		if(down)
 			bar.isdown = true;
@@ -338,17 +381,15 @@ function device()
 			this.docommand(this.id, color)
 		}
 		else if('curtain' == dev_id){
-			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
+			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x || !down)
 				return;
 
-			progress = _CURTAIN_[mode][this.id]['progress'];
+			command = this.getCommand(loc.x, this.bar1, down);
 			
-			progress = this.doProgress(loc.x, this.bar1, down);
-			
-			if(-1 == progress)
+			if(-1 == command)
 				return;
 
-			this.docommand(this.id, progress)
+			this.docommand(this.id, command)
 		}
 		this.doDraw();
 	}
@@ -437,7 +478,7 @@ function device()
 		} 
 		else if( json.event === "curtain" ){
 			_CURTAIN_[json.mode] = json.data;
-			
+
 			var id = json.id;
 			if(!_DEVICE_["curtain"].hasOwnProperty(json.id)){
 				id = '1';
@@ -484,11 +525,11 @@ function device()
 		_device.doDraw();
 	}
 	
-	this.docommand = function(id, color){
+	this.docommand = function(id, commandEx){
 		var btn = document.getElementById(id.toString());
 
 		if('lamp' == dev_id){
-			if(color == undefined){
+			if(commandEx == undefined){
 				if(_LAMP_[mode][id]['status'] === 'on'){
 					if(this.id != id){
 						this.id = id;
@@ -505,12 +546,12 @@ function device()
 			}
 			else{
 				//调光调色
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + color;
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + commandEx;
 				
 			}
 		}
 		else if('curtain' == dev_id){
-			if(color == undefined){
+			if(commandEx == undefined){
 			/*	if(_CURTAIN_[mode][id]['status'] === 'on'){
 					if(this.id != id){
 						this.id = id;
@@ -543,7 +584,7 @@ function device()
 			}
 			else{
 				//调窗帘开合进度
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&progress=" + color;
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
 			}
 		}
 
