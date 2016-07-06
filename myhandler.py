@@ -353,12 +353,19 @@ class WebHandler(tornado.web.RequestHandler):
         else:#TODO:其它设备待完成
             return;
 			
+        curtain_last_command = None#curtain的stop指令不保存，将前面的指令缓存到这里，stop指令执行后再还原
+        '''
+        TODO:窗帘模式指令下切换有个问题，如果用户在当前模式下开合窗帘过程中按下stop停止指令，窗帘将会停在某个中间状态，
+        当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
+		而与界面显示的状态不一致
+        '''
         if key == 'command':							#开关指令
+            if dev_id == 'curtain' and value == 'stop':
+                curtain_last_command = item['status']
             item['status'] = value
         elif key == 'color' and dev_id == 'lamp':		#调光调色指令
             r, g, b = RPi_GPIO.get_color(value)
             item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
-            #print("get_colors: %s  %s  %d  %d" %(value, RPi_GPIO.get_colors(item), r, item['color']['r']))
         elif key == None:    							#模式指令
             key = 'command'
             value = item['status']
@@ -372,6 +379,8 @@ class WebHandler(tornado.web.RequestHandler):
             if sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
                 sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
 
+        if curtain_last_command:	#还原curtain stop前的开关指令
+            item['status'] = curtain_last_command
 				
     def lamp(post_data):
         global mode

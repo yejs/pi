@@ -235,7 +235,7 @@ function device()
 			}, false);
 	}
 
-	this.getCommand = function(x, bar, down) { 
+	this.doCurtain = function(x, bar, down) { 
 		if(down)
 			bar.isdown = true;
 
@@ -384,7 +384,7 @@ function device()
 			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x || !down)
 				return;
 
-			command = this.getCommand(loc.x, this.bar1, down);
+			command = this.doCurtain(loc.x, this.bar1, down);
 			
 			if(-1 == command)
 				return;
@@ -480,36 +480,14 @@ function device()
 			_CURTAIN_[json.mode] = json.data;
 
 			var id = json.id;
-			if(!_DEVICE_["curtain"].hasOwnProperty(json.id)){
+			if(!_DEVICE_["curtain"].hasOwnProperty(json.id))
 				id = '1';
-			}
 
 			mode = json.mode;
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
 			_device.setID(id);
-		//	document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + (_CURTAIN_[mode][id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
 
-		/*	for(var id in _CURTAIN_[mode]){
-				if(_DEVICE_["curtain"].hasOwnProperty(id.toString())){
-					if(_CURTAIN_[mode][id]['status'] === 'on')
-						document.getElementById(id).style.backgroundColor = '#e00';						
-					else
-						document.getElementById(id).style.backgroundColor = '#aaa';
-				}
-			}
-
-			//检查是不是所有灯的状态一样且为全开，如是则‘所有’灯的状态设为全开，否则为关的状态
-			for(var id in _CURTAIN_[mode]){
-				if(id == "all")
-					break;
-				if(_CURTAIN_[mode]['1']['status'] !== _CURTAIN_[mode][id]['status']){
-					_CURTAIN_[mode]['all']['status'] = 'off';
-					document.getElementById('all').style.backgroundColor = '#aaa';
-					break;
-				}
-			}*/
-			
 			for(var i=0;i<20;i++){
 				if(document.getElementById(i.toString())){
 					if(i.toString() === id){
@@ -552,19 +530,9 @@ function device()
 		}
 		else if('curtain' == dev_id){
 			if(commandEx == undefined){
-			/*	if(_CURTAIN_[mode][id]['status'] === 'on'){
-					if(this.id != id){
-						this.id = id;
-						command = 'on';
-					}
-					else
-						command = 'off';
-				}
-				else
-					command = 'on';
 				
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
-				btn.style.backgroundColor = '#ee0';*/
+				if(this.Progress.timer)
+					return;
 				
 				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节开合进度';
 				for(var i=0;i<20;i++){
