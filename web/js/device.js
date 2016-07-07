@@ -17,7 +17,6 @@ window.onload = function(){
 	pos = url.indexOf('dev_id');
 	if(pos>=0){
 		dev_id = url.substr(pos+7);
-
 	}
 }
 
@@ -34,7 +33,15 @@ refresh = function(){
 		document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
 		document.getElementById('color_title').innerText = '';
-		document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
+		if('lamp' == dev_id)
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调光调色';
+		else if('curtain' == dev_id)
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
+		else
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节';
+		
+		if('air_conditioner' == dev_id || 'TV' == dev_id)
+			_device.setFocus(_device.id);
 	}
 }
 
@@ -62,20 +69,20 @@ function device()
 			img.onload = function(){
 				var offset = _device.bar1.height/2 - 5
 				_device.contextImage.drawImage(img, 0, 0, img.width, img.height, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.width, 500);
-				_device.drawImage();
+				_device.drawCurtain();
 			};
 		}
 	}
 	
-	this.drawImage = function()
+	this.drawCurtain = function()
 	{
 		var w = this.bar1.pos*this.bar1.width/200;
 		var offset = this.bar1.height/2 + 25;
 			
-
-		this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, 500, this.bar1.x, this.bar1.y + offset, w, 500);
+		var h = parseInt(this.rect.height) - 20;
+		this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, h, this.bar1.x, this.bar1.y + offset, w, h);
 			
-		this.ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, 500, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, 500);
+		this.ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
 	}
 	
 	this.doDraw = function()
@@ -140,7 +147,7 @@ function device()
 			r = this.bar1.height/4;
 			this.contextReport.fillStyle = "rgba(120, 0, 0, 0.5)";
 			
-			this.drawImage();
+			this.drawCurtain();
 			
 			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
 		}
@@ -271,7 +278,7 @@ function device()
 	//显示窗帘开关的进度
 	this.doProgress = function(bar, command) { 
 		//重要，此处是决定界面显示的进度是否与实际轨道运行是否同步的关键
-		var length = _DEVICE_['curtain'][this.id]['length'];//this.Progress_tick
+		var length = _DEVICE_['curtain'][this.id]['length'];
 		var tick = (new Date()).getTime() - this.Progress.tick;
 		var me_per_ms = 0.0002;					//每秒20cm
 		var pos = tick * me_per_ms *100/length;
@@ -475,6 +482,7 @@ function device()
 					break;
 				}
 			}
+			
 		} 
 		else if( json.event === "curtain" ){
 			_CURTAIN_[json.mode] = json.data;
@@ -487,22 +495,24 @@ function device()
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
 			_device.setID(id);
-
-			for(var i=0;i<20;i++){
-				if(document.getElementById(i.toString())){
-					if(i.toString() === id){
-						document.getElementById(i).style.backgroundColor = '#e00';
-						document.getElementById('all').style.backgroundColor = '#aaa';
-					}
-					else
-						document.getElementById(i).style.backgroundColor = '#aaa';	
-				}
-			}
+			_device.setFocus(id);
 		} 
 		_device.setPos();
 		_device.doDraw();
 	}
 	
+	this.setFocus = function(id){
+		for(var i=0;i<20;i++){
+			if(document.getElementById(i.toString())){
+				if(i.toString() === id){
+					document.getElementById(i).style.backgroundColor = '#e00';
+					document.getElementById('all').style.backgroundColor = '#aaa';
+				}
+				else
+					document.getElementById(i).style.backgroundColor = '#aaa';	
+			}
+		}
+	}
 	this.docommand = function(id, commandEx){
 		var btn = document.getElementById(id.toString());
 
@@ -535,16 +545,7 @@ function device()
 					return;
 				
 				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节开合进度';
-				for(var i=0;i<20;i++){
-					if(document.getElementById(i.toString())){
-						if(i.toString() === id){
-							document.getElementById(i).style.backgroundColor = '#e00';
-							document.getElementById('all').style.backgroundColor = '#aaa';
-						}
-						else
-							document.getElementById(i).style.backgroundColor = '#aaa';	
-					}
-				}
+				this.setFocus(id);
 				this.setID(id);
 				this.setPos();
 				this.doDraw();
@@ -553,6 +554,38 @@ function device()
 			else{
 				//调窗帘开合进度
 				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
+			}
+		}
+		else if('air_conditioner' == dev_id){
+			if(commandEx == undefined){
+
+				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
+				this.setFocus(id);
+				this.setID(id);
+				this.setPos();
+				this.doDraw();
+				return;
+			}
+			else{
+		
+			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
+			return;//TODO
+			}
+		}
+		else if('TV' == dev_id){
+			if(commandEx == undefined){
+
+				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
+				this.setFocus(id);
+				this.setID(id);
+				this.setPos();
+				this.doDraw();
+				return;
+			}
+			else{
+				//调窗帘开合进度
+			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
+			return;//TODO
 			}
 		}
 

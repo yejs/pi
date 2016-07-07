@@ -3,6 +3,7 @@
 """
  命令处理模块 
 """
+from __future__ import division
 __author__ = 'yejs'
 __version__ = '1.0'
 
@@ -22,8 +23,10 @@ from data import _DEVICE_, _LAMP_ , _CURTAIN_
 import threading
 import time
 
+
 sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
 mode = 'normal'
+last_mode = 'normal'
 lamp_id = '1'
 curtain_id = '1'
 
@@ -171,15 +174,14 @@ class Connection(object):
             Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
             Connection.timer.start()
 
-
     def output_ex():
         Connection.time_tick = time.time()
-
+		
         if len(Connection.output_param) == 0:
             Connection.timer.cancel()
             Connection.timer = None
             return;
-			
+
         Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
         Connection.timer.start()
         param = Connection.output_param.pop()
@@ -282,16 +284,19 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
         WebSocket.broadcast_messages(str1) 
 		
+#客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         global mode
-		
+        global last_mode
         post_data = {}
 
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
 			
-        if post_data.get('mode'):		
+        if post_data.get('mode'):
+            if mode != post_data['mode'][0]:
+                last_mode = mode
             mode = post_data['mode'][0]
         else:
             mode = "normal"
@@ -352,16 +357,8 @@ class WebHandler(tornado.web.RequestHandler):
             item = _CURTAIN_[mode][id]
         else:#TODO:其它设备待完成
             return;
-			
-        curtain_last_command = None#curtain的stop指令不保存，将前面的指令缓存到这里，stop指令执行后再还原
-        '''
-        TODO:窗帘模式指令下切换有个问题，如果用户在当前模式下开合窗帘过程中按下stop停止指令，窗帘将会停在某个中间状态，
-        当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
-		而与界面显示的状态不一致
-        '''
+
         if key == 'command':							#开关指令
-            if dev_id == 'curtain' and value == 'stop':
-                curtain_last_command = item['status']
             item['status'] = value
         elif key == 'color' and dev_id == 'lamp':		#调光调色指令
             r, g, b = RPi_GPIO.get_color(value)
@@ -378,9 +375,6 @@ class WebHandler(tornado.web.RequestHandler):
 
             if sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
                 sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
-
-        if curtain_last_command:	#还原curtain stop前的开关指令
-            item['status'] = curtain_last_command
 				
     def lamp(post_data):
         global mode
@@ -415,6 +409,7 @@ class WebHandler(tornado.web.RequestHandler):
 		
     def curtain(post_data):
         global mode
+        global last_mode
         global curtain_id
 
         key = None
@@ -436,15 +431,34 @@ class WebHandler(tornado.web.RequestHandler):
 			
         if None == _CURTAIN_.get(mode):		
             return
-			
+        '''
+        TODO:窗帘模式指令下切换有个问题，如果用户在当前模式下开合窗帘过程中按下stop停止指令，窗帘将会停在某个中间状态，
+        当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
+		而与界面显示的状态不一致
+        '''
         if curtain_id == 'all' or key == None:
-            for k in _CURTAIN_[mode].keys():
-                WebHandler.output('curtain', k, key, value)
-
-        WebHandler.output('curtain', curtain_id, key, value)
+            for id in _CURTAIN_[mode].keys():
+                #WebHandler.output('curtain', id, key, value)
+                last_progress = _CURTAIN_[last_mode][id]['progress']
+                progress = _CURTAIN_[mode][id]['progress']
+                if last_progress > progress:
+                    command = 'open';
+                elif last_progress < progress:
+                    command  =  'close';
+                else :
+                    continue
+                WebHandler.output('curtain', id, 'command', command)
+				
+                length = int(_DEVICE_['curtain'][id]['length']);
+                n = float(abs(last_progress - progress)*length/100)/0.2
+                #print("last_progress:%s progress:%s length:%s, f:%s" %(last_progress, progress, length, n))
+                timer = threading.Timer(n, WebHandler.output, ('curtain', id, 'command', 'stop', ))#延时停止输出
+                timer.start()
+        else:
+            WebHandler.output('curtain', curtain_id, key, value)
 
         WebSocket.broadcast_curtain_status()
-				
+		
     def car(post_data):
         command = post_data['command'][0]
         _CAR_ = {'INT1':11, 'INT2':12, 'INT3':13, 'INT4':15}

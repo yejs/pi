@@ -15,8 +15,13 @@ window.onload = function(){
 	pos = url.indexOf('dev_id');
 	if(pos>=0){
 		_dev_set.dev_id = url.substr(pos+7);
-		if(_dev_set.dev_id == 'curtain')
+		if(_dev_set.dev_id == 'curtain'){
+			document.getElementById('d_GPIO').style.display = 'none';
 			document.getElementById('d_length').style.display = 'block';
+		}
+		else if(_dev_set.dev_id == 'TV' || _dev_set.dev_id == 'air_conditioner'){
+			document.getElementById('d_GPIO').style.display = 'none';
+		}
 	}
 }
 
@@ -49,6 +54,7 @@ function dev_set()
 		//	console.log('device:' + JSON.stringify(_DEVICE_));
 			
 			if(_DEVICE_.hasOwnProperty(_dev_set.dev_id)){
+				console.log('device111:' + _dev_set.dev_id);
 				for(var i=0;i<20;i++){
 					if(document.getElementById(i.toString())){
 						if(!_DEVICE_[_dev_set.dev_id].hasOwnProperty(i.toString()))
@@ -133,10 +139,10 @@ function dev_set()
 		if(document.getElementById('IP').value.length>0)
 			_DEVICE_[this.dev_id][this.id]['ip'] = document.getElementById('IP').value; 
 		
-		if(document.getElementById('GPIO').value.length>0)
+		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[this.dev_id][id].hasOwnProperty('GPIO'))
 			_DEVICE_[this.dev_id][this.id]['pin'] = document.getElementById('GPIO').value; 
 		
-		if(document.getElementById('length').value.length>0)
+		if(document.getElementById('length').value.length>0 && _DEVICE_[this.dev_id][id].hasOwnProperty('length'))
 			_DEVICE_[this.dev_id][this.id]['length'] = document.getElementById('length').value; 
 		
 		_DEVICE_[this.dev_id][this.id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';

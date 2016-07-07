@@ -9,7 +9,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['灯光控制', '窗帘控制', '场景模式', '小车', '视频监控', '空调控制', '电视控制'];
+	var _title = ['灯光控制', '窗帘控制', '空调控制', '电视控制', '场景模式', '小车', '视频监控'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -32,7 +32,7 @@ window.onload = function(){
 
 }
 
-var titles = ["lamp", "curtain", "scene", "car", "video"];
+var titles = ["lamp", "curtain", "air_conditioner", "TV", "scene", "car", "video"];
 showPage = function(title){
 	for(var i in titles){
 		if(titles[i] === title)
@@ -65,32 +65,15 @@ onNewsTitle = function(i){
 	}
 	var news=document.getElementById("video");
 	var elem_child = news.getElementsByTagName("iframe"); 
-	if(0 == i){
-		showPage("lamp");
+	showPage(titles[i]);
+	
+	if('video' != titles[i]){
 		if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
 			elem_child[0].src = "fake.html";
-
-		window.frames['flamp'].window.refresh();//location.reload();
+			
+		window.frames['f' + titles[i]].window.refresh();
 	}
-	else if(1 == i){
-		showPage("curtain");
-		if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
-			elem_child[0].src = "fake.html";
-		window.frames['fcurtain'].window.refresh();//location.reload();
-	}
-	else if(2 == i){
-		showPage("scene");
-		if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
-			elem_child[0].src = "fake.html";
-		window.frames['fscene'].window.refresh();//location.reload();
-	}
-	else if(3 == i){
-		showPage("car");
-		if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
-			elem_child[0].src = "fake.html";
-	}
-	else if(4 == i){
-		showPage("video");
+	else if('video' == titles[i]){//video
 		var src = window.location.host;
 		var npos = src.indexOf(":");
 
@@ -127,6 +110,8 @@ window.addEventListener('message',function(e){
 			
 			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fTV'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else if( json.event === "lamp" ){
 

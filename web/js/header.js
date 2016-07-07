@@ -81,7 +81,7 @@ function header(index)
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 
-		this.contextReport.fillStyle = "rgb(100, 100, 100)";
+		this.contextReport.fillStyle = "rgb(43, 64, 180)";
 		this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);
 		
 		var rect = {x:0, y:0, width:this.rect.width*2/3, height:this.rect.height};
