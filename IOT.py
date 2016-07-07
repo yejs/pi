@@ -6,8 +6,9 @@
 __author__ = 'yejs'
 __version__ = '1.0'
 
-from myhandler import WebHandler, WebSocket, SocketServer, Connection
-from myhandler import RPi_GPIO 
+from myhandler import WebHandler, WebSocket
+from my_socket import SocketServer, Connection
+from my_gpio import RPi_GPIO
 import os, threading
 #import RPi.GPIO as GPIO
 
