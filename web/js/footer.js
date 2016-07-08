@@ -1,17 +1,7 @@
+document.write('<script type="text/javascript" src="js/mymath.js"></script>');
+document.write('<script type="text/javascript" src="js/canvas.js"></script>');
 
 var _footer = null;
-
-var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
-
-var _font42 = "bold  42px " + _font_family;
-var _font30 = "30px " + _font_family;
-var _font25 = "25px " + _font_family;
-var _font23 = "23px " + _font_family;
-var _font20 = "20px " + _font_family;
-var _font18 = "18px " + _font_family;
-var _font16 = "16px " + _font_family;
-var _font14 = "14px " + _font_family;
-var _font12 = "12px " + _font_family;
 
 footer_title = ['首页', '设置', '关于'];
 
@@ -21,7 +11,6 @@ doInitFooter = function(canvas, index)
 	_footer.doInit(canvas);	
 	
 }
-
 
 function footer(index)
 {

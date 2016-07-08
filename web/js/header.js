@@ -5,19 +5,6 @@ document.write('<script type="text/javascript" src="js/jquery.min.js"></script>'
 
 var _header = null;
 
-var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
-
-var _font56 = "bold 56px " + _font_family;
-var _font36 = "36px " + _font_family;
-var _font25 = "25px " + _font_family;
-var _font23 = "23px " + _font_family;
-var _font20 = "20px " + _font_family;
-var _font18 = "18px " + _font_family;
-var _font16 = "16px " + _font_family;
-var _font14 = "14px " + _font_family;
-var _font12 = "12px " + _font_family;
-
-
 doInitHeader = function(canvas, index)
 {
 	_header = new header(index);

@@ -10,8 +10,10 @@ mode = "normal";
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
 
-	if(document.getElementById('lamp'))
+	if(document.getElementById('lamp')){
 		_device = new device();
+	}
+		
 	
 	var url = location.search;
 	pos = url.indexOf('dev_id');
@@ -21,14 +23,15 @@ window.onload = function(){
 }
 
 window.onresize = function(){
-	_device.onresize();
+	if(_device)
+		_device.onresize();
 }
 
 //浏览器为了效率，在页面隐藏的情况下，节点元素值改变了，显示时不会反映到界面上来，
 //这里做了个简单处理，在页面显示时重新刷新下节点元素，但是，在改为中文时也会有些问题，
 //这里先刷为别的任意值，再改为真正的元素值，看来浏览器也不是万能的，谁让咱比较聪明呢
 refresh = function(){
-	if(_device.getmessaged){
+	if(_device && _device.getmessaged){
 		document.getElementById('scene_title').innerText = mode;
 		document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
@@ -71,6 +74,36 @@ function device()
 				_device.contextImage.drawImage(img, 0, 0, img.width, img.height, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.width, 500);
 				_device.drawCurtain();
 			};
+		}
+		else if('air_conditioner' == dev_id){
+			this.contextImage.clearRect(0, 0, this.rect.width, this.rect.height);
+	
+			this.imageRect = {x:25, y:5, width:this.rect.width-50 , height:(this.rect.width-50)*5/9};
+			var btn_w = 200, btn_h = 100, offset_x = 20, offset_y = 20;
+			var y = this.imageRect.y + this.imageRect.height + offset_y;
+			this.arrayBtn[0].doResize(this.rect.width/2 - btn_w/2, y, this.rect.width/2 + btn_w/2, y + btn_h);
+			this.arrayBtn[1].doResize(this.imageRect.x + offset_x, y, this.imageRect.x + offset_x + btn_w, y+ btn_h);
+			this.arrayBtn[2].doResize(this.imageRect.x + this.imageRect.width - offset_x - btn_w, y, this.imageRect.x + this.imageRect.width - offset_x, y + btn_h);
+			
+			
+			this.contextImage.fillStyle = "rgb(141, 178, 159)";
+			this.contextImage.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
+
+			
+			this.contextImage.strokeStyle = "rgb(47, 82, 67)";
+			this.contextImage.lineWidth = 3;
+			this.contextImage.drawLine(this.imageRect.x + this.imageRect.width*2/5, this.imageRect.y, this.imageRect.x + this.imageRect.width*2/5, this.imageRect.y + this.imageRect.height);
+			this.contextImage.drawLine(this.imageRect.x, this.imageRect.y + this.imageRect.height/3, this.imageRect.x + this.imageRect.width*2/5, this.imageRect.y + this.imageRect.height/3);
+			this.contextImage.drawLine(this.imageRect.x, this.imageRect.y + this.imageRect.height*2/3, this.imageRect.x + this.imageRect.width*2/5, this.imageRect.y + this.imageRect.height*2/3);
+			
+			this.contextImage.font = _font38;
+			this.contextImage.fillStyle = this.contextImage.strokeStyle = "rgb(47, 82, 67)";
+			this.contextImage.fillText('风速', this.imageRect.x+25, this.imageRect.y + 60);
+			this.contextImage.fillText('风向', this.imageRect.x+25, this.imageRect.y + 60 + this.imageRect.height/3);
+			this.contextImage.fillText('扫风', this.imageRect.x+25, this.imageRect.y + 60 + this.imageRect.height*2/3);
+			
+			this.contextImage.font = _font56;
+			this.contextImage.fillText('℃', this.imageRect.x + this.imageRect.width-25-this.contextImage.measureText('℃').width, this.imageRect.y + 60);
 		}
 	}
 	
@@ -151,12 +184,35 @@ function device()
 			
 			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
 		}
+		else if('air_conditioner' == dev_id){
+			this.contextReport.drawImage(this.canvasImage, 0, 0);
+
+			if(this.power_on){
+				this.contextReport.font = _font106;
+				var tmp = '33'
+				this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(47, 82, 67)";
+				this.contextReport.fillText(tmp, this.imageRect.x + this.imageRect.width*2/5 + this.imageRect.width*3/10 -this.contextReport.measureText(tmp).width/2, this.imageRect.y + this.imageRect.height/2);
+			}
+			else{
+				this.contextReport.fillStyle = "rgba(10, 10, 10, .3)";
+				this.contextReport.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
+			}
+			
+			this.contextReport.fillStyle = "rgb(170, 170, 170)";
+			this.arrayBtn[0].drawBtn(this.contextReport, _font38, "rgb(0, 0, 0)", 10);
+			this.arrayBtn[1].drawBtn(this.contextReport, _font106, "rgb(0, 0, 0)", 10);
+			this.arrayBtn[2].drawBtn(this.contextReport, _font106, "rgb(0, 0, 0)", 10);
+			this.contextReport.strokeStyle = "rgb(170, 0, 0)";
+			this.contextReport.lineWidth = 5;
+			this.contextReport.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1);
+			this.contextReport.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 20,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 50);
+		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	this.onresize = function()
 	{
 		this.rect = getWinRect();
-		this.rect.height = '520';
+		this.rect.height = '720';
 		this.canvas.width = this.canvasReport.width = this.canvasImage.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.canvasImage.height = this.rect.height;
 		offset = 20;
@@ -171,6 +227,7 @@ function device()
 		this.contextReport = this.canvasReport.getContext("2d");
 		this.contextImage = this.canvasImage.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
+
 		this.setPos();
 		this.initDraw();
 		this.doDraw();
@@ -201,6 +258,38 @@ function device()
 	this.Progress = {timer:null, tick:null, pos:0};
 	this.Progress_timer = null;
 	this.Progress_tick = null;
+	
+	this.power_on = true;
+	this.imageRect = {x:0, y:0, width:0, height:0};
+	
+	this.arrayBtn = new Array();
+	for(var i=0;i<7;i++)
+	{
+		switch(i){
+			case 0:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
+			break;
+			case 1:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'+');
+			break;
+			case 2:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'-');
+			break;
+			case 3:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'模式');
+			break;
+			case 4:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'风速');
+			break;
+			case 5:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'风向');
+			break;
+			case 6:
+			this.arrayBtn[i] = new tagRECT(0,0,0,0,'扫风');
+			break;
+		}
+		
+	}
 
 	//创建双缓存
 	this.canvasReport = document.createElement("canvas");
@@ -385,7 +474,7 @@ function device()
 			
 			color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
 		//	console.log(color + ',r:' + r + ',g:' + g + ',b:' + b);
-			this.docommand(this.id, color)
+			this.docommand(this.id, color);
 		}
 		else if('curtain' == dev_id){
 			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x || !down)
@@ -396,7 +485,12 @@ function device()
 			if(-1 == command)
 				return;
 
-			this.docommand(this.id, command)
+			this.docommand(this.id, command);
+		}
+		else if('air_conditioner' == dev_id){
+			if(this.arrayBtn[0].IsInRect(loc, 0) && down){
+				this.power_on = this.power_on ? false : true;
+			}
 		}
 		this.doDraw();
 	}

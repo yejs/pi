@@ -1,6 +1,22 @@
 var _readyState_ = 4;
 var _last_timer = null;
 
+var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
+
+var _font106 = "bold 106px " + _font_family;
+var _font56 = "bold 56px " + _font_family;
+var _font42 = "bold  42px " + _font_family;
+var _font38 = "bold 36px " + _font_family;
+var _font36 = "36px " + _font_family;
+var _font30 = "30px " + _font_family;
+var _font25 = "25px " + _font_family;
+var _font23 = "23px " + _font_family;
+var _font20 = "20px " + _font_family;
+var _font18 = "18px " + _font_family;
+var _font16 = "16px " + _font_family;
+var _font14 = "14px " + _font_family;
+var _font12 = "12px " + _font_family;
+
 function loadXMLDoc(url,cfunc,param){
 /*	if (url.indexOf("t=") < 0){
 		var timeStamp = (new Date()).valueOf();

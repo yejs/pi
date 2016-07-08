@@ -106,8 +106,8 @@ CanvasRenderingContext2D.prototype.arcEx = function (x, y, r, sAngle, eAngle, co
 	this.moveTo(pt.x, pt.y); 
 	this.arc(x, y, r, sAngle, eAngle, counterclockwise);
 	if(eAngle - sAngle < Math.PI*2){
-		this.lineTo(x, y);
-		this.closePath();
+	//	this.lineTo(x, y);
+	//	this.closePath();
 	}
 		
 	if (stroke) {  
@@ -322,7 +322,7 @@ function tagRECT(left, top, right, bottom, title1, title2, tips)
 		s = this.title[this.onclick && this.title[1] != ''? 1 : 0];
 		ctx.font = font;
 		ctx.textBaseline="middle";
-		ctx.fillText(s, this.left + this.width/2 - ctx.measureText(s).width/2, this.top + this.height/2);
+		ctx.fillText(s, this.left + this.width/2 - ctx.measureText(s).width/2, this.top + this.height/2 - 10);
 		ctx.restore(); 	
 	}
 	
