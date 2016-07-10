@@ -18,8 +18,8 @@ import logging
 from data import _DEVICE_, _LAMP_ , _CURTAIN_
 import threading
 import time
-
-
+from my_gpio import RPi_GPIO
+from g_data import mode
 
 class Connection(object):    
     heart_beat_init = False
@@ -28,9 +28,9 @@ class Connection(object):
     output_param = list()#{"ip": "", "pin": "", "item": None}
     time_tick = 0
     timer = None
+    sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
     def __init__(self, stream, address):   
-        global sock
-        sock = self
+        Connection.sock = self
         Connection.clients.add(self)   
         self._stream = stream    
         self._address = address    
@@ -122,7 +122,6 @@ class Connection(object):
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 try:
-                    print('outputex: %s , len: %d' % (pin, l))
                     conn._stream.write(msg.encode())
                 except:
                     logging.error('Error sending message', exc_info=True)	

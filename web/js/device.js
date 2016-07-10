@@ -72,18 +72,24 @@ function device()
 			img.onload = function(){
 				var offset = _device.bar1.height/2 - 5
 				_device.contextImage.drawImage(img, 0, 0, img.width, img.height, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.width, 500);
-				_device.drawCurtain();
+				_device.drawCurtainImage();
 			};
 		}
 		else if('air_conditioner' == dev_id){
 			this.contextImage.clearRect(0, 0, this.rect.width, this.rect.height);
 	
-			this.imageRect = {x:25, y:5, width:this.rect.width-50 , height:(this.rect.width-50)*5/9};
-			var btn_w = 200, btn_h = 100, offset_x = 20, offset_y = 20;
+			this.imageRect = {x:25, y:5, width:this.rect.width-50 , height:(this.rect.width-50)*9/18};
+			var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 40;
 			var y = this.imageRect.y + this.imageRect.height + offset_y;
 			this.arrayBtn[0].doResize(this.rect.width/2 - btn_w/2, y, this.rect.width/2 + btn_w/2, y + btn_h);
 			this.arrayBtn[1].doResize(this.imageRect.x + offset_x, y, this.imageRect.x + offset_x + btn_w, y+ btn_h);
 			this.arrayBtn[2].doResize(this.imageRect.x + this.imageRect.width - offset_x - btn_w, y, this.imageRect.x + this.imageRect.width - offset_x, y + btn_h);
+			
+			var s = ((this.imageRect.x + this.imageRect.width - offset_x - btn_w) - (this.imageRect.x + offset_x))/3;
+			y += 130;
+			for(var i=3;i<this.arrayBtn.length;i++){
+				this.arrayBtn[i].doResize(this.imageRect.x + offset_x + (i-3)*s, y, this.imageRect.x + offset_x + (i-3)*s + btn_w, y + btn_h);
+			}
 			
 			
 			this.contextImage.fillStyle = "rgb(141, 178, 159)";
@@ -107,8 +113,7 @@ function device()
 		}
 	}
 	
-	this.drawCurtain = function()
-	{
+	this.drawCurtainImage = function(){
 		var w = this.bar1.pos*this.bar1.width/200;
 		var offset = this.bar1.height/2 + 25;
 			
@@ -118,97 +123,199 @@ function device()
 		this.ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
 	}
 	
-	this.doDraw = function()
-	{
+	this.doDraw = function(){
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 
 		if("lamp" == dev_id){
-			var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
-			var offset = this.bar1.height/2 - 5, r = 5, h = 10;
-			//滚动条的左半部分
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
-			this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
-			this.contextReport.roundRect(this.bar2.x, this.bar2.y+offset, pos2, h, r, 1, 0);
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
-			this.contextReport.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
-			
-			//滚动条的右半部分
-			this.contextReport.fillStyle = "rgb(220, 220, 220)";
-			this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
-			this.contextReport.roundRect(this.bar2.x + pos2, this.bar2.y+offset, this.bar2.width - pos2, h, r, 1, 0);
-			this.contextReport.roundRect(this.bar3.x + pos3, this.bar3.y+offset, this.bar3.width - pos3, h, r, 1, 0);
-			
-			//滚动条的拖动按钮部分
-			r = this.bar1.height/4;
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
-			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
-			this.contextReport.roundRect(this.bar2.x + pos2 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
-			this.contextReport.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
-			
-			//七彩条状滚动条
-			this.contextReport.beginPath();
-			var width = this.bar0.width/45;
-			for(var i=0;i<45;i++)
-				this.contextReport.roundRect2(this.bar0.x + i*width, this.bar0.y, width - 4, this.bar0.height, 8, 0, 0);
-			this.contextReport.closePath();
-			var grd=this.contextReport.createLinearGradient(this.bar0.x,this.bar0.y,this.bar0.width,0); //颜色渐变的起始坐标和终点坐标
-			grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
-			grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
-			grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
-			grd.addColorStop(0.75, "rgba(0, 255, 255, 1)");
-			grd.addColorStop(1, "rgba(0, 0, 255, 1)");
-			this.contextReport.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
-			this.contextReport.fill();
+			this.drawLamp(this.contextReport);
 		}
 		else if('curtain' == dev_id){
-			var pos1 = this.bar1.pos*this.bar1.width/200;
-			var offset = this.bar1.height/2 - 5, r = 5, h = 10;
-			
-			//滚动条的左半部分
-			this.contextReport.fillStyle = "rgb(220, 0, 0)";
-			this.contextReport.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
-
-			//滚动条的右半部分
-			this.contextReport.fillStyle = "rgb(220, 220, 220)";
-			this.contextReport.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
-
-			//滚动条的拖动按钮部分
-			r = this.bar1.height/4;
-			this.contextReport.fillStyle = "rgba(120, 0, 0, 0.5)";
-			
-			this.drawCurtain();
-			
-			this.contextReport.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
+			this.drawCurtain(this.contextReport);
 		}
 		else if('air_conditioner' == dev_id){
-			this.contextReport.drawImage(this.canvasImage, 0, 0);
-
-			if(this.power_on){
-				this.contextReport.font = _font106;
-				var tmp = '33'
-				this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(47, 82, 67)";
-				this.contextReport.fillText(tmp, this.imageRect.x + this.imageRect.width*2/5 + this.imageRect.width*3/10 -this.contextReport.measureText(tmp).width/2, this.imageRect.y + this.imageRect.height/2);
-			}
-			else{
-				this.contextReport.fillStyle = "rgba(10, 10, 10, .3)";
-				this.contextReport.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
-			}
-			
-			this.contextReport.fillStyle = "rgb(170, 170, 170)";
-			this.arrayBtn[0].drawBtn(this.contextReport, _font38, "rgb(0, 0, 0)", 10);
-			this.arrayBtn[1].drawBtn(this.contextReport, _font106, "rgb(0, 0, 0)", 10);
-			this.arrayBtn[2].drawBtn(this.contextReport, _font106, "rgb(0, 0, 0)", 10);
-			this.contextReport.strokeStyle = "rgb(170, 0, 0)";
-			this.contextReport.lineWidth = 5;
-			this.contextReport.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1);
-			this.contextReport.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 20,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 50);
+			this.drawAir(this.contextReport);
 		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
+	
+	this.drawLamp = function(ctx){
+		var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
+		var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+		//滚动条的左半部分
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
+		ctx.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
+		ctx.roundRect(this.bar2.x, this.bar2.y+offset, pos2, h, r, 1, 0);
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
+		ctx.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
+		
+		//滚动条的右半部分
+		ctx.fillStyle = "rgb(220, 220, 220)";
+		ctx.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
+		ctx.roundRect(this.bar2.x + pos2, this.bar2.y+offset, this.bar2.width - pos2, h, r, 1, 0);
+		ctx.roundRect(this.bar3.x + pos3, this.bar3.y+offset, this.bar3.width - pos3, h, r, 1, 0);
+		
+		//滚动条的拖动按钮部分
+		r = this.bar1.height/4;
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		ctx.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		ctx.roundRect(this.bar2.x + pos2 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		ctx.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
+		
+		//七彩条状滚动条
+		ctx.beginPath();
+		var width = this.bar0.width/45;
+		for(var i=0;i<45;i++)
+			ctx.roundRect2(this.bar0.x + i*width, this.bar0.y, width - 4, this.bar0.height, 8, 0, 0);
+		ctx.closePath();
+		var grd=ctx.createLinearGradient(this.bar0.x,this.bar0.y,this.bar0.width,0); //颜色渐变的起始坐标和终点坐标
+		grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
+		grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
+		grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
+		grd.addColorStop(0.75, "rgba(0, 255, 255, 1)");
+		grd.addColorStop(1, "rgba(0, 0, 255, 1)");
+		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
+		ctx.fill();
+	}
+	
+	this.drawCurtain = function(ctx){
+		var pos1 = this.bar1.pos*this.bar1.width/200;
+		var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+		
+		//滚动条的左半部分
+		ctx.fillStyle = "rgb(220, 0, 0)";
+		ctx.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
+
+		//滚动条的右半部分
+		ctx.fillStyle = "rgb(220, 220, 220)";
+		ctx.roundRect(this.bar1.x + pos1, this.bar1.y+offset, this.bar1.width - pos1, h, r, 1, 0);
+
+		//滚动条的拖动按钮部分
+		r = this.bar1.height/4;
+		ctx.fillStyle = "rgba(120, 0, 0, 0.5)";
+
+		ctx.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
+		
+		this.drawCurtainImage();
+	}
+	
+	this.drawAir = function(ctx){
+		ctx.drawImage(this.canvasImage, 0, 0);
+
+//this.air = {power_on:true, mode:'heat', speed:1, direction:0, swept:1, temperature:16, temp_true:24}
+		air_mode = {heat:'制热模式', cold:'制冷模式', dehumidify:'除湿模式', blowing:'通风模式', sleep:'睡眠模式', energy:'节能模式', health:'健康模式'};
+		if(this.air.power_on){//电源打开显示
+			ctx.fillStyle = ctx.strokeStyle = "rgb(47, 82, 67)";
+			
+			ctx.font = _font106;
+			var tmp = this.air.temp_true;	//实际温度
+			ctx.fillText(tmp, this.imageRect.x + this.imageRect.width*2/5 + this.imageRect.width*3/10 -ctx.measureText(tmp).width/2, this.imageRect.y + this.imageRect.height/2);
+			ctx.font = _font38;
+			tmp = this.air.temperature;		//设定温度
+			ctx.fillText(tmp, this.imageRect.x + this.imageRect.width-25- ctx.measureText(tmp + '   ℃').width, this.imageRect.y + 60);
+			tmp = air_mode[this.air.mode];	//模式选择
+			ctx.fillText(tmp, this.imageRect.x + this.imageRect.width*2/5 + this.imageRect.width*3/10 -ctx.measureText(tmp).width/2, this.imageRect.y + this.imageRect.height/2 + 120);
+			
+			var offset = this.imageRect.height*2/9 + 13, step = 12;
+			var x = this.imageRect.x + this.imageRect.width/5, y = this.imageRect.y + offset;
+			//画风速
+			ctx.lineWidth = 2;
+			for(var i=0;i<5;i++){
+				if(this.air.speed>i)
+					ctx.fillRect(x + i*20, y - (i+1)*step, 12, (i+1)*step);
+				else
+					ctx.strokeRectEx(x + i*20, y - (i+1)*step + 2, 10, (i+1)*step - 4);
+			//	ctx.fillStyle = ctx.strokeStyle = (this.air.speed>i ? "rgb(47, 82, 67)" : "rgb(150, 150, 150)");
+			//	ctx.drawLine(x + i*20, y, x + i*20, y - (i+1)*step);
+			}
+
+			
+			
+			
+			//画上下风向
+			y += this.imageRect.height/3;
+
+			ctx.save();//保存状态
+			ctx.translate(x + 80, y - 80);//原点移到x,y处，即要画的多边形中心
+			
+			for(var i=1;i<=4;i++){
+				var ang = (180-(i-1)*30)*Math.PI*2/360;
+				ctx.rotate(ang);//旋转
+				ctx.beginPath();
+				ctx.fillStyle = ctx.strokeStyle = (i == this.air.up_down.direction ? "rgb(47, 82, 67)" : "rgb(150, 150, 150)");
+				ctx.lineWidth = 5;
+				ctx.moveTo(20, 0);//据中心r距离处画点
+				ctx.lineTo(78, 0);//据中心r距离处连线
+				ctx.stroke(); 
+				
+				ctx.beginPath();
+				ctx.lineWidth = 2;
+				ctx.moveTo(70, -5);
+				ctx.lineTo(70, 5);
+				ctx.lineTo(80, 0);
+				ctx.lineTo(70, -5);
+				ctx.stroke(); 
+				ctx.rotate(-ang);
+			}
+			ctx.restore();//返回原始状态
+			
+			//画左右扫风
+			x = this.imageRect.x + this.imageRect.width/6;
+			y += this.imageRect.height/3;
+			ctx.lineWidth = 5;
+			ctx.drawLine(x + 20, y - 80, x + 140, y - 80);
+
+			ctx.save();//保存状态
+			ctx.translate(x + 80, y - 80);//原点移到x,y处，即要画的多边形中心
+			
+			for(var i=1;i<=5;i++){
+				var ang = (180-(i)*30)*Math.PI*2/360;
+				ctx.rotate(ang);//旋转
+				ctx.beginPath();
+				ctx.fillStyle = ctx.strokeStyle = (i == this.air.left_right.direction ? "rgb(47, 82, 67)" : "rgb(150, 150, 150)");
+				ctx.lineWidth = 5;
+				ctx.moveTo(20, 0);//据中心r距离处画点
+				ctx.lineTo(78, 0);//据中心r距离处连线
+				ctx.stroke(); 
+				
+				ctx.beginPath();
+				ctx.lineWidth = 2;
+				ctx.moveTo(70, -5);
+				ctx.lineTo(70, 5);
+				ctx.lineTo(80, 0);
+				ctx.lineTo(70, -5);
+				ctx.stroke(); 
+				ctx.rotate(-ang);
+			}
+			ctx.restore();//返回原始状态
+		}
+		else{//电源关闭显示
+			ctx.fillStyle = "rgba(10, 10, 10, .3)";
+			ctx.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
+		}
+		
+		//画按钮
+		for(var i=0;i<this.arrayBtn.length;i++){
+			if(this.arrayBtn[i].istouch)
+				ctx.fillStyle = "rgb(230, 100, 100)";
+			else
+				ctx.fillStyle = "rgb(170, 170, 170)";
+			
+			if(i == 1 || i == 2)
+				this.arrayBtn[i].drawBtn(ctx, _font56, "rgb(0, 0, 0)", 10);
+			else
+				this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
+		}
+		//画电源按钮
+		ctx.strokeStyle = this.air.power_on ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
+		ctx.lineWidth = 5;
+		ctx.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1);
+		ctx.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 15,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 30);
+	}
+	
 	this.onresize = function()
 	{
 		this.rect = getWinRect();
@@ -247,7 +354,7 @@ function device()
 			this.bar1.pos = _CURTAIN_[mode][this.id]['progress'];
 		}
 	}
-	
+	this.touch_tmp = null;
 	this.rect = null;
 	this.bar0 = null;
 	this.bar1 = null;
@@ -259,7 +366,7 @@ function device()
 	this.Progress_timer = null;
 	this.Progress_tick = null;
 	
-	this.power_on = true;
+	this.air = {power_on:true, mode:'heat', speed:1, up_down:{direction:1, swept:0, swept_flag:0, timer:null}, left_right:{direction:1, swept:0, swept_flag:0, timer:null}, temperature:24, temp_true:24};
 	this.imageRect = {x:0, y:0, width:0, height:0};
 	
 	this.arrayBtn = new Array();
@@ -432,7 +539,6 @@ function device()
 			this.bar1.isdown = false;
 			this.bar2.isdown = false;
 			this.bar3.isdown = false;
-			return;
 		}
 		if(mouse){
 			var x = event.pageX; 
@@ -441,6 +547,14 @@ function device()
 		}
 		else if(!mouse){
 			var touch = event.targetTouches[0];
+			
+			if(event.targetTouches.length == 0 && up)
+				var touch = this.touch_tmp;
+			else
+				this.touch_tmp = touch;
+
+			
+			
 			var x = touch.pageX; 
 			var y = touch.pageY; 
 			var canvas = touch.target; 
@@ -488,11 +602,146 @@ function device()
 			this.docommand(this.id, command);
 		}
 		else if('air_conditioner' == dev_id){
-			if(this.arrayBtn[0].IsInRect(loc, 0) && down){
-				this.power_on = this.power_on ? false : true;
+			if(down){
+				for(var i=0;i<this.arrayBtn.length;i++){
+					if(this.arrayBtn[i].IsInRect(loc, 0) && (i == 0 || (i!= 0 && this.air.power_on))){
+						if((1 == i && this.air.temperature == 30) || (2 == i && this.air.temperature == 16))
+							return;
+						this.arrayBtn[i].istouch = true;
+					//	break;
+					}
+				}
+			}
+			else if(up){
+
+				for(var i=0;i<this.arrayBtn.length;i++){
+					this.arrayBtn[i].istouch = false;
+				}
+				
+				if(this.arrayBtn[0].IsInRect(loc, 0)){//power
+					this.air.power_on = this.air.power_on ? false : true;
+					this.doBtnFocus(0);
+				}
+				else if(this.arrayBtn[1].IsInRect(loc, 0) && this.air.power_on){//+
+					if(this.air.temperature < 30){
+						this.air.temperature++;
+					//	this.doBtnFocus(1);
+					}
+					else
+						return;
+				}
+				else if(this.arrayBtn[2].IsInRect(loc, 0) && this.air.power_on){//-
+					if(this.air.temperature > 16){
+						this.air.temperature--;
+					//	this.doBtnFocus(2);
+					}
+					else
+						return;
+				}
+				else if(this.arrayBtn[3].IsInRect(loc, 0) && this.air.power_on){//mode
+					if(this.air.mode == 'heat')
+						this.air.mode = 'cold';
+					else if(this.air.mode == 'cold')
+						this.air.mode = 'dehumidify';
+					else if(this.air.mode == 'dehumidify')
+						this.air.mode = 'blowing';
+					else if(this.air.mode == 'blowing')
+						this.air.mode = 'sleep';
+					else if(this.air.mode == 'sleep')
+						this.air.mode = 'energy';
+					else if(this.air.mode == 'energy')
+						this.air.mode = 'health';
+					else if(this.air.mode == 'health')
+						this.air.mode = 'heat';
+					
+					this.doBtnFocus(3);
+				}
+				else if(this.arrayBtn[4].IsInRect(loc, 0) && this.air.power_on){//speed
+					if(this.air.speed < 5)
+						this.air.speed++;
+					else if(this.air.speed == 5)
+						this.air.speed = 1;
+					
+					this.doBtnFocus(4);
+				}
+				else if(this.arrayBtn[5].IsInRect(loc, 0) && this.air.power_on){//up_down
+			
+					this.air.up_down.swept = this.air.up_down.swept ? 0 : 1;
+					
+					if(this.air.up_down.timer)
+						clearInterval(this.air.up_down.timer);
+					
+					if(this.air.up_down.swept){
+
+						this.air.up_down.timer = setInterval(function() {
+							if(_device.air.up_down.swept_flag == 0){
+								if(_device.air.up_down.direction < 4)
+									_device.air.up_down.direction++;
+								else if(_device.air.up_down.direction == 4){
+									_device.air.up_down.direction = 3;
+									_device.air.up_down.swept_flag = 1;
+								}
+							}
+							else{
+								if(_device.air.up_down.direction > 1)
+									_device.air.up_down.direction--;
+								else if(_device.air.up_down.direction == 1){
+									_device.air.up_down.direction = 2;
+									_device.air.up_down.swept_flag = 0;
+								}
+							}
+							_device.doDraw();
+						},1000);
+					}
+
+					this.doBtnFocus(5);
+				
+				}
+				else if(this.arrayBtn[6].IsInRect(loc, 0) && this.air.power_on){//left_right
+					this.air.left_right.swept = this.air.left_right.swept ? 0 : 1;
+					
+					if(this.air.left_right.timer)
+						clearInterval(this.air.left_right.timer);
+					
+					if(this.air.left_right.swept){
+
+						this.air.left_right.timer = setInterval(function() {
+							if(_device.air.left_right.swept_flag == 0){
+								if(_device.air.left_right.direction < 5)
+									_device.air.left_right.direction++;
+								else if(_device.air.left_right.direction == 5){
+									_device.air.left_right.direction = 4;
+									_device.air.left_right.swept_flag = 1;
+								}
+							}
+							else{
+								if(_device.air.left_right.direction > 1)
+									_device.air.left_right.direction--;
+								else if(_device.air.left_right.direction == 1){
+									_device.air.left_right.direction = 2;
+									_device.air.left_right.swept_flag = 0;
+								}
+							}
+							_device.doDraw();
+						},1000);
+					}
+					
+					this.doBtnFocus(6);
+				}
 			}
 		}
 		this.doDraw();
+	}
+	
+
+	
+	this.doBtnFocus = function(id) { 
+		for(var i=0;i<this.arrayBtn.length;i++){
+			if(i == id)
+				this.arrayBtn[i].onclick = true;
+			else
+				this.arrayBtn[i].onclick = false;
+		}
 	}
 
 	this.doMouseDown = function(event, mouse) { 
@@ -677,7 +926,7 @@ function device()
 				return;
 			}
 			else{
-				//调窗帘开合进度
+
 			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
 			return;//TODO
 			}

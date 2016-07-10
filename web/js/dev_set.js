@@ -139,11 +139,11 @@ function dev_set()
 		if(document.getElementById('IP').value.length>0)
 			_DEVICE_[this.dev_id][this.id]['ip'] = document.getElementById('IP').value; 
 		
-		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[this.dev_id][id].hasOwnProperty('GPIO'))
+		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('GPIO'))
 			_DEVICE_[this.dev_id][this.id]['pin'] = document.getElementById('GPIO').value; 
 		
-		if(document.getElementById('length').value.length>0 && _DEVICE_[this.dev_id][id].hasOwnProperty('length'))
-			_DEVICE_[this.dev_id][this.id]['length'] = document.getElementById('length').value; 
+		if(document.getElementById('length').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('length'))
+			_DEVICE_[this.dev_id][this.id]['length'] = parseFloat(document.getElementById('length').value); 
 		
 		_DEVICE_[this.dev_id][this.id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
 		

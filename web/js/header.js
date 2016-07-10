@@ -3,6 +3,9 @@ document.write('<script type="text/javascript" src="js/canvas.js"></script>');
 document.write('<script type="text/javascript" src="js/data.js"></script>');
 document.write('<script type="text/javascript" src="js/jquery.min.js"></script>');
 
+var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
+var _font36 = "36px " + _font_family;
+
 var _header = null;
 
 doInitHeader = function(canvas, index)

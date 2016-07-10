@@ -146,6 +146,7 @@ CanvasRenderingContext2D.prototype.drawLineEx = function (point) {
 	this.restore(); 
 }
 
+
 CanvasRenderingContext2D.prototype.strokeRectEx = function (x, y, w, h) {
 	this.save(); 
 	this.translate(0.5,0.5); 
@@ -318,11 +319,11 @@ function tagRECT(left, top, right, bottom, title1, title2, tips)
 	{ 
 		ctx.save();//保存状态
 		ctx.roundRect(this.left, this.top, this.width, this.height, r, 1, 0);
-		ctx.fillStyle = ctx.strokeStyle = textColor;
+		ctx.fillStyle = ctx.strokeStyle = this.onclick ? "rgb(30, 30, 255)" : textColor;
 		s = this.title[this.onclick && this.title[1] != ''? 1 : 0];
 		ctx.font = font;
 		ctx.textBaseline="middle";
-		ctx.fillText(s, this.left + this.width/2 - ctx.measureText(s).width/2, this.top + this.height/2 - 10);
+		ctx.fillText(s, this.left + this.width/2 - ctx.measureText(s).width/2, this.top + this.height/2 - 0);
 		ctx.restore(); 	
 	}
 	

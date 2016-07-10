@@ -9,7 +9,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['灯光', '窗帘', '空调', '电视', '场景模式', '小车', '视频监控'];
+	var _title = ['灯光', '窗帘', '空调', '电视', '场景模式', '视频监控'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -32,7 +32,7 @@ window.onload = function(){
 
 }
 
-var titles = ["lamp", "curtain", "air_conditioner", "TV", "scene", "car", "video"];
+var titles = ["lamp", "curtain", "air_conditioner", "TV", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
 		if(titles[i] === title)

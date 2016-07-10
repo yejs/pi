@@ -16,18 +16,13 @@ import json
 import base64
 import urllib
 import logging
-from data import _DEVICE_, _LAMP_ , _CURTAIN_
 import threading
 import time
 
 from my_gpio import RPi_GPIO
 from my_socket import SocketServer, Connection
-
-sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
-mode = 'normal'
-last_mode = 'normal'
-lamp_id = '1'
-curtain_id = '1'
+from data import _DEVICE_, _LAMP_ , _CURTAIN_
+from g_data import mode, last_mode , lamp_id, curtain_id
 
 		
 class WebSocket(tornado.websocket.WebSocketHandler):
@@ -149,8 +144,7 @@ class WebHandler(tornado.web.RequestHandler):
 	
     #硬件层输出（GPIO 或 socket到硬件终端）
     def output(dev_id, id, key, value):
-        global sock
-		
+
         if dev_id == 'lamp':
             item = _LAMP_[mode][id]
         elif dev_id == 'curtain':
@@ -173,8 +167,8 @@ class WebHandler(tornado.web.RequestHandler):
             if _DEVICE_[dev_id][id].get('pin'):
                 RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
 
-            if sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
-                sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
+            if Connection.sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
+                Connection.sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
 				
     def lamp(post_data):
         global mode
@@ -249,7 +243,7 @@ class WebHandler(tornado.web.RequestHandler):
                     continue
                 WebHandler.output('curtain', id, 'command', command)
 				
-                length = int(_DEVICE_['curtain'][id]['length']);
+                length = float(_DEVICE_['curtain'][id]['length']);
                 n = float(abs(last_progress - progress)*length/100)/0.2
                 #print("last_progress:%s progress:%s length:%s, f:%s" %(last_progress, progress, length, n))
                 timer = threading.Timer(n, WebHandler.output, ('curtain', id, 'command', 'stop', ))#延时停止输出
