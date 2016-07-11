@@ -205,18 +205,19 @@ function device()
 	this.drawAir = function(ctx){
 		ctx.drawImage(this.canvasImage, 0, 0);
 
-//this.air = {power_on:true, mode:'heat', speed:1, direction:0, swept:1, temperature:16, temp_true:24}
+		air_item = _AIR_CONDITIONER_[mode][this.id];
+		
 		air_mode = {heat:'制热模式', cold:'制冷模式', dehumidify:'除湿模式', blowing:'通风模式', sleep:'睡眠模式', energy:'节能模式', health:'健康模式'};
-		if(this.air.power_on){//电源打开显示
+		if(air_item.power_on){//电源打开显示
 			ctx.fillStyle = ctx.strokeStyle = "rgb(47, 82, 67)";
 			
 			ctx.font = _font106;
-			var tmp = this.air.temp_true;	//实际温度
+			var tmp = air_item.temp_true;	//实际温度
 			ctx.fillText(tmp, this.imageRect.x + this.imageRect.width*2/5 + this.imageRect.width*3/10 -ctx.measureText(tmp).width/2, this.imageRect.y + this.imageRect.height/2);
 			ctx.font = _font38;
-			tmp = this.air.temperature;		//设定温度
+			tmp = air_item.temp_set;		//设定温度
 			ctx.fillText(tmp, this.imageRect.x + this.imageRect.width-25- ctx.measureText(tmp + '   ℃').width, this.imageRect.y + 60);
-			tmp = air_mode[this.air.mode];	//模式选择
+			tmp = air_mode[air_item.mode];	//模式选择
 			ctx.fillText(tmp, this.imageRect.x + this.imageRect.width*2/5 + this.imageRect.width*3/10 -ctx.measureText(tmp).width/2, this.imageRect.y + this.imageRect.height/2 + 120);
 			
 			var offset = this.imageRect.height*2/9 + 13, step = 12;
@@ -224,17 +225,14 @@ function device()
 			//画风速
 			ctx.lineWidth = 2;
 			for(var i=0;i<5;i++){
-				if(this.air.speed>i)
+				if(air_item.speed>i)
 					ctx.fillRect(x + i*20, y - (i+1)*step, 12, (i+1)*step);
 				else
 					ctx.strokeRectEx(x + i*20, y - (i+1)*step + 2, 10, (i+1)*step - 4);
-			//	ctx.fillStyle = ctx.strokeStyle = (this.air.speed>i ? "rgb(47, 82, 67)" : "rgb(150, 150, 150)");
+			//	ctx.fillStyle = ctx.strokeStyle = (air_item.speed>i ? "rgb(47, 82, 67)" : "rgb(150, 150, 150)");
 			//	ctx.drawLine(x + i*20, y, x + i*20, y - (i+1)*step);
 			}
 
-			
-			
-			
 			//画上下风向
 			y += this.imageRect.height/3;
 
@@ -310,7 +308,7 @@ function device()
 				this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
 		}
 		//画电源按钮
-		ctx.strokeStyle = this.air.power_on ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
+		ctx.strokeStyle = air_item.power_on ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
 		ctx.lineWidth = 5;
 		ctx.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1);
 		ctx.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 15,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 30);
@@ -366,7 +364,8 @@ function device()
 	this.Progress_timer = null;
 	this.Progress_tick = null;
 	
-	this.air = {power_on:true, mode:'heat', speed:1, up_down:{direction:1, swept:0, swept_flag:0, timer:null}, left_right:{direction:1, swept:0, swept_flag:0, timer:null}, temperature:24, temp_true:24};
+	this.air = {'up_down':{'direction':1, 'swept_flag':0, 'timer':null}, 'left_right':{'direction':1, 'swept_flag':0, 'timer':null}};
+
 	this.imageRect = {x:0, y:0, width:0, height:0};
 	
 	this.arrayBtn = new Array();
@@ -553,8 +552,6 @@ function device()
 			else
 				this.touch_tmp = touch;
 
-			
-			
 			var x = touch.pageX; 
 			var y = touch.pageY; 
 			var canvas = touch.target; 
@@ -602,10 +599,12 @@ function device()
 			this.docommand(this.id, command);
 		}
 		else if('air_conditioner' == dev_id){
+				
+			air_item = _AIR_CONDITIONER_[mode][this.id];
 			if(down){
 				for(var i=0;i<this.arrayBtn.length;i++){
-					if(this.arrayBtn[i].IsInRect(loc, 0) && (i == 0 || (i!= 0 && this.air.power_on))){
-						if((1 == i && this.air.temperature == 30) || (2 == i && this.air.temperature == 16))
+					if(this.arrayBtn[i].IsInRect(loc, 0) && (i == 0 || (i!= 0 && air_item.power_on))){
+						if((1 == i && air_item.temp_set == 30) || (2 == i && air_item.temp_set == 16))
 							return;
 						this.arrayBtn[i].istouch = true;
 					//	break;
@@ -619,112 +618,69 @@ function device()
 				}
 				
 				if(this.arrayBtn[0].IsInRect(loc, 0)){//power
-					this.air.power_on = this.air.power_on ? false : true;
+					air_item.power_on = air_item.power_on ? false : true;
+					this.docommand(this.id, air_item.power_on ? 'power_on' : 'power_off');
 					this.doBtnFocus(0);
 				}
-				else if(this.arrayBtn[1].IsInRect(loc, 0) && this.air.power_on){//+
-					if(this.air.temperature < 30){
-						this.air.temperature++;
+				else if(this.arrayBtn[1].IsInRect(loc, 0) && air_item.power_on){//+
+					if(air_item.temp_set < 30){
+						air_item.temp_set++;
+						this.docommand(this.id, 'temp_inc');
 					//	this.doBtnFocus(1);
 					}
 					else
 						return;
 				}
-				else if(this.arrayBtn[2].IsInRect(loc, 0) && this.air.power_on){//-
-					if(this.air.temperature > 16){
-						this.air.temperature--;
+				else if(this.arrayBtn[2].IsInRect(loc, 0) && air_item.power_on){//-
+					if(air_item.temp_set > 16){
+						air_item.temp_set--;
+						this.docommand(this.id, 'temp_dec');
 					//	this.doBtnFocus(2);
 					}
 					else
 						return;
 				}
-				else if(this.arrayBtn[3].IsInRect(loc, 0) && this.air.power_on){//mode
-					if(this.air.mode == 'heat')
-						this.air.mode = 'cold';
-					else if(this.air.mode == 'cold')
-						this.air.mode = 'dehumidify';
-					else if(this.air.mode == 'dehumidify')
-						this.air.mode = 'blowing';
-					else if(this.air.mode == 'blowing')
-						this.air.mode = 'sleep';
-					else if(this.air.mode == 'sleep')
-						this.air.mode = 'energy';
-					else if(this.air.mode == 'energy')
-						this.air.mode = 'health';
-					else if(this.air.mode == 'health')
-						this.air.mode = 'heat';
-					
+				else if(this.arrayBtn[3].IsInRect(loc, 0) && air_item.power_on){//mode
+					if(air_item.mode == 'heat')
+						air_item.mode = 'cold';
+					else if(air_item.mode == 'cold')
+						air_item.mode = 'dehumidify';
+					else if(air_item.mode == 'dehumidify')
+						air_item.mode = 'blowing';
+					else if(air_item.mode == 'blowing')
+						air_item.mode = 'sleep';
+					else if(air_item.mode == 'sleep')
+						air_item.mode = 'energy';
+					else if(air_item.mode == 'energy')
+						air_item.mode = 'health';
+					else if(air_item.mode == 'health')
+						air_item.mode = 'heat';
+					this.docommand(this.id, 'mode_' + air_item.mode);
 					this.doBtnFocus(3);
 				}
-				else if(this.arrayBtn[4].IsInRect(loc, 0) && this.air.power_on){//speed
-					if(this.air.speed < 5)
-						this.air.speed++;
-					else if(this.air.speed == 5)
-						this.air.speed = 1;
-					
+				
+				else if(this.arrayBtn[4].IsInRect(loc, 0) && air_item.power_on){//speed
+					if(air_item.speed < 5)
+						air_item.speed++;
+					else if(air_item.speed == 5)
+						air_item.speed = 1;
+					this.docommand(this.id, 'speed_' + air_item.speed);
 					this.doBtnFocus(4);
 				}
-				else if(this.arrayBtn[5].IsInRect(loc, 0) && this.air.power_on){//up_down
-			
-					this.air.up_down.swept = this.air.up_down.swept ? 0 : 1;
-					
-					if(this.air.up_down.timer)
-						clearInterval(this.air.up_down.timer);
-					
-					if(this.air.up_down.swept){
+				else if(this.arrayBtn[5].IsInRect(loc, 0) && air_item.power_on){//up_down
+					air_item.up_down_swept = air_item.up_down_swept ? 0 : 1;
+					this.docommand(this.id, 'up_down_swept_' + air_item.up_down_swept);
 
-						this.air.up_down.timer = setInterval(function() {
-							if(_device.air.up_down.swept_flag == 0){
-								if(_device.air.up_down.direction < 4)
-									_device.air.up_down.direction++;
-								else if(_device.air.up_down.direction == 4){
-									_device.air.up_down.direction = 3;
-									_device.air.up_down.swept_flag = 1;
-								}
-							}
-							else{
-								if(_device.air.up_down.direction > 1)
-									_device.air.up_down.direction--;
-								else if(_device.air.up_down.direction == 1){
-									_device.air.up_down.direction = 2;
-									_device.air.up_down.swept_flag = 0;
-								}
-							}
-							_device.doDraw();
-						},1000);
-					}
-
+					this.doSwept();
+					
 					this.doBtnFocus(5);
 				
 				}
-				else if(this.arrayBtn[6].IsInRect(loc, 0) && this.air.power_on){//left_right
-					this.air.left_right.swept = this.air.left_right.swept ? 0 : 1;
+				else if(this.arrayBtn[6].IsInRect(loc, 0) && air_item.power_on){//left_right
+					air_item.left_right_swept = air_item.left_right_swept ? 0 : 1;
+					this.docommand(this.id, 'left_right_swept_' + air_item.left_right_swept);
 					
-					if(this.air.left_right.timer)
-						clearInterval(this.air.left_right.timer);
-					
-					if(this.air.left_right.swept){
-
-						this.air.left_right.timer = setInterval(function() {
-							if(_device.air.left_right.swept_flag == 0){
-								if(_device.air.left_right.direction < 5)
-									_device.air.left_right.direction++;
-								else if(_device.air.left_right.direction == 5){
-									_device.air.left_right.direction = 4;
-									_device.air.left_right.swept_flag = 1;
-								}
-							}
-							else{
-								if(_device.air.left_right.direction > 1)
-									_device.air.left_right.direction--;
-								else if(_device.air.left_right.direction == 1){
-									_device.air.left_right.direction = 2;
-									_device.air.left_right.swept_flag = 0;
-								}
-							}
-							_device.doDraw();
-						},1000);
-					}
+					this.doSwept();
 					
 					this.doBtnFocus(6);
 				}
@@ -733,6 +689,57 @@ function device()
 		this.doDraw();
 	}
 	
+	this.doSwept = function(){
+		if(this.air.up_down.timer)
+			clearInterval(this.air.up_down.timer);
+		if(this.air.left_right.timer)
+			clearInterval(this.air.left_right.timer);
+		
+		air_item = _AIR_CONDITIONER_[mode][this.id];
+		
+		if(air_item.up_down_swept){
+			this.air.up_down.timer = setInterval(function() {
+				if(_device.air.up_down.swept_flag == 0){
+					if(_device.air.up_down.direction < 4)
+						_device.air.up_down.direction++;
+					else if(_device.air.up_down.direction == 4){
+						_device.air.up_down.direction = 3;
+						_device.air.up_down.swept_flag = 1;
+					}
+				}
+				else{
+					if(_device.air.up_down.direction > 1)
+						_device.air.up_down.direction--;
+					else if(_device.air.up_down.direction == 1){
+						_device.air.up_down.direction = 2;
+						_device.air.up_down.swept_flag = 0;
+					}
+				}
+				_device.doDraw();
+			},1000);
+		}
+		if(air_item.left_right_swept){
+			this.air.left_right.timer = setInterval(function() {
+				if(_device.air.left_right.swept_flag == 0){
+					if(_device.air.left_right.direction < 5)
+						_device.air.left_right.direction++;
+					else if(_device.air.left_right.direction == 5){
+						_device.air.left_right.direction = 4;
+						_device.air.left_right.swept_flag = 1;
+					}
+				}
+				else{
+					if(_device.air.left_right.direction > 1)
+						_device.air.left_right.direction--;
+					else if(_device.air.left_right.direction == 1){
+						_device.air.left_right.direction = 2;
+						_device.air.left_right.swept_flag = 0;
+					}
+				}
+				_device.doDraw();
+			},1000);
+		}
+	}
 
 	
 	this.doBtnFocus = function(id) { 
@@ -831,7 +838,22 @@ function device()
 			_CURTAIN_[json.mode] = json.data;
 
 			var id = json.id;
-			if(!_DEVICE_["curtain"].hasOwnProperty(json.id))
+			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
+				id = '1';
+
+			mode = json.mode;
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+
+			_device.setID(id);
+			_device.setFocus(id);
+		} 
+		else if( json.event === "air_conditioner" ){
+			_AIR_CONDITIONER_[json.mode] = json.data;
+
+			this.doSwept();
+			
+			var id = json.id;
+			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
 				id = '1';
 
 			mode = json.mode;
@@ -907,12 +929,15 @@ function device()
 				this.setID(id);
 				this.setPos();
 				this.doDraw();
+				
+				this.doSwept();
+				
 				return;
 			}
 			else{
 		
-			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
-			return;//TODO
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
+			//	console.log(param);
 			}
 		}
 		else if('TV' == dev_id){
@@ -927,7 +952,7 @@ function device()
 			}
 			else{
 
-			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
+			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
 			return;//TODO
 			}
 		}

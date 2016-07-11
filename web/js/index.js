@@ -129,6 +129,22 @@ window.addEventListener('message',function(e){
 			
 			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
+		else if( json.event === "air_conditioner" ){
+
+			_AIR_CONDITIONER_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "TV" ){
+
+		//	_fTV_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['fTV'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
 
 		
 	//	window.frames['fscene'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');

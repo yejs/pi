@@ -15,7 +15,7 @@ import json
 import base64
 import urllib
 import logging
-from data import _DEVICE_, _LAMP_ , _CURTAIN_
+from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_
 import threading
 import time
 from my_gpio import RPi_GPIO
