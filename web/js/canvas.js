@@ -97,17 +97,22 @@ CanvasRenderingContext2D.prototype.getPoint = function (x, y, r, sAngle)
 	return {x:x+Math.cos(sAngle)*r, y:y+Math.sin(sAngle)*r};  
 }
 
-CanvasRenderingContext2D.prototype.arcEx = function (x, y, r, sAngle, eAngle, counterclockwise, fill, stroke) {
+CanvasRenderingContext2D.prototype.arcEx = function (x, y, r, sAngle, eAngle, counterclockwise, fill, stroke, close) {
+	if(close == undefined)
+		close = true;
+	
 	this.save(); 
 //	this.translate(0.5,0.5); 
 	this.beginPath(); 
 	var pt = this.getPoint(x, y, r, sAngle);
 
-	this.moveTo(pt.x, pt.y); 
+	if(Math.abs(eAngle - sAngle) < Math.PI*2 && close){
+		this.moveTo(pt.x, pt.y); 
+	}
 	this.arc(x, y, r, sAngle, eAngle, counterclockwise);
-	if(eAngle - sAngle < Math.PI*2){
-	//	this.lineTo(x, y);
-	//	this.closePath();
+	if(Math.abs(eAngle - sAngle) < Math.PI*2 && close){
+		this.lineTo(x, y);
+		this.closePath();
 	}
 		
 	if (stroke) {  

@@ -19,7 +19,7 @@ window.onload = function(){
 			document.getElementById('d_GPIO').style.display = 'none';
 			document.getElementById('d_length').style.display = 'block';
 		}
-		else if(_dev_set.dev_id == 'TV' || _dev_set.dev_id == 'air_conditioner'){
+		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner'){
 			document.getElementById('d_GPIO').style.display = 'none';
 		}
 	}
@@ -47,14 +47,12 @@ function dev_set()
 		var json = JSON.parse(evt);
 		if(!json)
 			return;
-		
 		if( json.event === "device" ){
 			_DEVICE_ = json.data;
 		//	window.parent.postMessage({'msg':'device' , 'data':json.data},'*');
 		//	console.log('device:' + JSON.stringify(_DEVICE_));
 			
 			if(_DEVICE_.hasOwnProperty(_dev_set.dev_id)){
-				console.log('device111:' + _dev_set.dev_id);
 				for(var i=0;i<20;i++){
 					if(document.getElementById(i.toString())){
 						if(!_DEVICE_[_dev_set.dev_id].hasOwnProperty(i.toString()))

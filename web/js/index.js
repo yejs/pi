@@ -32,7 +32,7 @@ window.onload = function(){
 
 }
 
-var titles = ["lamp", "curtain", "air_conditioner", "TV", "scene", "video"];
+var titles = ["lamp", "curtain", "air_conditioner", "tv", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
 		if(titles[i] === title)
@@ -111,7 +111,7 @@ window.addEventListener('message',function(e){
 			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			window.frames['fTV'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else if( json.event === "lamp" ){
 
@@ -137,13 +137,13 @@ window.addEventListener('message',function(e){
 			
 			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
-		else if( json.event === "TV" ){
+		else if( json.event === "tv" ){
 
 		//	_fTV_[json.mode] = json.data;
 
 			mode = json.mode;
 			
-			window.frames['fTV'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 
 		

@@ -9,16 +9,15 @@ mode = "normal";
 
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
-
-	if(document.getElementById('lamp')){
-		_device = new device();
-	}
-		
-	
 	var url = location.search;
 	pos = url.indexOf('dev_id');
 	if(pos>=0){
 		dev_id = url.substr(pos+7);
+		
+	}
+	
+	if(document.getElementById('lamp')){
+		_device = new device();
 	}
 }
 
@@ -43,7 +42,7 @@ refresh = function(){
 		else
 			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节';
 		
-		if('air_conditioner' == dev_id || 'TV' == dev_id)
+		if('air_conditioner' == dev_id || 'tv' == dev_id)
 			_device.setFocus(_device.id);
 	}
 }
@@ -91,11 +90,9 @@ function device()
 				this.arrayBtn[i].doResize(this.imageRect.x + offset_x + (i-3)*s, y, this.imageRect.x + offset_x + (i-3)*s + btn_w, y + btn_h);
 			}
 			
-			
 			this.contextImage.fillStyle = "rgb(141, 178, 159)";
 			this.contextImage.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
 
-			
 			this.contextImage.strokeStyle = "rgb(47, 82, 67)";
 			this.contextImage.lineWidth = 3;
 			this.contextImage.drawLine(this.imageRect.x + this.imageRect.width*2/5, this.imageRect.y, this.imageRect.x + this.imageRect.width*2/5, this.imageRect.y + this.imageRect.height);
@@ -110,6 +107,19 @@ function device()
 			
 			this.contextImage.font = _font56;
 			this.contextImage.fillText('℃', this.imageRect.x + this.imageRect.width-25-this.contextImage.measureText('℃').width, this.imageRect.y + 60);
+		}
+		else if('tv' == dev_id){
+
+			var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 20;
+			this.arrayBtn[0].doResize(offset_x, offset_y, offset_x + btn_w, offset_y + btn_h);
+			this.arrayBtn[1].doResize(this.rect.width - offset_x - btn_w, offset_y, this.rect.width - offset_x, offset_y + btn_h);
+			this.arrayBtn[2].doResize(0, offset_y + btn_h + 30, this.rect.width, offset_y + btn_h + 380);
+
+			var s = ((this.rect.width - offset_x - btn_w) - (offset_x))/3;
+			y = offset_y + btn_h + 410;
+			for(var i=3;i<this.arrayBtn.length;i++){
+				this.arrayBtn[i].doResize(offset_x + (i-3)*s, y, offset_x + (i-3)*s + btn_w, y + btn_h);
+			}
 		}
 	}
 	
@@ -135,6 +145,9 @@ function device()
 		}
 		else if('air_conditioner' == dev_id){
 			this.drawAir(this.contextReport);
+		}
+		else if('tv' == dev_id){
+			this.drawTV(this.contextReport);
 		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
@@ -208,7 +221,7 @@ function device()
 		air_item = _AIR_CONDITIONER_[mode][this.id];
 		
 		air_mode = {heat:'制热模式', cold:'制冷模式', dehumidify:'除湿模式', blowing:'通风模式', sleep:'睡眠模式', energy:'节能模式', health:'健康模式'};
-		if(air_item.power_on){//电源打开显示
+		if(air_item.power_on == 'true'){//电源打开显示，画液晶屏
 			ctx.fillStyle = ctx.strokeStyle = "rgb(47, 82, 67)";
 			
 			ctx.font = _font106;
@@ -308,9 +321,137 @@ function device()
 				this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
 		}
 		//画电源按钮
-		ctx.strokeStyle = air_item.power_on ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
+		ctx.strokeStyle = air_item.power_on == 'true' ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
 		ctx.lineWidth = 5;
-		ctx.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1);
+		ctx.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
+		ctx.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 15,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 30);
+	}
+	
+	this.drawTV = function(ctx){
+		if(this.rect.width == 0 || this.arrayBtn[2].height == 0)
+			return;
+
+		tv_item = _TV_[mode][this.id];
+
+		var x = this.rect.width/2;
+		var y = parseInt(this.arrayBtn[2].top + this.arrayBtn[2].height/2);
+		var r = parseInt(this.arrayBtn[2].height/2);
+
+		var grd=new Array();
+		for(var i=0;i<5;i++){
+			grd[i]=ctx.createRadialGradient(x,y,0,x,y,r);
+			switch(i){
+				case 0:
+				grd[i].addColorStop(0,'rgba(120, 120, 120, 0.1)');
+				grd[i].addColorStop(0.5,'rgba(120, 120, 120, 0.2)');
+				grd[i].addColorStop(0.9,'rgba(120, 120, 120, 0.25)');
+				grd[i].addColorStop(1,'rgba(120, 120, 120, 0.9)');
+				break;
+				case 1:
+				grd[i].addColorStop(0,'rgba(250, 60, 60, 0.3)');
+				grd[i].addColorStop(0.5,'rgba(250, 60, 60, 0.4)');
+				grd[i].addColorStop(0.9,'rgba(250, 60, 60, 0.5)');
+				grd[i].addColorStop(1,'rgba(250, 60, 60, 0.9)');
+				break;
+				case 2:
+				grd[i].addColorStop(0,'rgba(120, 120, 255, 1)');
+				grd[i].addColorStop(1,'rgba(120, 120, 220, 0.2)');
+				break;
+				case 3:
+				grd[i].addColorStop(0,'rgba(120, 120, 120, 0.5)');
+				grd[i].addColorStop(1,'rgba(120, 120, 120, 0.2)');
+				break;
+				case 4:
+				grd[i].addColorStop(0,'rgba(120, 120, 120, 0.5)');
+				grd[i].addColorStop(1,'rgba(120, 120, 120, 0.2)');
+				break;
+			}
+		}
+		
+		ctx.strokeStyle = 'rgba(120, 120, 120, 0.5)';
+		ctx.lineWidth = 5;
+		
+		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
+		ctx.arcEx(x, y, r,  0, Math.PI * 2, true, 1, 1);
+		
+		ctx.font = _font56;
+
+		var r1 = 0;
+		if(this.p)
+			r1 = Math.sqrt((this.p.x-x)*(this.p.x-x) + (this.p.y-y)*(this.p.y-y));
+		for(var i=0;i<4;i++){
+			if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, this.p, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2))
+				ctx.fillStyle = grd[1];
+			else
+				ctx.fillStyle = grd[0];
+			
+			ctx.arcEx(x, y, r-10,  -Math.PI/4 + i*Math.PI/2 + Math.PI/100, Math.PI/4 + i*Math.PI/2 - Math.PI/100, false, 1, 1);
+			
+			ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+			a = i*Math.PI/2;
+			r2 = r*3/4;
+			x1 = x + Math.cos(a) * r2;
+			y1 = y + Math.sin(a) * r2;
+			ctx.beginPath(); 
+			if(0 == i){
+				x1 -= r/8;
+				ctx.moveTo(x1, y1 - 20); 
+				ctx.lineTo(x1, y1 + 20); 
+				ctx.lineTo(x1 + 40, y1); 
+			}
+			else if(1 == i){
+				y1 -= r/8;
+				ctx.moveTo(x1 - 20, y1); 
+				ctx.lineTo(x1 + 20, y1); 
+				ctx.lineTo(x1, y1 + 40); 
+			}
+			if(2 == i){
+				x1 += r/8;
+				ctx.moveTo(x1, y1 - 20); 
+				ctx.lineTo(x1, y1 + 20); 
+				ctx.lineTo(x1 - 40, y1); 
+			}
+			else if(3 == i){
+				y1 += r/8;
+				ctx.moveTo(x1 - 20, y1); 
+				ctx.lineTo(x1 + 20, y1); 
+				ctx.lineTo(x1, y1 - 40); 
+			}
+			ctx.closePath();
+			ctx.stroke();  
+			ctx.fill();
+			ctx.closePath();
+		}
+		
+		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
+		ctx.arcEx(x, y, r/2,  0, Math.PI * 2, true, 1, 0);
+		
+		if(r1 && r1 < r/2-10)
+			ctx.fillStyle = grd[1];
+		else
+			ctx.fillStyle = grd[0];
+		ctx.arcEx(x, y, r/2-10,  0, Math.PI * 2, true, 1, 1);
+		
+		ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+		ctx.fillText('ok', x-ctx.measureText('ok').width/2, y + 20);
+		
+		
+		//画按钮
+		for(var i=0;i<this.arrayBtn.length;i++){
+			if(i == 2)
+				continue;
+			
+			if(this.arrayBtn[i].istouch)
+				ctx.fillStyle = "rgb(230, 100, 100)";
+			else
+				ctx.fillStyle = "rgb(170, 170, 170)";
+			
+			this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
+		}
+		//画电源按钮
+		ctx.strokeStyle = tv_item.status == 'on' ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
+		ctx.lineWidth = 5;
+		ctx.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
 		ctx.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 15,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 30);
 	}
 	
@@ -323,6 +464,7 @@ function device()
 		offset = 20;
 		var width = this.rect.width-offset*2;
 		this.bar0 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
+		this.bar1 = {x:offset, y: 205, width:width, height:90, pos:50, isdown:false};
 		if('lamp' == dev_id)
 			this.bar1 = {x:offset, y: 105, width:width, height:90, pos:0, isdown:false};
 		else if('curtain' == dev_id)
@@ -367,34 +509,64 @@ function device()
 	this.air = {'up_down':{'direction':1, 'swept_flag':0, 'timer':null}, 'left_right':{'direction':1, 'swept_flag':0, 'timer':null}};
 
 	this.imageRect = {x:0, y:0, width:0, height:0};
+	this.p = null;
 	
 	this.arrayBtn = new Array();
-	for(var i=0;i<7;i++)
-	{
-		switch(i){
-			case 0:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
-			break;
-			case 1:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'+');
-			break;
-			case 2:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'-');
-			break;
-			case 3:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'模式');
-			break;
-			case 4:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'风速');
-			break;
-			case 5:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'风向');
-			break;
-			case 6:
-			this.arrayBtn[i] = new tagRECT(0,0,0,0,'扫风');
-			break;
+	if('air_conditioner' == dev_id){
+		for(var i=0;i<7;i++)
+		{
+			switch(i){
+				case 0:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
+				break;
+				case 1:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'+');
+				break;
+				case 2:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'-');
+				break;
+				case 3:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'模式');
+				break;
+				case 4:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'风速');
+				break;
+				case 5:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'风向');
+				break;
+				case 6:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'扫风');
+				break;
+			}
 		}
-		
+	}
+	else if('tv' == dev_id){
+		for(var i=0;i<7;i++)
+		{
+			switch(i){
+				case 0:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
+				break;
+				case 1:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'静音');
+				break;
+				case 2:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
+				break;
+				case 3:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'AV/TV');
+				break;
+				case 4:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'Home');
+				break;
+				case 5:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'后退');
+				break;
+				case 6:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'回看');
+				break;
+			}
+		}
 	}
 
 	//创建双缓存
@@ -402,6 +574,7 @@ function device()
 	this.canvasImage = document.createElement("canvas");
 	this.canvas = document.getElementById('msg');//显示画布
 	this.onresize();
+	
 	
 	if(isPC()){
 		this.canvas.addEventListener('mousedown', function(event) { 
@@ -538,6 +711,7 @@ function device()
 			this.bar1.isdown = false;
 			this.bar2.isdown = false;
 			this.bar3.isdown = false;
+			this.p = null; 
 		}
 		if(mouse){
 			var x = event.pageX; 
@@ -558,6 +732,9 @@ function device()
 		}
 
 		var loc = getPointOnCanvas(canvas, x, y); 
+		
+		if(down)
+			this.p = loc; 
 		
 		if("lamp" == dev_id){
 			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
@@ -601,9 +778,11 @@ function device()
 		else if('air_conditioner' == dev_id){
 				
 			air_item = _AIR_CONDITIONER_[mode][this.id];
+			power_on = air_item.power_on == 'false' ? false : true;
+			
 			if(down){
 				for(var i=0;i<this.arrayBtn.length;i++){
-					if(this.arrayBtn[i].IsInRect(loc, 0) && (i == 0 || (i!= 0 && air_item.power_on))){
+					if(this.arrayBtn[i].IsInRect(loc, 0) && (i == 0 || (i!= 0 && power_on))){
 						if((1 == i && air_item.temp_set == 30) || (2 == i && air_item.temp_set == 16))
 							return;
 						this.arrayBtn[i].istouch = true;
@@ -618,11 +797,12 @@ function device()
 				}
 				
 				if(this.arrayBtn[0].IsInRect(loc, 0)){//power
-					air_item.power_on = air_item.power_on ? false : true;
-					this.docommand(this.id, air_item.power_on ? 'power_on' : 'power_off');
+					power_on = power_on ? false : true;
+
+					this.docommand(this.id, power_on ? 'power_on' : 'power_off');
 					this.doBtnFocus(0);
 				}
-				else if(this.arrayBtn[1].IsInRect(loc, 0) && air_item.power_on){//+
+				else if(this.arrayBtn[1].IsInRect(loc, 0) && power_on){//+
 					if(air_item.temp_set < 30){
 						air_item.temp_set++;
 						this.docommand(this.id, 'temp_inc');
@@ -631,7 +811,7 @@ function device()
 					else
 						return;
 				}
-				else if(this.arrayBtn[2].IsInRect(loc, 0) && air_item.power_on){//-
+				else if(this.arrayBtn[2].IsInRect(loc, 0) && power_on){//-
 					if(air_item.temp_set > 16){
 						air_item.temp_set--;
 						this.docommand(this.id, 'temp_dec');
@@ -640,7 +820,7 @@ function device()
 					else
 						return;
 				}
-				else if(this.arrayBtn[3].IsInRect(loc, 0) && air_item.power_on){//mode
+				else if(this.arrayBtn[3].IsInRect(loc, 0) && power_on){//mode
 					if(air_item.mode == 'heat')
 						air_item.mode = 'cold';
 					else if(air_item.mode == 'cold')
@@ -659,7 +839,7 @@ function device()
 					this.doBtnFocus(3);
 				}
 				
-				else if(this.arrayBtn[4].IsInRect(loc, 0) && air_item.power_on){//speed
+				else if(this.arrayBtn[4].IsInRect(loc, 0) && power_on){//speed
 					if(air_item.speed < 5)
 						air_item.speed++;
 					else if(air_item.speed == 5)
@@ -667,7 +847,7 @@ function device()
 					this.docommand(this.id, 'speed_' + air_item.speed);
 					this.doBtnFocus(4);
 				}
-				else if(this.arrayBtn[5].IsInRect(loc, 0) && air_item.power_on){//up_down
+				else if(this.arrayBtn[5].IsInRect(loc, 0) && power_on){//up_down
 					air_item.up_down_swept = air_item.up_down_swept ? 0 : 1;
 					this.docommand(this.id, 'up_down_swept_' + air_item.up_down_swept);
 
@@ -676,7 +856,7 @@ function device()
 					this.doBtnFocus(5);
 				
 				}
-				else if(this.arrayBtn[6].IsInRect(loc, 0) && air_item.power_on){//left_right
+				else if(this.arrayBtn[6].IsInRect(loc, 0) && power_on){//left_right
 					air_item.left_right_swept = air_item.left_right_swept ? 0 : 1;
 					this.docommand(this.id, 'left_right_swept_' + air_item.left_right_swept);
 					
@@ -685,6 +865,78 @@ function device()
 					this.doBtnFocus(6);
 				}
 			}
+		}
+		else if('tv' == dev_id){
+			tv_item = _TV_[mode][this.id];
+			power_on = tv_item.status == 'off' ? false : true;
+			
+			if(down){
+				for(var i=0;i<this.arrayBtn.length;i++){
+					if(this.arrayBtn[i].IsInRect(loc, 0)){
+						if(i == 0 || (i!= 0 && power_on))
+							this.arrayBtn[i].istouch = true;
+						else
+							return;
+					}
+				}
+			}
+			else if(up){
+
+				for(var i=0;i<this.arrayBtn.length;i++){
+					this.arrayBtn[i].istouch = false;
+				}
+				
+				if(this.arrayBtn[0].IsInRect(loc, 0)){//power
+					power_on = power_on ? false : true;
+
+					this.docommand(this.id, power_on ? 'power_on' : 'power_off');
+					this.doBtnFocus(0);
+				}
+				else if(this.arrayBtn[1].IsInRect(loc, 0) && power_on){//mute
+					this.docommand(this.id, 'mute');
+					this.doBtnFocus(1);
+				}
+				else if(this.arrayBtn[3].IsInRect(loc, 0) && power_on){//av/tv
+					this.docommand(this.id, 'av/tv');
+					this.doBtnFocus(3);
+				}
+				else if(this.arrayBtn[4].IsInRect(loc, 0) && power_on){//home
+					this.docommand(this.id, 'home');
+					this.doBtnFocus(4);
+				}
+				else if(this.arrayBtn[5].IsInRect(loc, 0) && power_on){//back
+					this.docommand(this.id, 'back');
+					this.doBtnFocus(5);
+				}
+				else if(this.arrayBtn[6].IsInRect(loc, 0) && power_on){//view
+					this.docommand(this.id, 'view');
+					this.doBtnFocus(6);
+				}
+				else if(power_on){
+					var x = this.rect.width/2;
+					var y = parseInt(this.arrayBtn[2].top + this.arrayBtn[2].height/2);
+					var r = parseInt(this.arrayBtn[2].height/2);
+
+					var r1 = 0;
+					if(loc)
+						r1 = Math.sqrt((loc.x-x)*(loc.x-x) + (loc.y-y)*(loc.y-y));
+					for(var i=0;i<4;i++){
+						if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, loc, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2)){
+							if(0 == i)//volume +
+								this.docommand(this.id, 'vol_inc');
+							else if(1 == i)//prog_inc
+								this.docommand(this.id, 'prog_inc');
+							else if(2 == i)//volume -
+								this.docommand(this.id, 'vol_dec');
+							else if(3 == i)//prog_dec
+								this.docommand(this.id, 'prog_dec');
+						}
+					}
+					if(r1 && r1 < r/2)
+						this.docommand(this.id, 'ok');
+				}
+			}
+			
 		}
 		this.doDraw();
 	}
@@ -795,9 +1047,10 @@ function device()
 				else
 					document.getElementById('all').style.display = 'none';
 			}
+			return;
 		} 
 		else if( json.event === "lamp" ){
-		//	console.log('lamp:' + JSON.stringify(json));
+			console.log('lamp:' + JSON.stringify(json));
 		//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
 		//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
 		//真正的命令信息是由ajax发出的（docommand）
@@ -849,7 +1102,6 @@ function device()
 		} 
 		else if( json.event === "air_conditioner" ){
 			_AIR_CONDITIONER_[json.mode] = json.data;
-
 			this.doSwept();
 			
 			var id = json.id;
@@ -862,6 +1114,19 @@ function device()
 			_device.setID(id);
 			_device.setFocus(id);
 		} 
+		else if( json.event === "tv" ){
+			_TV_[json.mode] = json.data;
+console.log('tv:' + JSON.stringify(json));
+			var id = json.id;
+			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
+				id = '1';
+
+			mode = json.mode;
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+
+			_device.setID(id);
+			_device.setFocus(id);
+		}
 		_device.setPos();
 		_device.doDraw();
 	}
@@ -896,6 +1161,7 @@ function device()
 				
 				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 				btn.style.backgroundColor = '#ee0';
+				console.log(param);
 			}
 			else{
 				//调光调色
@@ -935,12 +1201,10 @@ function device()
 				return;
 			}
 			else{
-		
 				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
-			//	console.log(param);
 			}
 		}
-		else if('TV' == dev_id){
+		else if('tv' == dev_id){
 			if(commandEx == undefined){
 
 				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
@@ -948,12 +1212,12 @@ function device()
 				this.setID(id);
 				this.setPos();
 				this.doDraw();
+				
 				return;
 			}
 			else{
-
-			//	param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
-			return;//TODO
+				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
+				console.log(param);
 			}
 		}
 

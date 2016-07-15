@@ -71,6 +71,40 @@ function loadXMLDoc(url,cfunc,param){
 	}
 }
 
+//判断点击的位置是否在信号的两个指针夹角范围之内
+function IsInRange(x, y, p, a1, a2)
+{
+	a = getAngle2(x, y, p);
+	a = a>Math.PI*7/4 ? a - Math.PI*2 : a;
+
+	if(a>=a1 && a<=a2)
+		return true;
+	else
+		return false;
+
+	return false;
+}
+
+function getAngle2(x, y, p)
+{ 
+	r = Math.sqrt((p.x-x)*(p.x-x) + (p.y-y)*(p.y-y));
+	s = Math.asin((p.y-y)/r);
+	c = Math.acos((p.x-x)/r);
+
+	if(p.x<x)
+		a = Math.PI - s;
+	else if(s<0 && c>0)
+		a = Math.PI*2 + s;
+	else
+		a = s;
+	return a;
+}
+
+function transfer(angle)
+{
+	return angle<0 ? angle + Math.PI*2 : angle;//angle>=Math.PI*3/2 ? angle - Math.PI*3/2 : angle+Math.PI/2;
+}
+
 function getWinRect() {   
 	var self = window;
 	if(window.parent != window)

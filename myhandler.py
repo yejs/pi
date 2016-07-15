@@ -10,8 +10,6 @@ __version__ = '1.0'
 
 import os
 import tornado.web
-import tornado.websocket
-from tornado.tcpserver import TCPServer 
 import json
 import base64
 import urllib
@@ -21,108 +19,24 @@ import time
 
 from my_gpio import RPi_GPIO
 from my_socket import SocketServer, Connection
+from my_websocket import WebSocket
 from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_
-from g_data import mode, last_mode , lamp_id, curtain_id, air_conditioner_id, tv_id
+from g_data import GlobalVar
 
-		
-class WebSocket(tornado.websocket.WebSocketHandler):
-    socket_handlers = set()
-    def open(self):
-        #print( "%s" % (self.request))#.method, self.request.uri, self.request.remote_ip))
-        WebSocket.socket_handlers.add(self)
-        WebSocket.broadcast_device()
-        WebSocket.broadcast_lamp_status()
-        WebSocket.broadcast_curtain_status()
-        WebSocket.broadcast_air_status()
-        WebSocket.broadcast_tv_status()
-    def on_close(self):
-        WebSocket.socket_handlers.remove(self)
-    def on_message(self, message):
-        WebSocket.broadcast_messages(message)
-	
-    def broadcast_messages(message):
-        for handler in WebSocket.socket_handlers:
-            try:
-                handler.write_message(message)
-            except:
-                logging.error('Error sending message', exc_info=True)
-				
-    #向其它页面客户端广播状态消息(用于各客户端间同步，一个客户端发送命令，其它客户端同时此看到命令)
-    def broadcast_device():
-        str1 = '{\"event\": \"device\", \"data\":'
-        str1 += json.dumps(_DEVICE_)
-        str1 += '}'
-
-        WebSocket.broadcast_messages(str1) 
-		
-    def broadcast_lamp_status():
-        global mode
-        global lamp_id
-        str1 = '{\"event\": \"lamp\", \"data\":'
-        str1 += json.dumps(_LAMP_[mode])
-        str1 += ', \"mode\":\"'
-        str1 += mode
-        str1 += '\", \"id\":\"'
-        str1 += lamp_id
-        str1 += '\"}'
-
-        WebSocket.broadcast_messages(str1) 
-		
-    def broadcast_curtain_status():
-        global mode
-        global curtain_id
-        str1 = '{\"event\": \"curtain\", \"data\":'
-        str1 += json.dumps(_CURTAIN_[mode])
-        str1 += ', \"mode\":\"'
-        str1 += mode
-        str1 += '\", \"id\":\"'
-        str1 += curtain_id
-        str1 += '\"}'
-
-        WebSocket.broadcast_messages(str1) 
-		
-    def broadcast_air_status():
-        global mode
-        global air_conditioner_id
-        str1 = '{\"event\": \"air_conditioner\", \"data\":'
-        str1 += json.dumps(_AIR_CONDITIONER_[mode])
-        str1 += ', \"mode\":\"'
-        str1 += mode
-        str1 += '\", \"id\":\"'
-        str1 += air_conditioner_id
-        str1 += '\"}'
-
-        WebSocket.broadcast_messages(str1) 
-		
-    def broadcast_tv_status():
-        global mode
-        global tv_id
-        str1 = '{\"event\": \"tv\", \"data\":'
-        str1 += json.dumps(_TV_[mode])
-        str1 += ', \"mode\":\"'
-        str1 += mode
-        str1 += '\", \"id\":\"'
-        str1 += tv_id
-        str1 += '\"}'
-
-        WebSocket.broadcast_messages(str1) 
-		
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
-        global mode
-        global last_mode
         post_data = {}
 
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
 			
         if post_data.get('mode'):
-            if mode != post_data['mode'][0]:
-                last_mode = mode
-            mode = post_data['mode'][0]
+            if GlobalVar.get_mode() != post_data['mode'][0]:
+                GlobalVar.set_last_mode(GlobalVar.get_mode())
+            GlobalVar.set_mode(post_data['mode'][0])
         else:
-            mode = "normal"
+            GlobalVar.set_mode("normal")
 			
         if post_data.get('dev_id'):
             dev_id = post_data['dev_id'][0]
@@ -140,7 +54,7 @@ class WebHandler(tornado.web.RequestHandler):
         elif post_data.get('color'):	#调光调色指令
             str1 = '{\"dev_id\":\"'+dev_id+'\", \"id\":\"'+post_data['id'][0]+'\", \"command\":\"'+post_data['color'][0]+'\"}'
         elif dev_id == None:			#模式指令
-            str1 = '{\"mode\":\"'+mode + '\"}'
+            str1 = '{\"mode\":\"'+GlobalVar.get_mode() + '\"}'
         			
         self.write(str1)#base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
 
@@ -178,10 +92,10 @@ class WebHandler(tornado.web.RequestHandler):
 	
     #硬件层输出（GPIO 或 socket到硬件终端）
     def output(dev_id, id, key, value):
-
+        mode = GlobalVar.get_mode()
         if dev_id == 'lamp':#灯
             item = _LAMP_[mode][id]
-            if key == 'color':		#调光调色指令
+            if key == 'color':		                        #调光调色指令
                 r, g, b = RPi_GPIO.get_color(value)
                 item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
         elif dev_id == 'curtain':#窗帘
@@ -196,7 +110,7 @@ class WebHandler(tornado.web.RequestHandler):
                 else:
                     item['temp_set'] -= 1
             #print("air_conditioner, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
-            return
+            #return
         elif dev_id == 'tv':#电视
             item = _TV_[mode][id]
             if key == 'power_on':
@@ -204,7 +118,8 @@ class WebHandler(tornado.web.RequestHandler):
                     item['status'] = 'on'
                 else:
                     item['status'] = 'off'
-            return
+            print("tv, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
+            #return
         else:#TODO:其它设备待完成
             return;
 
@@ -217,16 +132,17 @@ class WebHandler(tornado.web.RequestHandler):
         Connection.check_output()
         if _DEVICE_[dev_id].get(id):
 	
-            if _DEVICE_[dev_id][id].get('pin'):
+            if _DEVICE_[dev_id][id].get('pin') and key:
                 RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
 
             if Connection.sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
-                Connection.sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'], item)
-	#灯业务逻辑模块处理		
+                Connection.sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'] if _DEVICE_[dev_id][id].get('pin') else None, key, value, item)
+				
+	#灯业务逻辑模块处理,协议：	mode=normal&dev_id=lamp&id=1&command=on（开关指令） 或 mode=normal&dev_id=lamp&id=1&color=aabbcc（调光调色指令）
     def lamp(post_data):
-        global mode
-        global lamp_id
-
+        last_mode = GlobalVar.get_last_mode()
+        mode = GlobalVar.get_mode()
+		
         key = None
         value = None
 
@@ -236,10 +152,10 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'color'
 			
         if post_data.get('id'):
-            lamp_id = post_data['id'][0]
+            GlobalVar.set_lamp_id(post_data['id'][0])
         else :
-            lamp_id = '1'
-
+            GlobalVar.set_lamp_id('1')
+        lamp_id = GlobalVar.get_lamp_id()
         if key != None:		
             value = post_data[key][0]
 			
@@ -251,15 +167,13 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.output('lamp', k, key, value)
 
         WebHandler.output('lamp', lamp_id, key, value)
-
+        print('lamp_id: %s' %lamp_id )
         WebSocket.broadcast_lamp_status()
 		
-	#窗帘业务逻辑模块处理	
+	#窗帘业务逻辑模块处理,协议：	mode=normal&dev_id=curtain&id=1&command=open&progress=1
     def curtain(post_data):
-        global mode
-        global last_mode
-        global curtain_id
-
+        last_mode = GlobalVar.get_last_mode()
+        mode = GlobalVar.get_mode()
         key = None
         value = None
 
@@ -267,10 +181,11 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'command'
 			
         if post_data.get('id'):
-            curtain_id = post_data['id'][0]
+            GlobalVar.set_curtain_id(post_data['id'][0])
         else :
-            curtain_id = '1'
+            GlobalVar.set_curtain_id('1')
 			
+        curtain_id = GlobalVar.get_curtain_id()
         if post_data.get('progress'):#前端通知当前窗帘开合进度
             _CURTAIN_[mode][curtain_id]['progress'] = int(post_data['progress'][0])
 			
@@ -279,6 +194,7 @@ class WebHandler(tornado.web.RequestHandler):
 			
         if None == _CURTAIN_.get(mode):		
             return
+        
         '''
         TODO:窗帘模式指令下切换有个问题，如果用户在当前模式下开合窗帘过程中按下stop停止指令，窗帘将会停在某个中间状态，
         当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
@@ -307,11 +223,11 @@ class WebHandler(tornado.web.RequestHandler):
 
         WebSocket.broadcast_curtain_status()
 		
-	#空调业务逻辑模块处理	
+	#空调业务逻辑模块处理,协议：	mode=normal&dev_id=air_conditioner&id=1&command=power_on
+	#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
     def air_conditioner(post_data):
-        global mode
-        global air_conditioner_id
-
+        mode = GlobalVar.get_mode()
+        last_mode = GlobalVar.get_last_mode()
         key = None
         value = None
 
@@ -356,29 +272,28 @@ class WebHandler(tornado.web.RequestHandler):
                 value = int(value[17:])
 			
         if post_data.get('id'):
-            air_conditioner_id = post_data['id'][0]
+            GlobalVar.set_air_conditioner_id(post_data['id'][0])
         else :
-            air_conditioner_id = '1'
+            GlobalVar.set_air_conditioner_id('1')
 		
         if None == _AIR_CONDITIONER_.get(mode):		
             return
-			
+        air_conditioner_id = GlobalVar.get_air_conditioner_id()
         if air_conditioner_id == 'all' or key == None:
             for k in _AIR_CONDITIONER_[mode].keys():
-                last_value = _AIR_CONDITIONER_[last_mode][id]['power_on']
-                now_value = _AIR_CONDITIONER_[mode][id]['power_on']
+                last_value = _AIR_CONDITIONER_[last_mode][air_conditioner_id]['power_on']
+                now_value = _AIR_CONDITIONER_[mode][air_conditioner_id]['power_on']
                 if last_value != now_value:
-                    WebHandler.output('air_conditioner', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+                    WebHandler.output('air_conditioner', air_conditioner_id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
 
         WebHandler.output('air_conditioner', air_conditioner_id, key, value)
 
         WebSocket.broadcast_air_status()
 		
-	#空调业务逻辑模块处理	
+	#空调业务逻辑模块处理,协议：	mode=normal&dev_id=tv&id=1&command=power_on	
+	#command 可能的值：power_on、power_off、vol_inc、vol_dec、prog_inc、prog_dec、mute、av/tv、home、back、view
     def tv(post_data):
-        global mode
-        global tv_id
-
+        mode = GlobalVar.get_mode()
         key = None
         value = None
 
@@ -396,27 +311,42 @@ class WebHandler(tornado.web.RequestHandler):
                     value = 'true'
                 elif value.find('vol_dec') != -1:
                     value = 'false'
-            elif value.find('prog_') != -1:#音量+ 、-指令
+            elif value.find('prog_') != -1:#节目+ 、-指令
                 key = 'prog_inc'
                 if value.find('prog_inc') != -1:
                     value = 'true'
                 elif value.find('prog_dec') != -1:
                     value = 'false'
+            elif value.find('mute') != -1:#静音指令
+                key = 'mute'
+                value = 'true'
+            elif value.find('av/tv') != -1:#av/tv指令
+                key = 'av/tv'
+                value = 'true'
+            elif value.find('home') != -1:#home指令
+                key = 'home'
+                value = 'true'
+            elif value.find('back') != -1:#back指令
+                key = 'back'
+                value = 'true'
+            elif value.find('view') != -1:#back指令
+                key = 'view'
+                value = 'true'
 
         if post_data.get('id'):
-            tv_id = post_data['id'][0]
+            GlobalVar.set_tv_id(post_data['id'][0])
         else :
-            tv_id = '1'
+            GlobalVar.set_tv_id('1')
 		
         if None == _TV_.get(mode):		
             return
-			
+        tv_id = GlobalVar.get_tv_id()
         if tv_id == 'all' or key == None:
             for k in _TV_[mode].keys():
-                last_value = _TV_[last_mode][id]['status']
-                now_value = _TV_[mode][id]['status']
+                last_value = _TV_[last_mode][tv_id]['status']
+                now_value = _TV_[mode][tv_id]['status']
                 if last_value != now_value:
-                    WebHandler.output('tv', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+                    WebHandler.output('tv', tv_id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
 
         WebHandler.output('tv', tv_id, key, value)
 

@@ -37,7 +37,7 @@
 			ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 		}
 		
-		var titles = ["lamp", "curtain", "air_conditioner", "TV"];
+		var titles = ["lamp", "curtain", "air_conditioner", "tv"];
 		showPage = function(title){
 			for(var i in titles){
 				if(titles[i] === title)
@@ -73,7 +73,7 @@
 				showPage("air_conditioner");
 			}
 			else if(3 == i){
-				showPage("TV");
+				showPage("tv");
 			}
 		}
 		
@@ -103,7 +103,7 @@
 		window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		window.frames['fTV'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 	}
 	onopen = function()
 	{
@@ -152,8 +152,8 @@
 	<div id="air_conditioner" style="display:none">
 		<iframe name="fair_conditioner" src='dev_set.html?dev_id=air_conditioner' class="myframe"></iframe>
 	</div>
-	<div id="TV" style="display:none">
-		<iframe name="fTV" src='dev_set.html?dev_id=TV' class="myframe"></iframe>
+	<div id="tv" style="display:none">
+		<iframe name="ftv" src='dev_set.html?dev_id=tv' class="myframe"></iframe>
 	</div>
 	<div id="div_footer"><canvas id="footer" align="left"></canvas></div>
 </div>
