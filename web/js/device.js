@@ -502,7 +502,7 @@ function device()
 	this.bar3 = null;
 	this.id = '1';
 	this.getmessaged = false;
-	this.Progress = {timer:null, tick:null, pos:0};
+	this.Progress = {timer:null, tick:null, pos:0, time_out:null};
 	this.Progress_timer = null;
 	this.Progress_tick = null;
 	
@@ -619,7 +619,7 @@ function device()
 		else
 			var pos = parseInt((bar.x + bar.width - x)*200/bar.width);
 			
-		if(pos == bar.pos || !bar.isdown)
+		if(pos == bar.pos || !bar.isdown || this.Progress.time_out)
 			return -1;
 
 		var command = null;
@@ -640,6 +640,7 @@ function device()
 			this.Progress.pos = bar.pos;
 			this.Progress.count = 0;
 		}
+		this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);//由于继电器反应有时间差，快速点击继电器来不及响应，所以这里限制点击速度
 		return command;
 	}
 	
@@ -1050,7 +1051,7 @@ function device()
 			return;
 		} 
 		else if( json.event === "lamp" ){
-			console.log('lamp:' + JSON.stringify(json));
+		//	console.log('lamp:' + JSON.stringify(json));
 		//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
 		//否则一个客户端发送命令，服务端的状态发生改变，另一个客户端收不到同样的状态将显示不一致的信息
 		//真正的命令信息是由ajax发出的（docommand）
@@ -1116,7 +1117,7 @@ function device()
 		} 
 		else if( json.event === "tv" ){
 			_TV_[json.mode] = json.data;
-console.log('tv:' + JSON.stringify(json));
+
 			var id = json.id;
 			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
 				id = '1';
@@ -1161,7 +1162,7 @@ console.log('tv:' + JSON.stringify(json));
 				
 				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
 				btn.style.backgroundColor = '#ee0';
-				console.log(param);
+
 			}
 			else{
 				//调光调色
@@ -1217,7 +1218,6 @@ console.log('tv:' + JSON.stringify(json));
 			}
 			else{
 				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
-				console.log(param);
 			}
 		}
 

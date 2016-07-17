@@ -3,7 +3,8 @@
 """
   服务主模块
   https://linux.cn/article-3782-1.html  使用树莓派红外控制空调和风扇
-  http://my.oschina.net/funnky/blog/147094 用红外遥控器遥控树莓派
+  http://my.oschina.net/funnky/blog/147094 用红外遥控器遥控树莓派\
+  http://stackoverflow.com/questions/22652156/how-to-use-irrecord-with-2ms-timing-instead-of-the-default-5ms
 """
 __author__ = 'yejs'
 __version__ = '1.0'

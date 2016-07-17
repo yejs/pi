@@ -47,13 +47,16 @@ class Connection(object):
 
         if False == Connection.heart_beat_init:
             Connection.heart_beat_init = True
-            Connection.heart_beat()
+            Connection.heart_beat()        
   
+    def test():    
+        pass#print(json.dumps(_LAMP_['normal']['1']))
+		
     def read_message(self):    
         self._stream.read_bytes(1024, self.doRecv, partial=True)
 
     def doRecv(self, data):    
-        obj = json.loads(data[:-1].decode())
+        obj = json.loads(data[:-1].decode()) 
         if obj and obj.get('event') == 'report':    
             set_dev_item(obj['dev_id'], self._address[0], obj['status'])
             print("recv from %s: %s" % (self._address[0], data[:-1].decode()))   
@@ -70,6 +73,7 @@ class Connection(object):
     def on_close(self):    
         Connection.clients.remove(self)    
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
+        mode = GlobalVar.get_mode()
         for k,v in _DEVICE_['lamp'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
             if v.get('ip') == self._address[0]:
                 _LAMP_[mode][k]['status'] = 'off'
@@ -120,55 +124,59 @@ class Connection(object):
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, key, value, color)
         elif dev_id.find('curtain') != -1:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
-        elif dev_id.find('air_conditioner') != -1:
+        elif dev_id.find('air_conditioner') != -1:#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
             LIRC_KEY = None
-            if key == 'power_on':
+            if value == 'power_on' or value == 'power_off':
                 LIRC_KEY = 'KEY_POWER'
-            elif key == 'temp_inc' and value == 'true':
+            elif value == 'temp_inc':
                 LIRC_KEY = 'KEY_UP'
-            elif key == 'temp_inc' and value == 'false':
+            elif value == 'temp_dec':
                 LIRC_KEY = 'KEY_DOWN'
-            elif key == 'mode':
+            elif value.find('mode_') != -1:
                 LIRC_KEY = 'KEY_MODE'
-            elif key == 'speed':
-                LIRC_KEY = 'KEY_SPEED'
-            elif key == 'up_down_swept':
-                LIRC_KEY = 'KEY_KP0'
-            elif key == 'left_right_swept':
-                LIRC_KEY = 'KEY_KP1'
-            value = Connection.lirc_air.getKey(LIRC_KEY) if LIRC_KEY else None
-            if value == None:
-                print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(key, LIRC_KEY))
-                return
-            msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"0\"}" %(value, )
-        elif dev_id.find('tv') != -1:
-            LIRC_KEY = None
-            if key == 'power_on':
-                LIRC_KEY = 'KEY_POWER'
-            elif key == 'vol_inc' and value == 'true':
+            elif value.find('speed_') != -1:
                 LIRC_KEY = 'KEY_VOLUMEUP'
-            elif key == 'vol_inc' and value == 'false':
-                LIRC_KEY = 'KEY_VOLUMEDOWN'
-            elif key == 'prog_inc' and value == 'true':
+            elif value.find('up_down_swept_') != -1:
                 LIRC_KEY = 'KEY_DOWN'
-            elif key == 'prog_inc' and value == 'false':
-                LIRC_KEY = 'KEY_UP'
-            elif key == 'ok':
+            elif value.find('left_right_swept_') != -1:
+                LIRC_KEY = 'KEY_RIGHT'
+            value = Connection.lirc_air.getKey(LIRC_KEY) if LIRC_KEY else None
+            is_raw = Connection.lirc_air.is_raw()
+			
+            if value == None:
+                print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
+                return
+            msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
+        elif dev_id.find('tv') != -1:#command 可能的值：power_on、power_off、vol_inc、vol_dec、prog_inc、prog_dec、mute、av/tv、home、back、view
+            LIRC_KEY = None
+            if value == 'power_on' or value == 'power_off':
+                LIRC_KEY = 'KEY_POWER'
+            elif value == 'vol_inc':
+                LIRC_KEY = 'KEY_VOLUMEUP'
+            elif value == 'vol_dec':
+                LIRC_KEY = 'KEY_VOLUMEDOWN'
+            elif value == 'prog_inc':
+                LIRC_KEY = 'KEY_CHANNELDOWN'
+            elif value == 'prog_dec':
+                LIRC_KEY = 'KEY_CHANNELUP'
+            elif value == 'ok':
                 LIRC_KEY = 'KEY_OK'
-            elif key == 'mute':
+            elif value == 'mute':
                 LIRC_KEY = 'KEY_MUTE'
-            elif key == 'av/tv':
-                LIRC_KEY = 'KEY_AV/TV'
-            elif key == 'home':
+            elif value == 'av/tv':
+                LIRC_KEY = 'KEY_TV'
+            elif value == 'home':
                 LIRC_KEY = 'KEY_HOME'
-            elif key == 'back':
+            elif value == 'back':
                 LIRC_KEY = 'KEY_BACK'
             value = Connection.lirc_tv.getKey(LIRC_KEY) if LIRC_KEY else None
+            is_raw = Connection.lirc_tv.is_raw()
+			
             if value == None:
-                print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(key, LIRC_KEY))
+                print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                 return
-            msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"0\"}" %(value, )
-
+            msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
+        print(msg)
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 try:

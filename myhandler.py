@@ -93,39 +93,17 @@ class WebHandler(tornado.web.RequestHandler):
     #硬件层输出（GPIO 或 socket到硬件终端）
     def output(dev_id, id, key, value):
         mode = GlobalVar.get_mode()
+		
         if dev_id == 'lamp':#灯
             item = _LAMP_[mode][id]
             if key == 'color':		                        #调光调色指令
-                r, g, b = RPi_GPIO.get_color(value)
-                item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
-        elif dev_id == 'curtain':#窗帘
-            item = _CURTAIN_[mode][id]
-        elif dev_id == 'air_conditioner':#空调
-            item = _AIR_CONDITIONER_[mode][id]
-            if key == 'power_on' or key == 'mode' or key == 'speed' or key == 'up_down_swept' or key == 'left_right_swept':
-                item[key] = value
-            elif key == 'temp_inc':
-                if value == 'true':
-                    item['temp_set'] += 1
-                else:
-                    item['temp_set'] -= 1
-            #print("air_conditioner, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
-            #return
-        elif dev_id == 'tv':#电视
-            item = _TV_[mode][id]
-            if key == 'power_on':
-                if value == 'true' or value == 'on':
-                    item['status'] = 'on'
-                else:
-                    item['status'] = 'off'
-            print("tv, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
-            #return
-        else:#TODO:其它设备待完成
-            return;
+                key = 'command'
+                value = item['status']
+        else:
+            item = None
 
-        if key == 'command':							#开关指令
-            item['status'] = value
-        elif key == None:    							#模式指令
+
+        if key == None:    							#模式指令
             key = 'command'
             value = item['status']
 		
@@ -145,30 +123,36 @@ class WebHandler(tornado.web.RequestHandler):
 		
         key = None
         value = None
-
-        if post_data.get('command'):#开关指令
-            key = 'command'
-        elif post_data.get('color'):#调光调色指令
-            key = 'color'
-			
+		
         if post_data.get('id'):
             GlobalVar.set_lamp_id(post_data['id'][0])
         else :
             GlobalVar.set_lamp_id('1')
-        lamp_id = GlobalVar.get_lamp_id()
-        if key != None:		
+        id = GlobalVar.get_lamp_id()
+
+        item = _LAMP_[mode][id]
+		
+        if post_data.get('command'):#开关指令
+            key = 'command'
             value = post_data[key][0]
-			
+            item['status'] = value
+        elif post_data.get('color'):#调光调色指令
+            key = 'color'
+            value = post_data[key][0]
+
+            r, g, b = RPi_GPIO.get_color(value)
+            item['color']['r'], item['color']['g'], item['color']['b'] = int(r*100/255 + 0.5), int(g*100/255 + 0.5), int(b*100/255 + 0.5)
+
         if None == _LAMP_.get(mode):		
             return
 			
-        if lamp_id == 'all' or key == None:
+        if id == 'all' or key == None:
             for k in _LAMP_[mode].keys():
                 WebHandler.output('lamp', k, key, value)
 
-        WebHandler.output('lamp', lamp_id, key, value)
-        print('lamp_id: %s' %lamp_id )
+        WebHandler.output('lamp', id, key, value)
         WebSocket.broadcast_lamp_status()
+        Connection.test()
 		
 	#窗帘业务逻辑模块处理,协议：	mode=normal&dev_id=curtain&id=1&command=open&progress=1
     def curtain(post_data):
@@ -176,18 +160,24 @@ class WebHandler(tornado.web.RequestHandler):
         mode = GlobalVar.get_mode()
         key = None
         value = None
-
-        if post_data.get('command'):#开关指令
-            key = 'command'
-			
+		
         if post_data.get('id'):
             GlobalVar.set_curtain_id(post_data['id'][0])
         else :
             GlobalVar.set_curtain_id('1')
 			
-        curtain_id = GlobalVar.get_curtain_id()
+        id = GlobalVar.get_curtain_id()
+		
+
+        if post_data.get('command'):#开关指令
+            key = 'command'
+			
+            item = _CURTAIN_[mode][id]
+            item['status'] = post_data[key][0]
+			
+
         if post_data.get('progress'):#前端通知当前窗帘开合进度
-            _CURTAIN_[mode][curtain_id]['progress'] = int(post_data['progress'][0])
+            _CURTAIN_[mode][id]['progress'] = int(post_data['progress'][0])
 			
         if key != None:		
             value = post_data[key][0]
@@ -200,7 +190,7 @@ class WebHandler(tornado.web.RequestHandler):
         当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
 		而与界面显示的状态不一致
         '''
-        if curtain_id == 'all' or key == None:
+        if id == 'all' or key == None:
             for id in _CURTAIN_[mode].keys():
                 #WebHandler.output('curtain', id, key, value)
                 last_progress = _CURTAIN_[last_mode][id]['progress']
@@ -219,58 +209,17 @@ class WebHandler(tornado.web.RequestHandler):
                 timer = threading.Timer(n, WebHandler.output, ('curtain', id, 'command', 'stop', ))#延时停止输出
                 timer.start()
         else:
-            WebHandler.output('curtain', curtain_id, key, value)
+            WebHandler.output('curtain', id, key, value)
 
         WebSocket.broadcast_curtain_status()
 		
 	#空调业务逻辑模块处理,协议：	mode=normal&dev_id=air_conditioner&id=1&command=power_on
-	#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
     def air_conditioner(post_data):
         mode = GlobalVar.get_mode()
         last_mode = GlobalVar.get_last_mode()
         key = None
         value = None
-
-        if post_data.get('command'):#解析command指令为具体的空调指令
-            value = post_data['command'][0]
-            if value.find('power_') != -1:#电源开关指令
-                key = 'power_on'
-                if value.find('power_on') != -1:
-                    value = 'true'
-                elif value.find('power_off') != -1:
-                    value = 'false'
-            elif value.find('temp_') != -1:#温度+ 、-指令
-                key = 'temp_inc'
-                if value.find('temp_inc') != -1:
-                    value = 'true'
-                elif value.find('temp_dec') != -1:
-                    value = 'false'
-            elif value.find('mode_') != -1:#调整模式指令
-                key = 'mode'
-                if value.find('mode_heat') != -1:
-                    value = 'heat'
-                elif value.find('mode_cold') != -1:
-                    value = 'cold'
-                elif value.find('mode_dehumidify') != -1:
-                    value = 'dehumidify'
-                elif value.find('mode_blowing') != -1:
-                    value = 'blowing'
-                elif value.find('mode_sleep') != -1:
-                    value = 'sleep'
-                elif value.find('mode_energy') != -1:
-                    value = 'energy'
-                elif value.find('mode_health') != -1:
-                    value = 'health'
-            elif value.find('speed_') != -1:#调整风速指令
-                key = 'speed'
-                value = int(value[6:])
-            elif value.find('up_down_swept_') != -1:#调整上下风向指令（扫风、定向吹风）
-                key = 'up_down_swept'
-                value = int(value[14:])
-            elif value.find('left_right_swept_') != -1:#调整左右风向指令（扫风、定向吹风）
-                key = 'left_right_swept'
-                value = int(value[17:])
-			
+		
         if post_data.get('id'):
             GlobalVar.set_air_conditioner_id(post_data['id'][0])
         else :
@@ -278,60 +227,64 @@ class WebHandler(tornado.web.RequestHandler):
 		
         if None == _AIR_CONDITIONER_.get(mode):		
             return
-        air_conditioner_id = GlobalVar.get_air_conditioner_id()
-        if air_conditioner_id == 'all' or key == None:
-            for k in _AIR_CONDITIONER_[mode].keys():
-                last_value = _AIR_CONDITIONER_[last_mode][air_conditioner_id]['power_on']
-                now_value = _AIR_CONDITIONER_[mode][air_conditioner_id]['power_on']
-                if last_value != now_value:
-                    WebHandler.output('air_conditioner', air_conditioner_id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+			
+        id = GlobalVar.get_air_conditioner_id()
 
-        WebHandler.output('air_conditioner', air_conditioner_id, key, value)
+        if post_data.get('command'):#解析command指令为具体的空调指令
+            key = 'command'
+            value = post_data['command'][0]
+            item = _AIR_CONDITIONER_[mode][id]
+			
+            if value.find('power_') != -1:#电源开关指令
+                if value.find('power_on') != -1:
+                    item['power_on'] = 'true'
+                elif value.find('power_off') != -1:
+                    item['power_on'] = 'false'
+            elif value.find('temp_') != -1:#温度+ 、-指令
+                if value.find('temp_inc') != -1:
+                    item['temp_set'] += 1
+                elif value.find('temp_dec') != -1:
+                    item['temp_set'] -= 1
+            elif value.find('mode_') != -1:#调整模式指令
+                if value.find('mode_heat') != -1:
+                    item['mode'] = 'heat'
+                elif value.find('mode_cold') != -1:
+                    item['mode'] = 'cold'
+                elif value.find('mode_dehumidify') != -1:
+                    item['mode'] = 'dehumidify'
+                elif value.find('mode_blowing') != -1:
+                    item['mode'] = 'blowing'
+                elif value.find('mode_sleep') != -1:
+                    item['mode'] = 'sleep'
+                elif value.find('mode_energy') != -1:
+                    item['mode'] = 'energy'
+                elif value.find('mode_health') != -1:
+                    item['mode'] = 'health'
+            elif value.find('speed_') != -1:#调整风速指令
+                item['speed'] = int(value[6:])
+            elif value.find('up_down_swept_') != -1:#调整上下风向指令（扫风、定向吹风）
+                item['up_down_swept'] = int(value[14:])
+            elif value.find('left_right_swept_') != -1:#调整左右风向指令（扫风、定向吹风）
+                item['left_right_swept'] = int(value[17:])
+            #print("air_conditioner, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
+		
+        if id == 'all' or key == None:
+            for k in _AIR_CONDITIONER_[mode].keys():
+                last_value = _AIR_CONDITIONER_[last_mode][id]['power_on']
+                now_value = _AIR_CONDITIONER_[mode][id]['power_on']
+                if last_value != now_value:
+                    WebHandler.output('air_conditioner', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+
+        WebHandler.output('air_conditioner', id, key, value)
 
         WebSocket.broadcast_air_status()
 		
-	#空调业务逻辑模块处理,协议：	mode=normal&dev_id=tv&id=1&command=power_on	
-	#command 可能的值：power_on、power_off、vol_inc、vol_dec、prog_inc、prog_dec、mute、av/tv、home、back、view
+	#电视业务逻辑模块处理,协议：	mode=normal&dev_id=tv&id=1&command=power_on	
     def tv(post_data):
         mode = GlobalVar.get_mode()
+        last_mode = GlobalVar.get_last_mode()
         key = None
         value = None
-
-        if post_data.get('command'):#解析command指令为具体的空调指令
-            value = post_data['command'][0]
-            if value.find('power_') != -1:#电源开关指令
-                key = 'power_on'
-                if value.find('power_on') != -1:
-                    value = 'true'
-                elif value.find('power_off') != -1:
-                    value = 'false'
-            elif value.find('vol_') != -1:#音量+ 、-指令
-                key = 'vol_inc'
-                if value.find('vol_inc') != -1:
-                    value = 'true'
-                elif value.find('vol_dec') != -1:
-                    value = 'false'
-            elif value.find('prog_') != -1:#节目+ 、-指令
-                key = 'prog_inc'
-                if value.find('prog_inc') != -1:
-                    value = 'true'
-                elif value.find('prog_dec') != -1:
-                    value = 'false'
-            elif value.find('mute') != -1:#静音指令
-                key = 'mute'
-                value = 'true'
-            elif value.find('av/tv') != -1:#av/tv指令
-                key = 'av/tv'
-                value = 'true'
-            elif value.find('home') != -1:#home指令
-                key = 'home'
-                value = 'true'
-            elif value.find('back') != -1:#back指令
-                key = 'back'
-                value = 'true'
-            elif value.find('view') != -1:#back指令
-                key = 'view'
-                value = 'true'
 
         if post_data.get('id'):
             GlobalVar.set_tv_id(post_data['id'][0])
@@ -340,15 +293,28 @@ class WebHandler(tornado.web.RequestHandler):
 		
         if None == _TV_.get(mode):		
             return
-        tv_id = GlobalVar.get_tv_id()
-        if tv_id == 'all' or key == None:
-            for k in _TV_[mode].keys():
-                last_value = _TV_[last_mode][tv_id]['status']
-                now_value = _TV_[mode][tv_id]['status']
-                if last_value != now_value:
-                    WebHandler.output('tv', tv_id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+			
+        id = GlobalVar.get_tv_id()
 
-        WebHandler.output('tv', tv_id, key, value)
+        if post_data.get('command'):#解析command指令为具体的电视指令
+            key = 'command'
+            value = post_data['command'][0]
+            item = _TV_[mode][id]
+            if value == 'power_on':
+                item['status'] = 'on'
+            elif value == 'power_off':
+                item['status'] = 'off'
+            #print("tv, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
+
+		
+        if id == 'all' or key == None:
+            for k in _TV_[mode].keys():
+                last_value = _TV_[last_mode][id]['status']
+                now_value = _TV_[mode][id]['status']
+                if last_value != now_value:
+                    WebHandler.output('tv', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+
+        WebHandler.output('tv', id, key, value)
 
         WebSocket.broadcast_tv_status()
 		
@@ -379,6 +345,7 @@ class WebHandler(tornado.web.RequestHandler):
         obj['name'] = urllib.parse.unquote(obj['name'])
         _DEVICE_[post_data['dev_id'][0]][post_data['id'][0]] = obj
         WebSocket.broadcast_device()
+
 			
 if __name__ == "__main__":
     pass

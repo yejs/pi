@@ -52,7 +52,6 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 		
     def broadcast_lamp_status():
         mode = GlobalVar.get_mode()
-        print('broadcast_lamp_status lamp_id: %s' %GlobalVar.get_lamp_id() )
         str1 = '{\"event\": \"lamp\", \"data\":'
         str1 += json.dumps(_LAMP_[mode])
         str1 += ', \"mode\":\"'
