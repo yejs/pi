@@ -6,7 +6,7 @@ _device = null;
 _port = 8000;
 dev_id = 'lamp';
 mode = "normal";
-
+_TV_BTN_ = {'vol_prog':0, 'vol':1, 'prog':2, 'power':3, 'mute':4, 'av':5, 'home':6, 'back':7};
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
 	var url = location.search;
@@ -109,16 +109,21 @@ function device()
 			this.contextImage.fillText('℃', this.imageRect.x + this.imageRect.width-25-this.contextImage.measureText('℃').width, this.imageRect.y + 60);
 		}
 		else if('tv' == dev_id){
-
 			var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 20;
-			this.arrayBtn[0].doResize(offset_x, offset_y, offset_x + btn_w, offset_y + btn_h);
-			this.arrayBtn[1].doResize(this.rect.width - offset_x - btn_w, offset_y, this.rect.width - offset_x, offset_y + btn_h);
-			this.arrayBtn[2].doResize(0, offset_y + btn_h + 30, this.rect.width, offset_y + btn_h + 380);
+			r = 350;
+			this.arrayBtn[_TV_BTN_.vol_prog].doResize(this.rect.width/2 - r/2, offset_y + btn_h + 30, this.rect.width/2 + r/2, offset_y + btn_h + 30 + r);
+			o1 = offset_x + 120, o2 = offset_y + btn_h + 230;
+			this.arrayBtn[_TV_BTN_.vol].doResize(o1, o2, o1 + 100, o2 + 260);
+			this.arrayBtn[_TV_BTN_.prog].doResize(this.rect.width - o1 - 100, o2, this.rect.width - o1, o2 + 260);
 
-			var s = ((this.rect.width - offset_x - btn_w) - (offset_x))/3;
-			y = offset_y + btn_h + 410;
-			for(var i=3;i<this.arrayBtn.length;i++){
-				this.arrayBtn[i].doResize(offset_x + (i-3)*s, y, offset_x + (i-3)*s + btn_w, y + btn_h);
+			this.arrayBtn[_TV_BTN_.power].doResize(offset_x, offset_y, offset_x + btn_w, offset_y + btn_h);
+			this.arrayBtn[_TV_BTN_.mute].doResize(this.rect.width - offset_x - btn_w, offset_y, this.rect.width - offset_x, offset_y + btn_h);
+		
+			var s = ((this.rect.width - offset_x - btn_w) - (offset_x))/2;
+			y = offset_y + btn_h + 540;
+			st = _TV_BTN_.av;
+			for(var i=st;i<this.arrayBtn.length;i++){
+				this.arrayBtn[i].doResize(offset_x + (i-st)*s, y, offset_x + (i-st)*s + btn_w, y + btn_h);
 			}
 		}
 	}
@@ -334,11 +339,11 @@ function device()
 		tv_item = _TV_[mode][this.id];
 
 		var x = this.rect.width/2;
-		var y = parseInt(this.arrayBtn[2].top + this.arrayBtn[2].height/2);
-		var r = parseInt(this.arrayBtn[2].height/2);
+		var y = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].top + this.arrayBtn[_TV_BTN_.vol_prog].height/2);
+		var r = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].height/2);
 
 		var grd=new Array();
-		for(var i=0;i<5;i++){
+		for(var i=0;i<2;i++){
 			grd[i]=ctx.createRadialGradient(x,y,0,x,y,r);
 			switch(i){
 				case 0:
@@ -348,22 +353,10 @@ function device()
 				grd[i].addColorStop(1,'rgba(120, 120, 120, 0.9)');
 				break;
 				case 1:
-				grd[i].addColorStop(0,'rgba(250, 60, 60, 0.3)');
-				grd[i].addColorStop(0.5,'rgba(250, 60, 60, 0.4)');
-				grd[i].addColorStop(0.9,'rgba(250, 60, 60, 0.5)');
+				grd[i].addColorStop(0,'rgba(250, 60, 60, 0.6)');
+				grd[i].addColorStop(0.5,'rgba(250, 60, 60, 0.7)');
+				grd[i].addColorStop(0.9,'rgba(250, 60, 60, 0.8)');
 				grd[i].addColorStop(1,'rgba(250, 60, 60, 0.9)');
-				break;
-				case 2:
-				grd[i].addColorStop(0,'rgba(120, 120, 255, 1)');
-				grd[i].addColorStop(1,'rgba(120, 120, 220, 0.2)');
-				break;
-				case 3:
-				grd[i].addColorStop(0,'rgba(120, 120, 120, 0.5)');
-				grd[i].addColorStop(1,'rgba(120, 120, 120, 0.2)');
-				break;
-				case 4:
-				grd[i].addColorStop(0,'rgba(120, 120, 120, 0.5)');
-				grd[i].addColorStop(1,'rgba(120, 120, 120, 0.2)');
 				break;
 			}
 		}
@@ -371,15 +364,14 @@ function device()
 		ctx.strokeStyle = 'rgba(120, 120, 120, 0.5)';
 		ctx.lineWidth = 5;
 		
+		//----------------------画机顶盒音量、频道、确认组合键-----------------------------
 		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
-		ctx.arcEx(x, y, r,  0, Math.PI * 2, true, 1, 1);
-		
-		ctx.font = _font56;
+		ctx.arcEx(x, y, r,  0, Math.PI * 2, true, 1, 1);//最外层圆
 
 		var r1 = 0;
 		if(this.p)
 			r1 = Math.sqrt((this.p.x-x)*(this.p.x-x) + (this.p.y-y)*(this.p.y-y));
-		for(var i=0;i<4;i++){
+		for(var i=0;i<4;i++){//画机顶盒音量、频道组合键
 			if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, this.p, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2))
 				ctx.fillStyle = grd[1];
 			else
@@ -387,6 +379,7 @@ function device()
 			
 			ctx.arcEx(x, y, r-10,  -Math.PI/4 + i*Math.PI/2 + Math.PI/100, Math.PI/4 + i*Math.PI/2 - Math.PI/100, false, 1, 1);
 			
+			//画机顶盒音量、频道组合键标识（四个方向标识）
 			ctx.fillStyle = 'rgba(200, 200, 200, 1)';
 			a = i*Math.PI/2;
 			r2 = r*3/4;
@@ -420,12 +413,12 @@ function device()
 			ctx.closePath();
 			ctx.stroke();  
 			ctx.fill();
-			ctx.closePath();
 		}
 		
 		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
-		ctx.arcEx(x, y, r/2,  0, Math.PI * 2, true, 1, 0);
+		ctx.arcEx(x, y, r/2,  0, Math.PI * 2, true, 1, 0);//画里层圆
 		
+		//画机顶盒确认键
 		if(r1 && r1 < r/2-10)
 			ctx.fillStyle = grd[1];
 		else
@@ -433,14 +426,12 @@ function device()
 		ctx.arcEx(x, y, r/2-10,  0, Math.PI * 2, true, 1, 1);
 		
 		ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+		ctx.font = _font56;
 		ctx.fillText('ok', x-ctx.measureText('ok').width/2, y + 20);
-		
+		//----------------------画机顶盒音量、频道、确认组合键-----------------------------
 		
 		//画按钮
-		for(var i=0;i<this.arrayBtn.length;i++){
-			if(i == 2)
-				continue;
-			
+		for(var i=3;i<this.arrayBtn.length;i++){
 			if(this.arrayBtn[i].istouch)
 				ctx.fillStyle = "rgb(230, 100, 100)";
 			else
@@ -448,11 +439,87 @@ function device()
 			
 			this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
 		}
-		//画电源按钮
+		//画电源按钮图标
 		ctx.strokeStyle = tv_item.status == 'on' ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
 		ctx.lineWidth = 5;
-		ctx.arcEx(this.arrayBtn[0].left + this.arrayBtn[0].width/2, this.arrayBtn[0].top + this.arrayBtn[0].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
-		ctx.drawLine(this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 15,this.arrayBtn[0].left + this.arrayBtn[0].width/2,this.arrayBtn[0].top + 30);
+		ctx.arcEx(this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2, this.arrayBtn[_TV_BTN_.power].top + this.arrayBtn[_TV_BTN_.power].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
+		ctx.drawLine(this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2,this.arrayBtn[_TV_BTN_.power].top + 15,this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2,this.arrayBtn[_TV_BTN_.power].top + 30);
+		
+		this.drawTV2(ctx, _TV_BTN_.vol);
+		this.drawTV2(ctx, _TV_BTN_.prog);
+	}
+	
+	this.drawTV2 = function(ctx, index){
+		if(this.rect.width == 0 || this.arrayBtn[2].height == 0)
+			return;
+
+		tv_item = _TV_[mode][this.id];
+
+		var x = parseInt(this.arrayBtn[index].left + this.arrayBtn[index].width/2);
+		var y = parseInt(this.arrayBtn[index].top + this.arrayBtn[index].height/2);
+
+		ctx.strokeStyle = 'rgba(120, 120, 120, 0.5)';
+		ctx.lineWidth = 5;
+
+		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
+		ctx.roundRect(this.arrayBtn[index].left, this.arrayBtn[index].top, this.arrayBtn[index].width, this.arrayBtn[index].height, this.arrayBtn[index].width/2, 1, 0);//最外层圆
+
+		loc = {x:0, y:0};
+		if(this.p)
+			loc = this.p;
+		for(var i=0;i<2;i++){//画机顶盒音量、频道组合键
+			var left = this.arrayBtn[index].left + 10, right = this.arrayBtn[index].right - 10;
+			var top = this.arrayBtn[index].top + (i == 0 ? 10 : 5) + i*this.arrayBtn[index].height/2;
+			var bottom = top + this.arrayBtn[index].height/2 - 15;
+			if(loc.x >= left && loc.x <= right && loc.y >= top && loc.y <= bottom)
+				ctx.fillStyle = 'rgba(230, 100, 100, 1)';
+			else
+				ctx.fillStyle = 'rgba(170, 170, 170, 0.3)';
+
+			if(0 == i)
+				ctx.roundRectEx(left, top, right - left, bottom - top, (right - left)/2, 1, 1, 1, 1, 0, 0);
+			else
+				ctx.roundRectEx(left, top, right - left, bottom - top, (right - left)/2, 1, 1, 0, 0, 1, 1);
+
+			//画机顶盒音量、频道组合键标识
+			ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+			x1 = left + (right - left)/2;
+			y1 = top + (bottom - top)/2;
+			ctx.beginPath(); 
+
+			if(0 == i){
+				y1 += 20;
+				ctx.moveTo(x1 - 20, y1); 
+				ctx.lineTo(x1 + 20, y1); 
+				ctx.lineTo(x1, y1 - 40); 
+			}
+			else if(1 == i){
+				y1 -= 20;
+				ctx.moveTo(x1 - 20, y1); 
+				ctx.lineTo(x1 + 20, y1); 
+				ctx.lineTo(x1, y1 + 40); 
+			}
+
+			ctx.closePath();
+			ctx.stroke();  
+			ctx.fill();
+		}
+		
+		if(_TV_BTN_.vol == index){
+			ctx.strokeStyle = 'rgba(10, 10, 10, 0.6)';
+			ctx.beginPath(); 
+			y1 = this.arrayBtn[index].top + 20 + this.arrayBtn[index].height/2;
+			ctx.moveTo(left - 90, y1); 
+			ctx.lineTo(left - 30, y1); 
+			ctx.lineTo(left - 30, y1 - 30); 
+			ctx.closePath();
+			ctx.stroke();  
+		}
+		else if(_TV_BTN_.prog == index){
+			ctx.fillStyle = ctx.strokeStyle = 'rgba(10, 10, 10, 0.6)';
+			y1 = this.arrayBtn[index].top + 15 + this.arrayBtn[index].height/2;
+			ctx.fillText('P',this.arrayBtn[index].right + 20 , y1);
+		}
 	}
 	
 	this.onresize = function()
@@ -541,30 +608,34 @@ function device()
 		}
 	}
 	else if('tv' == dev_id){
-		for(var i=0;i<7;i++)
+		for(var i=0;i<8;i++)
 		{
 			switch(i){
-				case 0:
+				case 0://机顶盒音量、频道、确认组合键
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
 				break;
-				case 1:
-				this.arrayBtn[i] = new tagRECT(0,0,0,0,'静音');
+				case 1://电视音量组合键
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
 				break;
-				case 2:
+				case 2://电视频道组合键
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
 				break;
 				case 3:
-				this.arrayBtn[i] = new tagRECT(0,0,0,0,'AV/TV');
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'');
 				break;
 				case 4:
-				this.arrayBtn[i] = new tagRECT(0,0,0,0,'Home');
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'静音');
 				break;
 				case 5:
-				this.arrayBtn[i] = new tagRECT(0,0,0,0,'后退');
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'AV/TV');
 				break;
 				case 6:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'Home');
+				break;
+				case 7:
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'回看');
 				break;
+				
 			}
 		}
 	}
@@ -874,7 +945,7 @@ function device()
 			if(down){
 				for(var i=0;i<this.arrayBtn.length;i++){
 					if(this.arrayBtn[i].IsInRect(loc, 0)){
-						if(i == 0 || (i!= 0 && power_on))
+						if(i == 3 || (i!= 3 && power_on))
 							this.arrayBtn[i].istouch = true;
 						else
 							return;
@@ -887,36 +958,33 @@ function device()
 					this.arrayBtn[i].istouch = false;
 				}
 				
-				if(this.arrayBtn[0].IsInRect(loc, 0)){//power
+				if(this.arrayBtn[_TV_BTN_.power].IsInRect(loc, 0)){//power
 					power_on = power_on ? false : true;
 
 					this.docommand(this.id, power_on ? 'power_on' : 'power_off');
-					this.doBtnFocus(0);
+					this.doBtnFocus(_TV_BTN_.power);
 				}
-				else if(this.arrayBtn[1].IsInRect(loc, 0) && power_on){//mute
+				else if(this.arrayBtn[_TV_BTN_.mute].IsInRect(loc, 0) && power_on){//mute
 					this.docommand(this.id, 'mute');
-					this.doBtnFocus(1);
+					this.doBtnFocus(_TV_BTN_.mute);
 				}
-				else if(this.arrayBtn[3].IsInRect(loc, 0) && power_on){//av/tv
+				else if(this.arrayBtn[_TV_BTN_.av].IsInRect(loc, 0) && power_on){//av/tv
 					this.docommand(this.id, 'av/tv');
-					this.doBtnFocus(3);
+					this.doBtnFocus(_TV_BTN_.av);
 				}
-				else if(this.arrayBtn[4].IsInRect(loc, 0) && power_on){//home
+				else if(this.arrayBtn[_TV_BTN_.home].IsInRect(loc, 0) && power_on){//home
 					this.docommand(this.id, 'home');
-					this.doBtnFocus(4);
+					this.doBtnFocus(_TV_BTN_.home);
 				}
-				else if(this.arrayBtn[5].IsInRect(loc, 0) && power_on){//back
+				else if(this.arrayBtn[_TV_BTN_.back].IsInRect(loc, 0) && power_on){//back
 					this.docommand(this.id, 'back');
-					this.doBtnFocus(5);
+					this.doBtnFocus(_TV_BTN_.back);
 				}
-				else if(this.arrayBtn[6].IsInRect(loc, 0) && power_on){//view
-					this.docommand(this.id, 'view');
-					this.doBtnFocus(6);
-				}
+
 				else if(power_on){
 					var x = this.rect.width/2;
-					var y = parseInt(this.arrayBtn[2].top + this.arrayBtn[2].height/2);
-					var r = parseInt(this.arrayBtn[2].height/2);
+					var y = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].top + this.arrayBtn[_TV_BTN_.vol_prog].height/2);
+					var r = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].height/2);
 
 					var r1 = 0;
 					if(loc)
@@ -924,17 +992,35 @@ function device()
 					for(var i=0;i<4;i++){
 						if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, loc, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2)){
 							if(0 == i)//volume +
-								this.docommand(this.id, 'vol_inc');
-							else if(1 == i)//prog_inc
-								this.docommand(this.id, 'prog_inc');
+								this.docommand(this.id, 'vol_up');
+							else if(1 == i)//channel_up
+								this.docommand(this.id, 'channel_up');
 							else if(2 == i)//volume -
-								this.docommand(this.id, 'vol_dec');
-							else if(3 == i)//prog_dec
-								this.docommand(this.id, 'prog_dec');
+								this.docommand(this.id, 'vol_down');
+							else if(3 == i)//channel_down
+								this.docommand(this.id, 'channel_down');
 						}
 					}
 					if(r1 && r1 < r/2)
 						this.docommand(this.id, 'ok');
+					
+					for(var index=_TV_BTN_.vol;index<=_TV_BTN_.prog;index++){
+						for(var i=0;i<2;i++){//电视音量、频道组合键
+							var left = this.arrayBtn[index].left + 10, right = this.arrayBtn[index].right - 10;
+							var top = this.arrayBtn[index].top + (i == 0 ? 10 : 5) + i*this.arrayBtn[index].height/2;
+							var bottom = top + this.arrayBtn[index].height/2 - 15;
+							if(loc.x >= left && loc.x <= right && loc.y >= top && loc.y <= bottom){
+								if(index==1 && 0 == i)
+									this.docommand(this.id, 'vol_up');
+								else if(index==1 && 1 == i)
+									this.docommand(this.id, 'vol_down');
+								else if(index==2 && 0 == i)
+									this.docommand(this.id, 'channel_up');
+								else if(index==2 && 1 == i)
+									this.docommand(this.id, 'channel_down');
+							}
+						}
+					}
 				}
 			}
 			

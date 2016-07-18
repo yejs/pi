@@ -152,7 +152,7 @@ class WebHandler(tornado.web.RequestHandler):
 
         WebHandler.output('lamp', id, key, value)
         WebSocket.broadcast_lamp_status()
-        Connection.test()
+        #Connection.test()
 		
 	#窗帘业务逻辑模块处理,协议：	mode=normal&dev_id=curtain&id=1&command=open&progress=1
     def curtain(post_data):

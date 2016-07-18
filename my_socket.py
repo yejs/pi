@@ -41,8 +41,8 @@ class Connection(object):
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         if Connection.lirc_air == None:
-            Connection.lirc_air = LIRC("lircd.conf")
-            Connection.lirc_tv = LIRC("lircd.conf")
+            Connection.lirc_air = LIRC("lircd_air.conf")
+            Connection.lirc_tv = LIRC("lircd_tv.conf")
         print("New connection: %s, " % address[0])
 
         if False == Connection.heart_beat_init:
@@ -151,13 +151,13 @@ class Connection(object):
             LIRC_KEY = None
             if value == 'power_on' or value == 'power_off':
                 LIRC_KEY = 'KEY_POWER'
-            elif value == 'vol_inc':
+            elif value == 'vol_up':
                 LIRC_KEY = 'KEY_VOLUMEUP'
-            elif value == 'vol_dec':
+            elif value == 'vol_down':
                 LIRC_KEY = 'KEY_VOLUMEDOWN'
-            elif value == 'prog_inc':
+            elif value == 'channel_up':
                 LIRC_KEY = 'KEY_CHANNELDOWN'
-            elif value == 'prog_dec':
+            elif value == 'channel_down':
                 LIRC_KEY = 'KEY_CHANNELUP'
             elif value == 'ok':
                 LIRC_KEY = 'KEY_OK'
@@ -176,7 +176,7 @@ class Connection(object):
                 print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                 return
             msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
-        print(msg)
+        #print(msg)
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 try:
