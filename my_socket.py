@@ -176,7 +176,7 @@ class Connection(object):
                 print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                 return
             msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
-        #print(msg)
+        print(msg)
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 try:

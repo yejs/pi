@@ -690,7 +690,7 @@ function device()
 		else
 			var pos = parseInt((bar.x + bar.width - x)*200/bar.width);
 			
-		if(pos == bar.pos || !bar.isdown || this.Progress.time_out)
+		if(pos == bar.pos || !bar.isdown)// || this.Progress.time_out)
 			return -1;
 
 		var command = null;
@@ -711,7 +711,7 @@ function device()
 			this.Progress.pos = bar.pos;
 			this.Progress.count = 0;
 		}
-		this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);//由于继电器反应有时间差，快速点击继电器来不及响应，所以这里限制点击速度
+	//	this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);//由于继电器反应有时间差，快速点击继电器来不及响应，所以这里限制点击速度
 		return command;
 	}
 	
@@ -807,6 +807,15 @@ function device()
 		
 		if(down)
 			this.p = loc; 
+		
+		if(up){
+			
+			if(this.Progress.time_out){
+				this.doDraw();
+				return;
+			}
+			this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);
+		}
 		
 		if("lamp" == dev_id){
 			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
