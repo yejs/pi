@@ -63,6 +63,7 @@ class Connection(object):
                 WebSocket.broadcast_device();
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
+                print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
             print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
@@ -150,7 +151,7 @@ class Connection(object):
                 print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                 return
 
-            msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
         elif dev_id.find('tv') != -1:#command 可能的值：power_on、power_off、vol_inc、vol_dec、prog_inc、prog_dec、mute、av/tv、home、back、view
             LIRC_KEY = None
             if value == 'power_on' or value == 'power_off':
@@ -179,8 +180,8 @@ class Connection(object):
             if value == None:
                 print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                 return
-            msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
-        print(msg)
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
+        #print(msg)
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 try:

@@ -851,6 +851,7 @@ function device()
 				_device.Progress.time_ack = null;
 			},1000);
 		}
+
 		this.Progress.time_series = setTimeout(function(){_device.doTVEx(loc);}, 100);
 	}
 	
