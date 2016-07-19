@@ -41,8 +41,8 @@ class Connection(object):
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         if Connection.lirc_air == None:
-            Connection.lirc_air = LIRC("lircd_air.conf")
-            Connection.lirc_tv = LIRC("lircd_tv.conf")
+            Connection.lirc_air = LIRC("conf/lircd_air.conf")
+            Connection.lirc_tv = LIRC("conf/lircd_tv.conf")
         print("New connection: %s, " % address[0])
 
         if False == Connection.heart_beat_init:
