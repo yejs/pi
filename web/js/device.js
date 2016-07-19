@@ -50,7 +50,7 @@ refresh = function(){
 window.addEventListener('message',function(e){
 	if('onmessage'===e.data.msg){
 		_device.onmessage(e.data.data);
-	//	console.log(e.data.data);
+		//console.log(e.data.data);
 	}
 },false);
 
@@ -569,9 +569,10 @@ function device()
 	this.bar3 = null;
 	this.id = '1';
 	this.getmessaged = false;
-	this.Progress = {timer:null, tick:null, pos:0, time_out:null};
+	this.Progress = {timer:null, tick:null, pos:0, time_out:null, time_series:null, time_ack:null};
 	this.Progress_timer = null;
 	this.Progress_tick = null;
+	this.ack = true;
 	
 	this.air = {'up_down':{'direction':1, 'swept_flag':0, 'timer':null}, 'left_right':{'direction':1, 'swept_flag':0, 'timer':null}};
 
@@ -690,7 +691,7 @@ function device()
 		else
 			var pos = parseInt((bar.x + bar.width - x)*200/bar.width);
 			
-		if(pos == bar.pos || !bar.isdown)// || this.Progress.time_out)
+		if(pos == bar.pos || !bar.isdown || this.Progress.time_out)
 			return -1;
 
 		var command = null;
@@ -711,7 +712,7 @@ function device()
 			this.Progress.pos = bar.pos;
 			this.Progress.count = 0;
 		}
-	//	this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);//由于继电器反应有时间差，快速点击继电器来不及响应，所以这里限制点击速度
+		this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);//由于继电器反应有时间差，快速点击继电器来不及响应，所以这里限制点击速度
 		return command;
 	}
 	
@@ -773,6 +774,152 @@ function device()
 
 		return color;
 	}
+
+	this.doAir = function(loc) { 
+		if(this.arrayBtn[0].IsInRect(loc, 0)){//power
+			power_on = power_on ? false : true;
+
+			this.docommand(this.id, power_on ? 'power_on' : 'power_off');
+			this.doBtnFocus(0);
+		}
+		else if(this.arrayBtn[1].IsInRect(loc, 0) && power_on){//+
+			if(air_item.temp_set < 30){
+				air_item.temp_set++;
+				this.docommand(this.id, 'temp_inc');
+			}
+			else
+				return;
+		}
+		else if(this.arrayBtn[2].IsInRect(loc, 0) && power_on){//-
+			if(air_item.temp_set > 16){
+				air_item.temp_set--;
+				this.docommand(this.id, 'temp_dec');
+			}
+			else
+				return;
+		}
+		else if(this.arrayBtn[3].IsInRect(loc, 0) && power_on){//mode
+			if(air_item.mode == 'heat')
+				air_item.mode = 'cold';
+			else if(air_item.mode == 'cold')
+				air_item.mode = 'dehumidify';
+			else if(air_item.mode == 'dehumidify')
+				air_item.mode = 'blowing';
+			else if(air_item.mode == 'blowing')
+				air_item.mode = 'sleep';
+			else if(air_item.mode == 'sleep')
+				air_item.mode = 'energy';
+			else if(air_item.mode == 'energy')
+				air_item.mode = 'health';
+			else if(air_item.mode == 'health')
+				air_item.mode = 'heat';
+			this.docommand(this.id, 'mode_' + air_item.mode);
+			this.doBtnFocus(3);
+		}
+		
+		else if(this.arrayBtn[4].IsInRect(loc, 0) && power_on){//speed
+			if(air_item.speed < 5)
+				air_item.speed++;
+			else if(air_item.speed == 5)
+				air_item.speed = 1;
+			this.docommand(this.id, 'speed_' + air_item.speed);
+			this.doBtnFocus(4);
+		}
+		else if(this.arrayBtn[5].IsInRect(loc, 0) && power_on){//up_down
+			air_item.up_down_swept = air_item.up_down_swept ? 0 : 1;
+			this.docommand(this.id, 'up_down_swept_' + air_item.up_down_swept);
+			this.doSwept();
+			this.doBtnFocus(5);
+		}
+		else if(this.arrayBtn[6].IsInRect(loc, 0) && power_on){//left_right
+			air_item.left_right_swept = air_item.left_right_swept ? 0 : 1;
+			this.docommand(this.id, 'left_right_swept_' + air_item.left_right_swept);
+			this.doSwept();
+			this.doBtnFocus(6);
+		}
+	}
+	
+	//这里处理电视遥控按键的连续点击
+	this.doTVEx = function(loc) {
+		if(this.ack){
+			this.ack = false;
+			this.doTV(loc);
+			if(this.Progress.time_ack)
+				clearTimeout(this.Progress.time_ack);
+			this.Progress.time_ack = setTimeout(function() {//电视终端没返回应答时的超时处理
+				_device.ack = true; 
+				_device.Progress.time_ack = null;
+			},1000);
+		}
+		this.Progress.time_series = setTimeout(function(){_device.doTVEx(loc);}, 100);
+	}
+	
+	this.doTV = function(loc) { 
+		if(this.arrayBtn[_TV_BTN_.power].IsInRect(loc, 0)){//power
+			power_on = power_on ? false : true;
+
+			this.docommand(this.id, power_on ? 'power_on' : 'power_off');
+			this.doBtnFocus(_TV_BTN_.power);
+		}
+		else if(this.arrayBtn[_TV_BTN_.mute].IsInRect(loc, 0) && power_on){//mute
+			this.docommand(this.id, 'mute');
+			this.doBtnFocus(_TV_BTN_.mute);
+		}
+		else if(this.arrayBtn[_TV_BTN_.av].IsInRect(loc, 0) && power_on){//av/tv
+			this.docommand(this.id, 'av/tv');
+			this.doBtnFocus(_TV_BTN_.av);
+		}
+		else if(this.arrayBtn[_TV_BTN_.home].IsInRect(loc, 0) && power_on){//home
+			this.docommand(this.id, 'home');
+			this.doBtnFocus(_TV_BTN_.home);
+		}
+		else if(this.arrayBtn[_TV_BTN_.back].IsInRect(loc, 0) && power_on){//back
+			this.docommand(this.id, 'back');
+			this.doBtnFocus(_TV_BTN_.back);
+		}
+
+		else if(power_on){
+			var x = this.rect.width/2;
+			var y = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].top + this.arrayBtn[_TV_BTN_.vol_prog].height/2);
+			var r = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].height/2);
+
+			var r1 = 0;
+			if(loc)
+				r1 = Math.sqrt((loc.x-x)*(loc.x-x) + (loc.y-y)*(loc.y-y));
+			for(var i=0;i<4;i++){
+				if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, loc, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2)){
+					if(0 == i)//volume +
+						this.docommand(this.id, 'vol_up');
+					else if(1 == i)//channel_up
+						this.docommand(this.id, 'channel_up');
+					else if(2 == i)//volume -
+						this.docommand(this.id, 'vol_down');
+					else if(3 == i)//channel_down
+						this.docommand(this.id, 'channel_down');
+				}
+			}
+			if(r1 && r1 < r/2)
+				this.docommand(this.id, 'ok');
+			
+			for(var index=_TV_BTN_.vol;index<=_TV_BTN_.prog;index++){
+				for(var i=0;i<2;i++){//电视音量、频道组合键
+					var left = this.arrayBtn[index].left + 10, right = this.arrayBtn[index].right - 10;
+					var top = this.arrayBtn[index].top + (i == 0 ? 10 : 5) + i*this.arrayBtn[index].height/2;
+					var bottom = top + this.arrayBtn[index].height/2 - 15;
+					if(loc.x >= left && loc.x <= right && loc.y >= top && loc.y <= bottom){
+						if(index==1 && 0 == i)
+							this.docommand(this.id, 'vol_up');
+						else if(index==1 && 1 == i)
+							this.docommand(this.id, 'vol_down');
+						else if(index==2 && 0 == i)
+							this.docommand(this.id, 'channel_up');
+						else if(index==2 && 1 == i)
+							this.docommand(this.id, 'channel_down');
+					}
+				}
+			}
+		}
+	}
 	
 	this.doMouse = function(event, mouse, down, up) { 
 		if("lamp" == dev_id && _LAMP_[mode][this.id]['status'] === 'off')
@@ -807,15 +954,6 @@ function device()
 		
 		if(down)
 			this.p = loc; 
-		
-		if(up){
-			
-			if(this.Progress.time_out){
-				this.doDraw();
-				return;
-			}
-			this.Progress.time_out = setTimeout(function() {_device.Progress.time_out = null;},500);
-		}
 		
 		if("lamp" == dev_id){
 			if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
@@ -870,80 +1008,26 @@ function device()
 					//	break;
 					}
 				}
+
+			//与电视按键不同，空调按键不需要连续按的功能
+				if(this.ack){
+					this.ack = false;
+					this.doAir(loc);
+					if(this.Progress.time_ack)
+						clearTimeout(this.Progress.time_ack);
+					this.Progress.time_ack = setTimeout(function() {//空调终端没返回应答时的超时处理
+						_device.ack = true; 
+						_device.Progress.time_ack = null;
+					},1000);
+				}
 			}
 			else if(up){
-
 				for(var i=0;i<this.arrayBtn.length;i++){
 					this.arrayBtn[i].istouch = false;
 				}
-				
-				if(this.arrayBtn[0].IsInRect(loc, 0)){//power
-					power_on = power_on ? false : true;
-
-					this.docommand(this.id, power_on ? 'power_on' : 'power_off');
-					this.doBtnFocus(0);
-				}
-				else if(this.arrayBtn[1].IsInRect(loc, 0) && power_on){//+
-					if(air_item.temp_set < 30){
-						air_item.temp_set++;
-						this.docommand(this.id, 'temp_inc');
-					//	this.doBtnFocus(1);
-					}
-					else
-						return;
-				}
-				else if(this.arrayBtn[2].IsInRect(loc, 0) && power_on){//-
-					if(air_item.temp_set > 16){
-						air_item.temp_set--;
-						this.docommand(this.id, 'temp_dec');
-					//	this.doBtnFocus(2);
-					}
-					else
-						return;
-				}
-				else if(this.arrayBtn[3].IsInRect(loc, 0) && power_on){//mode
-					if(air_item.mode == 'heat')
-						air_item.mode = 'cold';
-					else if(air_item.mode == 'cold')
-						air_item.mode = 'dehumidify';
-					else if(air_item.mode == 'dehumidify')
-						air_item.mode = 'blowing';
-					else if(air_item.mode == 'blowing')
-						air_item.mode = 'sleep';
-					else if(air_item.mode == 'sleep')
-						air_item.mode = 'energy';
-					else if(air_item.mode == 'energy')
-						air_item.mode = 'health';
-					else if(air_item.mode == 'health')
-						air_item.mode = 'heat';
-					this.docommand(this.id, 'mode_' + air_item.mode);
-					this.doBtnFocus(3);
-				}
-				
-				else if(this.arrayBtn[4].IsInRect(loc, 0) && power_on){//speed
-					if(air_item.speed < 5)
-						air_item.speed++;
-					else if(air_item.speed == 5)
-						air_item.speed = 1;
-					this.docommand(this.id, 'speed_' + air_item.speed);
-					this.doBtnFocus(4);
-				}
-				else if(this.arrayBtn[5].IsInRect(loc, 0) && power_on){//up_down
-					air_item.up_down_swept = air_item.up_down_swept ? 0 : 1;
-					this.docommand(this.id, 'up_down_swept_' + air_item.up_down_swept);
-
-					this.doSwept();
-					
-					this.doBtnFocus(5);
-				
-				}
-				else if(this.arrayBtn[6].IsInRect(loc, 0) && power_on){//left_right
-					air_item.left_right_swept = air_item.left_right_swept ? 0 : 1;
-					this.docommand(this.id, 'left_right_swept_' + air_item.left_right_swept);
-					
-					this.doSwept();
-					
-					this.doBtnFocus(6);
+				if(this.Progress.time_ack){
+					clearTimeout(this.Progress.time_ack);
+					this.Progress.time_ack = null;
 				}
 			}
 		}
@@ -960,79 +1044,20 @@ function device()
 							return;
 					}
 				}
+				
+				this.doTVEx(loc);
 			}
 			else if(up){
-
 				for(var i=0;i<this.arrayBtn.length;i++){
 					this.arrayBtn[i].istouch = false;
 				}
-				
-				if(this.arrayBtn[_TV_BTN_.power].IsInRect(loc, 0)){//power
-					power_on = power_on ? false : true;
 
-					this.docommand(this.id, power_on ? 'power_on' : 'power_off');
-					this.doBtnFocus(_TV_BTN_.power);
+				if(this.Progress.time_series){
+					clearTimeout(this.Progress.time_series);
+					this.Progress.time_series = null;
 				}
-				else if(this.arrayBtn[_TV_BTN_.mute].IsInRect(loc, 0) && power_on){//mute
-					this.docommand(this.id, 'mute');
-					this.doBtnFocus(_TV_BTN_.mute);
-				}
-				else if(this.arrayBtn[_TV_BTN_.av].IsInRect(loc, 0) && power_on){//av/tv
-					this.docommand(this.id, 'av/tv');
-					this.doBtnFocus(_TV_BTN_.av);
-				}
-				else if(this.arrayBtn[_TV_BTN_.home].IsInRect(loc, 0) && power_on){//home
-					this.docommand(this.id, 'home');
-					this.doBtnFocus(_TV_BTN_.home);
-				}
-				else if(this.arrayBtn[_TV_BTN_.back].IsInRect(loc, 0) && power_on){//back
-					this.docommand(this.id, 'back');
-					this.doBtnFocus(_TV_BTN_.back);
-				}
-
-				else if(power_on){
-					var x = this.rect.width/2;
-					var y = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].top + this.arrayBtn[_TV_BTN_.vol_prog].height/2);
-					var r = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].height/2);
-
-					var r1 = 0;
-					if(loc)
-						r1 = Math.sqrt((loc.x-x)*(loc.x-x) + (loc.y-y)*(loc.y-y));
-					for(var i=0;i<4;i++){
-						if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, loc, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2)){
-							if(0 == i)//volume +
-								this.docommand(this.id, 'vol_up');
-							else if(1 == i)//channel_up
-								this.docommand(this.id, 'channel_up');
-							else if(2 == i)//volume -
-								this.docommand(this.id, 'vol_down');
-							else if(3 == i)//channel_down
-								this.docommand(this.id, 'channel_down');
-						}
-					}
-					if(r1 && r1 < r/2)
-						this.docommand(this.id, 'ok');
-					
-					for(var index=_TV_BTN_.vol;index<=_TV_BTN_.prog;index++){
-						for(var i=0;i<2;i++){//电视音量、频道组合键
-							var left = this.arrayBtn[index].left + 10, right = this.arrayBtn[index].right - 10;
-							var top = this.arrayBtn[index].top + (i == 0 ? 10 : 5) + i*this.arrayBtn[index].height/2;
-							var bottom = top + this.arrayBtn[index].height/2 - 15;
-							if(loc.x >= left && loc.x <= right && loc.y >= top && loc.y <= bottom){
-								if(index==1 && 0 == i)
-									this.docommand(this.id, 'vol_up');
-								else if(index==1 && 1 == i)
-									this.docommand(this.id, 'vol_down');
-								else if(index==2 && 0 == i)
-									this.docommand(this.id, 'channel_up');
-								else if(index==2 && 1 == i)
-									this.docommand(this.id, 'channel_down');
-							}
-						}
-					}
-				}
+			//	this.ack = true; 
 			}
-			
 		}
 		this.doDraw();
 	}
@@ -1118,7 +1143,11 @@ function device()
 		if(!json)
 			return;
 		
-		if( json.event === "device" ){
+		if( json.event === "ack" ){
+			setTimeout(function(){_device.ack = true;}, 100);//每个命令的响应与下个命令之间留出100ms的时间间隔
+			console.log('ack:' + JSON.stringify(json));
+		}
+		else if( json.event === "device" ){
 		//	console.log('device:' + JSON.stringify(json));
 			_DEVICE_ = json.data;
 

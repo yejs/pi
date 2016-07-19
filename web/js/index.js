@@ -102,7 +102,17 @@ window.addEventListener('message',function(e){
 		if(!json)
 			return;
 		
-		if( json.event === "device" ){
+		if( json.event === "ack" ){
+			if( json.dev_id === "lamp" )
+				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.dev_id === "curtain" )
+				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.dev_id === "air_conditioner" )
+				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.dev_id === "tv" )
+				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "device" ){
 			_DEVICE_ = json.data;
 			
 			if(_header)

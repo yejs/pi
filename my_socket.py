@@ -56,12 +56,15 @@ class Connection(object):
         self._stream.read_bytes(1024, self.doRecv, partial=True)
 
     def doRecv(self, data):    
-        obj = json.loads(data[:-1].decode()) 
-        if obj and obj.get('event') == 'report':    
-            set_dev_item(obj['dev_id'], self._address[0], obj['status'])
-            print("recv from %s: %s" % (self._address[0], data[:-1].decode()))   
-            WebSocket.broadcast_device();
-        #self._stream.write(data)  	
+        if data[:-1].decode().find('{') != -1 and data[:-1].decode().find('}') != -1:
+            obj = json.loads(data[:-1].decode()) 
+            if obj and obj.get('event') == 'report':    
+                set_dev_item(obj['dev_id'], self._address[0], obj['status'])
+                WebSocket.broadcast_device();
+            elif obj and obj.get('event') == 'ack':    
+                WebSocket.broadcast_messages(data[:-1].decode());
+        else:
+            print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
 		
     '''
@@ -142,10 +145,11 @@ class Connection(object):
                 LIRC_KEY = 'KEY_RIGHT'
             value = Connection.lirc_air.getKey(LIRC_KEY) if LIRC_KEY else None
             is_raw = Connection.lirc_air.is_raw()
-			
+            
             if value == None:
                 print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                 return
+
             msg = "{\"event\":\"msg\", \"dev_id\":\"ir\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(value, is_raw)
         elif dev_id.find('tv') != -1:#command 可能的值：power_on、power_off、vol_inc、vol_dec、prog_inc、prog_dec、mute、av/tv、home、back、view
             LIRC_KEY = None

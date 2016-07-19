@@ -13,9 +13,10 @@ import json
 
 class LIRC():
 	f = None
-	remote = {}
+	remote = None
 	def __init__(self, file):
 		self.f = open(file,'r') 
+		self.remote = {}
 		'''
 		self.remote['name'] = self.read('name')
 		self.remote['header'] = self.read('header')
@@ -55,8 +56,8 @@ class LIRC():
 				if len(key)>0 and key.find('flags') != -1: 
 					line = line[line.find(key) + len(key):].strip()
 					if line.find('RAW_CODES') != -1:
-						self.remote['is_raw'] = True
-						
+						self.remote['is_raw'] = True 
+
 				elif len(key)>0 and line.find('begin') == -1 and line.find('end') == -1: 
 					line = line[line.find(key) + len(key):].strip()
 					self.remote[key] = line
@@ -101,6 +102,7 @@ class LIRC():
 		if False == self.remote['is_raw']:
 			if None == self.remote.get('pre_data') or None == self.remote.get('pre_data_bits'):
 				return None
+			
 			addr = self.remote['pre_data']
 			tmp = int(addr, 16)
 			if tmp < 0xff and int(self.remote['pre_data_bits']) == 16:#地址反码
@@ -130,8 +132,8 @@ class LIRC():
 		
 if __name__ == "__main__":
 	try:
-		obj1 = LIRC("lircd.conf")
-		print('%s' % obj1.getKey('KEY_VOLUMEDOWN'))
+		obj1 = LIRC("lircd_air.conf")
+		#print('%s' % obj1.getKey('KEY_VOLUMEDOWN'))
 		#print('header1:%s, header2:%s' % obj1.getEx('header'))
 		#print('header1:%s' % obj1.getEx('header'))
 	except:
