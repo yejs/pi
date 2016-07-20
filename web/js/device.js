@@ -6,6 +6,7 @@ _device = null;
 _port = 8000;
 dev_id = 'lamp';
 mode = "normal";
+bgColor = 'rgba(180, 180, 180, 1)';
 _TV_BTN_ = {'vol_prog':0, 'vol':1, 'prog':2, 'power':3, 'mute':4, 'av':5, 'home':6, 'back':7};
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
 window.onload = function(){
@@ -365,7 +366,7 @@ function device()
 		ctx.lineWidth = 5;
 		
 		//----------------------画机顶盒音量、频道、确认组合键-----------------------------
-		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
+		ctx.fillStyle = bgColor;
 		ctx.arcEx(x, y, r,  0, Math.PI * 2, true, 1, 1);//最外层圆
 
 		var r1 = 0;
@@ -380,7 +381,7 @@ function device()
 			ctx.arcEx(x, y, r-10,  -Math.PI/4 + i*Math.PI/2 + Math.PI/100, Math.PI/4 + i*Math.PI/2 - Math.PI/100, false, 1, 1);
 			
 			//画机顶盒音量、频道组合键标识（四个方向标识）
-			ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+			ctx.fillStyle = 'rgba(20, 20, 20, 1)';
 			a = i*Math.PI/2;
 			r2 = r*3/4;
 			x1 = x + Math.cos(a) * r2;
@@ -415,7 +416,7 @@ function device()
 			ctx.fill();
 		}
 		
-		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
+		ctx.fillStyle = bgColor;
 		ctx.arcEx(x, y, r/2,  0, Math.PI * 2, true, 1, 0);//画里层圆
 		
 		//画机顶盒确认键
@@ -425,7 +426,7 @@ function device()
 			ctx.fillStyle = grd[0];
 		ctx.arcEx(x, y, r/2-10,  0, Math.PI * 2, true, 1, 1);
 		
-		ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
 		ctx.font = _font56;
 		ctx.fillText('ok', x-ctx.measureText('ok').width/2, y + 20);
 		//----------------------画机顶盒音量、频道、确认组合键-----------------------------
@@ -461,7 +462,7 @@ function device()
 		ctx.strokeStyle = 'rgba(120, 120, 120, 0.5)';
 		ctx.lineWidth = 5;
 
-		ctx.fillStyle = 'rgba(20, 20, 20, 1)';
+		ctx.fillStyle = bgColor;
 		ctx.roundRect(this.arrayBtn[index].left, this.arrayBtn[index].top, this.arrayBtn[index].width, this.arrayBtn[index].height, this.arrayBtn[index].width/2, 1, 0);//最外层圆
 
 		loc = {x:0, y:0};
@@ -482,7 +483,7 @@ function device()
 				ctx.roundRectEx(left, top, right - left, bottom - top, (right - left)/2, 1, 1, 0, 0, 1, 1);
 
 			//画机顶盒音量、频道组合键标识
-			ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+			ctx.fillStyle = 'rgba(20, 20, 20, 1)';
 			x1 = left + (right - left)/2;
 			y1 = top + (bottom - top)/2;
 			ctx.beginPath(); 
