@@ -1,10 +1,10 @@
 document.write('<script type="text/javascript" src="js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/canvas.js"></script>');
 document.write('<script type="text/javascript" src="js/data.js"></script>');
-document.write('<script type="text/javascript" src="js/lamp.js"></script>');
-document.write('<script type="text/javascript" src="js/curtain.js"></script>');
-document.write('<script type="text/javascript" src="js/air_conditioner.js"></script>');
-document.write('<script type="text/javascript" src="js/tv.js"></script>');
+document.write('<script type="text/javascript" src="js/device/lamp.js"></script>');
+document.write('<script type="text/javascript" src="js/device/curtain.js"></script>');
+document.write('<script type="text/javascript" src="js/device/air_conditioner.js"></script>');
+document.write('<script type="text/javascript" src="js/device/tv.js"></script>');
 
 _device = null;//设备对象
 
@@ -353,82 +353,10 @@ function device()
 		}
 	}
 	this.docommand = function(id, commandEx){
-		var btn = document.getElementById(id.toString());
 
-		if('lamp' == dev_id){
-			if(commandEx == undefined){
-				if(_LAMP_[mode][id]['status'] === 'on'){
-					if(this.id != id){
-						this.id = id;
-						command = 'on';
-					}
-					else
-						command = 'off';
-				}
-				else
-					command = 'on';
-				
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
-				btn.style.backgroundColor = '#ee0';
-
-			}
-			else{
-				//调光调色
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + commandEx;
-				
-			}
-		}
-		else if('curtain' == dev_id){
-			if(commandEx == undefined){
-				
-				if(this.Progress.timer)
-					return;
-				
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节开合进度';
-				this.setFocus(id);
-				this.setID(id);
-				this.setPos();
-				this.doDraw();
-				return;
-			}
-			else{
-				//调窗帘开合进度
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
-			}
-		}
-		else if('air_conditioner' == dev_id){
-			if(commandEx == undefined){
-
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
-				this.setFocus(id);
-				this.setID(id);
-				this.setPos();
-				this.doDraw();
-				
-				this.doSwept();
-				
-				return;
-			}
-			else{
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
-			}
-		}
-		else if('tv' == dev_id){
-			if(commandEx == undefined){
-
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
-				this.setFocus(id);
-				this.setID(id);
-				this.setPos();
-				this.doDraw();
-				
-				return;
-			}
-			else{
-				param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
-			}
-		}
-
+		param = this.docommandIt(id, commandEx);
+		if(!param)
+			return;
 
 		//页面ajax请求
 		loadXMLDoc("/control",function()

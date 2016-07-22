@@ -21,6 +21,7 @@ function curtain()
 		};
 	}
 	
+	//人机交互处理
 	this.doIt = function(loc, down, up){
 		if(up){
 			this.bar0.isdown = false;
@@ -32,7 +33,7 @@ function curtain()
 		if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x || !down)
 			return;
 
-		command = this.doCurtain(loc.x, this.bar1, down);
+		command = this.doCurtain(loc.x, this.bar1, down);//根据点击位置判断窗帘是开还是关的动作
 		
 		if(-1 == command)
 			return;
@@ -125,5 +126,25 @@ function curtain()
 		var h = parseInt(this.rect.height) - 20;
 		this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, h, this.bar1.x, this.bar1.y + offset, w, h);
 		this.ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
+	}
+	
+	this.docommandIt = function(id, commandEx){
+		if(commandEx == undefined){
+			
+			if(this.Progress.timer)
+				return null;
+			
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节开合进度';
+			this.setFocus(id);
+			this.setID(id);
+			this.setPos();
+			this.doDraw();
+			return null;
+		}
+		else{
+			//调窗帘开合进度
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx + "&progress=" + _CURTAIN_[mode][this.id]['progress'];
+		}
+		return param;
 	}
 }

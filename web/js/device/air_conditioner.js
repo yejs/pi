@@ -75,26 +75,29 @@ function air_conditioner()
 	}
 
 
-
+	//人机交互处理
 	this.doIt = function(loc, down, up){
-		air_item = _AIR_CONDITIONER_[mode][this.id];
-		power_on = air_item.power_on == 'false' ? false : true;
+		var air_item = _AIR_CONDITIONER_[mode][this.id];
+		var power_on = air_item.power_on == 'false' ? false : true;
 		
 		if(down){
+			var touchBtn = -1;
 			for(var i=0;i<this.arrayBtn.length;i++){
-				if(this.arrayBtn[i].IsInRect(loc, 0) && (i == 0 || (i!= 0 && power_on))){
+				if(this.arrayBtn[i].IsInRect(loc, 0) && (i == _AIR_BTN_.power || (i != _AIR_BTN_.power && power_on))){
 					if((_AIR_BTN_.temp_inc == i && air_item.temp_set == 30) || (_AIR_BTN_.temp_dec == i && air_item.temp_set == 16))
 						return;
 					this.arrayBtn[i].istouch = true;
+					touchBtn = i;
 				//	break;
 				}
 			}
 
-		//与电视按键不同，空调按键不需要连续按的功能
-			if(this.ack){
+			//与普通按键不同，按键按下时处理，非松开处理
+			//与电视按键不同，空调按键不需要连续按的功能
+			if(this.ack && touchBtn > -1){
 				this.ack = false;
-				this.doAir(loc);
-				
+				this.doAirKey(loc);
+		
 				time_ack = setTimeout(function() {//空调终端没返回应答时的超时处理
 					_device.ack = true; 
 					time_ack = null;
@@ -113,7 +116,10 @@ function air_conditioner()
 		this.doDraw();
 	}
 	
-	this.doAir = function(loc) { 
+	this.doAirKey = function(loc) { 
+		var air_item = _AIR_CONDITIONER_[mode][this.id];
+		var power_on = air_item.power_on == 'false' ? false : true;
+		
 		if(this.arrayBtn[_AIR_BTN_.power].IsInRect(loc, 0)){//power
 			power_on = power_on ? false : true;
 
@@ -321,7 +327,7 @@ function air_conditioner()
 			ctx.fillStyle = "rgba(10, 10, 10, .3)";
 			ctx.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
 		}
-		_AIR_BTN_ = {'power':0, 'temp_inc':1, 'temp_dec':2, 'mode':3, 'speed':4, 'up_down':5, 'left_right':6};
+
 		//画按钮
 		for(var i=0;i<this.arrayBtn.length;i++){
 			if(this.arrayBtn[i].istouch)
@@ -340,5 +346,24 @@ function air_conditioner()
 		powerBtn = this.arrayBtn[_AIR_BTN_.power];
 		ctx.arcEx(powerBtn.left + powerBtn.width/2, powerBtn.top + powerBtn.height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
 		ctx.drawLine(powerBtn.left + powerBtn.width/2,powerBtn.top + 15,powerBtn.left + powerBtn.width/2,powerBtn.top + 30);
+	}
+	
+	this.docommandIt = function(id, commandEx){
+		if(commandEx == undefined){
+
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
+			this.setFocus(id);
+			this.setID(id);
+			this.setPos();
+			this.doDraw();
+			
+			this.doSwept();
+			
+			return null;
+		}
+		else{
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
+		}
+		return param;
 	}
 }

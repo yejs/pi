@@ -8,7 +8,7 @@ function lamp()
 	}
 	this.initDraw = function(){
 	}
-	
+	//人机交互处理
 	this.doIt = function(loc, down, up){
 		if(up){
 			this.bar0.isdown = false;
@@ -127,5 +127,29 @@ function lamp()
 		grd.addColorStop(1, "rgba(0, 0, 255, 1)");
 		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
 		ctx.fill();
+	}
+	
+	this.docommandIt = function(id, commandEx){
+		if(commandEx == undefined){
+			if(_LAMP_[mode][id]['status'] === 'on'){
+				if(this.id != id){
+					this.id = id;
+					command = 'on';
+				}
+				else
+					command = 'off';
+			}
+			else
+				command = 'on';
+			
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + command;
+			document.getElementById(id.toString()).style.backgroundColor = '#ee0';
+
+		}
+		else{
+			//调光调色
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&color=" + commandEx;
+		}
+		return param;
 	}
 }

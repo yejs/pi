@@ -1,3 +1,5 @@
+https://linux.cn/article-6160-1.html
+
 ls,列出当前目录下的文件，ls -l是列出详细信息，ls -a列出隐藏文件。 
 cd,更改目录。clear，清屏命令。reset，重置终端。 
 startx,启动图形界面。fdisk -l,查看硬盘分区。 

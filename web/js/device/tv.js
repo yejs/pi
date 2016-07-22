@@ -59,22 +59,22 @@ function tv()
 		}
 	}
 
-	
+	//人机交互处理
 	this.doIt = function(loc, down, up){
-		tv_item = _TV_[mode][this.id];
-		power_on = tv_item.status == 'off' ? false : true;
+		var tv_item = _TV_[mode][this.id];
+		var power_on = tv_item.status == 'off' ? false : true;
 		
 		if(down){
 			this.p = loc; 
 			for(var i=0;i<this.arrayBtn.length;i++){
 				if(this.arrayBtn[i].IsInRect(loc, 0)){
-					if(i == 3 || (i!= 3 && power_on))
+					if(i == _TV_BTN_.power || (i!= _TV_BTN_.power && power_on))
 						this.arrayBtn[i].istouch = true;
 					else
 						return;
 				}
 			}
-			
+			//与普通按键不同，按键按下时处理，非松开处理
 			this.doTVEx(loc);
 		}
 		else if(up){
@@ -96,7 +96,7 @@ function tv()
 	this.doTVEx = function(loc) {
 		if(this.ack){
 			this.ack = false;
-			this.doTV(loc);
+			this.doTVKey(loc);
 
 			time_ack = setTimeout(function() {//电视终端没返回应答时的超时处理
 				_device.ack = true; 
@@ -105,8 +105,11 @@ function tv()
 		}
 		this.time_series = setTimeout(function(){_device.doTVEx(loc);}, 100);
 	}
-	
-	this.doTV = function(loc) { 
+	//真正的TV按键处理
+	this.doTVKey = function(loc) { 
+		var tv_item = _TV_[mode][this.id];
+		var power_on = tv_item.status == 'off' ? false : true;
+		
 		if(this.arrayBtn[_TV_BTN_.power].IsInRect(loc, 0)){//power
 			power_on = power_on ? false : true;
 
@@ -154,18 +157,18 @@ function tv()
 				this.docommand(this.id, 'ok');
 			
 			for(var index=_TV_BTN_.vol;index<=_TV_BTN_.prog;index++){
+				var left = this.arrayBtn[index].left + 10, right = this.arrayBtn[index].right - 10;
 				for(var i=0;i<2;i++){//电视音量、频道组合键
-					var left = this.arrayBtn[index].left + 10, right = this.arrayBtn[index].right - 10;
 					var top = this.arrayBtn[index].top + (i == 0 ? 10 : 5) + i*this.arrayBtn[index].height/2;
 					var bottom = top + this.arrayBtn[index].height/2 - 15;
 					if(loc.x >= left && loc.x <= right && loc.y >= top && loc.y <= bottom){
-						if(index==1 && 0 == i)
+						if(index==_TV_BTN_.vol && 0 == i)
 							this.docommand(this.id, 'vol_up');
-						else if(index==1 && 1 == i)
+						else if(index==_TV_BTN_.vol && 1 == i)
 							this.docommand(this.id, 'vol_down');
-						else if(index==2 && 0 == i)
+						else if(index==_TV_BTN_.prog && 0 == i)
 							this.docommand(this.id, 'channel_up');
-						else if(index==2 && 1 == i)
+						else if(index==_TV_BTN_.prog && 1 == i)
 							this.docommand(this.id, 'channel_down');
 					}
 				}
@@ -361,6 +364,23 @@ function tv()
 			y1 = this.arrayBtn[index].top + 15 + this.arrayBtn[index].height/2;
 			ctx.fillText('P',this.arrayBtn[index].right + 20 , y1);
 		}
+	}
+	
+	this.docommandIt = function(id, commandEx){
+		if(commandEx == undefined){
+
+			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
+			this.setFocus(id);
+			this.setID(id);
+			this.setPos();
+			this.doDraw();
+			
+			return null;
+		}
+		else{
+			param = "mode=" + mode + "&dev_id=" + dev_id + "&id=" + id + "&command=" + commandEx;
+		}
+		return param;
 	}
 }
 
