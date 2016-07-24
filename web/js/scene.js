@@ -1,6 +1,6 @@
-document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/websocket.js"></script>');
-document.write('<script type="text/javascript" src="js/data.js"></script>');
+document.write('<script type="text/javascript" src="js/js/mymath.js"></script>');
+document.write('<script type="text/javascript" src="js/js/websocket.js"></script>');
+document.write('<script type="text/javascript" src="js/js/data.js"></script>');
 var param=null;//work, set
 
 window.onload = function(){
@@ -49,8 +49,8 @@ domodel = function(id){
 
 	setFocus(id);
 		
-	params = "mode=" + _SCENE_[id]// + "&dev_id=lamp";
-//	console.log('222:' + params);
+	params = "mode=" + _SCENE_[id];
+
 	//页面ajax请求
 	loadXMLDoc("/control",function()
 	{

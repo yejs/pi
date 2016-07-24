@@ -41,10 +41,10 @@ function tv()
 	
 	this.initDraw = function()
 	{
-		var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 20;
+		var btn_w = 200, btn_h = 80, offset_x = 20, offset_y = 20;
 		r = 350;
 		this.arrayBtn[_TV_BTN_.vol_prog].doResize(this.rect.width/2 - r/2, offset_y + btn_h + 30, this.rect.width/2 + r/2, offset_y + btn_h + 30 + r);
-		o1 = offset_x + 120, o2 = offset_y + btn_h + 230;
+		o1 = offset_x + 220, o2 = offset_y + btn_h + 400;
 		this.arrayBtn[_TV_BTN_.vol].doResize(o1, o2, o1 + 100, o2 + 260);
 		this.arrayBtn[_TV_BTN_.prog].doResize(this.rect.width - o1 - 100, o2, this.rect.width - o1, o2 + 260);
 
@@ -52,7 +52,7 @@ function tv()
 		this.arrayBtn[_TV_BTN_.mute].doResize(this.rect.width - offset_x - btn_w, offset_y, this.rect.width - offset_x, offset_y + btn_h);
 		
 		var s = ((this.rect.width - offset_x - btn_w) - (offset_x))/2;
-		y = offset_y + btn_h + 540;
+		y = offset_y + btn_h + 700;
 		st = _TV_BTN_.av;
 		for(var i=st;i<this.arrayBtn.length;i++){
 			this.arrayBtn[i].doResize(offset_x + (i-st)*s, y, offset_x + (i-st)*s + btn_w, y + btn_h);
@@ -98,9 +98,11 @@ function tv()
 			this.ack = false;
 			this.doTVKey(loc);
 
-			time_ack = setTimeout(function() {//电视终端没返回应答时的超时处理
+			if(this.time_ack)
+				clearTimeout(this.time_ack);
+			this.time_ack = setTimeout(function() {//电视终端没返回应答时的超时处理
 				_device.ack = true; 
-				time_ack = null;
+				_device.time_ack = null;
 			},1000);
 		}
 		this.time_series = setTimeout(function(){_device.doTVEx(loc);}, 100);
@@ -349,20 +351,24 @@ function tv()
 			ctx.fill();
 		}
 		
+		ctx.font = _font36;
 		if(_TV_BTN_.vol == index){
-			ctx.strokeStyle = 'rgba(10, 10, 10, 0.6)';
+		/*	ctx.strokeStyle = 'rgba(10, 10, 10, 0.6)';
 			ctx.beginPath(); 
 			y1 = this.arrayBtn[index].top + 20 + this.arrayBtn[index].height/2;
 			ctx.moveTo(left - 90, y1); 
 			ctx.lineTo(left - 30, y1); 
 			ctx.lineTo(left - 30, y1 - 30); 
 			ctx.closePath();
-			ctx.stroke();  
+			ctx.stroke();  */
+			ctx.fillStyle = ctx.strokeStyle = 'rgba(10, 10, 10, 0.6)';
+			y1 = this.arrayBtn[index].top + 15 + this.arrayBtn[index].height/2;
+			ctx.fillText('音量',this.arrayBtn[index].left - 20 -ctx.measureText('音量').width, y1);
 		}
 		else if(_TV_BTN_.prog == index){
 			ctx.fillStyle = ctx.strokeStyle = 'rgba(10, 10, 10, 0.6)';
 			y1 = this.arrayBtn[index].top + 15 + this.arrayBtn[index].height/2;
-			ctx.fillText('P',this.arrayBtn[index].right + 20 , y1);
+			ctx.fillText('频道',this.arrayBtn[index].right + 20 , y1);
 		}
 	}
 	

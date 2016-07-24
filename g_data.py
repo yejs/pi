@@ -5,6 +5,7 @@ class GlobalVar:
 	curtain_id = '1'
 	air_conditioner_id = '1'
 	tv_id = '1'
+	plugin_id = '1'
 	def set_mode(value):
 		GlobalVar.mode = value
 	def get_mode():
@@ -29,3 +30,7 @@ class GlobalVar:
 		GlobalVar.tv_id = value
 	def get_tv_id():
 		return GlobalVar.tv_id
+	def set_plugin_id(value):
+		GlobalVar.plugin_id = value
+	def get_plugin_id():
+		return GlobalVar.plugin_id

@@ -1,7 +1,7 @@
-document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/websocket.js"></script>');
-document.write('<script type="text/javascript" src="js/canvas.js"></script>');
-document.write('<script type="text/javascript" src="js/data.js"></script>');
+document.write('<script type="text/javascript" src="js/js/mymath.js"></script>');
+document.write('<script type="text/javascript" src="js/js/websocket.js"></script>');
+document.write('<script type="text/javascript" src="js/js/canvas.js"></script>');
+document.write('<script type="text/javascript" src="js/js/data.js"></script>');
 
 ws = null;
 timer = null;
@@ -9,7 +9,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['灯光', '窗帘', '空调', '电视', '场景模式', '视频监控'];
+	var _title = ['灯光', '窗帘', '空调', '电视', '插座', '场景模式', '视频监控'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -32,7 +32,7 @@ window.onload = function(){
 
 }
 
-var titles = ["lamp", "curtain", "air_conditioner", "tv", "scene", "video"];
+var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
 		if(titles[i] === title)
@@ -111,6 +111,8 @@ window.addEventListener('message',function(e){
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if( json.dev_id === "tv" )
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.dev_id === "plugin" )
+				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 		else if( json.event === "device" ){
 			_DEVICE_ = json.data;
@@ -122,6 +124,7 @@ window.addEventListener('message',function(e){
 			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else if( json.event === "lamp" ){
 
@@ -149,11 +152,19 @@ window.addEventListener('message',function(e){
 		}
 		else if( json.event === "tv" ){
 
-		//	_fTV_[json.mode] = json.data;
+			_TV_[json.mode] = json.data;
 
 			mode = json.mode;
 			
 			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "plugin" ){
+
+			_PLUGIN_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 
 		

@@ -9,6 +9,8 @@ function air_conditioner()
 	
 	this.imageRect = {x:0, y:0, width:0, height:0};
 	
+	var time_ack = null;
+	
 	this.initIt = function(){
 		for(var i=0;i<7;i++)
 		{
@@ -98,9 +100,12 @@ function air_conditioner()
 				this.ack = false;
 				this.doAirKey(loc);
 		
-				time_ack = setTimeout(function() {//空调终端没返回应答时的超时处理
+				if(this.time_ack)
+					clearTimeout(this.time_ack);
+				this.time_ack = setTimeout(function() {//空调终端没返回应答时的超时处理
 					_device.ack = true; 
-					time_ack = null;
+					_device.time_ack = null;
+					console.log('air');
 				},1000);
 			}
 		}
@@ -108,10 +113,7 @@ function air_conditioner()
 			for(var i=0;i<this.arrayBtn.length;i++){
 				this.arrayBtn[i].istouch = false;
 			}
-			if(this.time_ack){
-				clearTimeout(this.time_ack);
-				this.time_ack = null;
-			}
+
 		}
 		this.doDraw();
 	}

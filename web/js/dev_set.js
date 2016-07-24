@@ -1,7 +1,7 @@
-document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/websocket.js"></script>');
-document.write('<script type="text/javascript" src="js/canvas.js"></script>');
-document.write('<script type="text/javascript" src="js/data.js"></script>');
+document.write('<script type="text/javascript" src="js/js/mymath.js"></script>');
+document.write('<script type="text/javascript" src="js/js/websocket.js"></script>');
+document.write('<script type="text/javascript" src="js/js/canvas.js"></script>');
+document.write('<script type="text/javascript" src="js/js/data.js"></script>');
 
 _dev_set = null;
 
@@ -96,8 +96,16 @@ function dev_set()
 		else
 			document.getElementById('IP').value = '';
 		
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('pin'))
-			document.getElementById('GPIO').value = _DEVICE_[this.dev_id][id]['pin'];
+		if(_DEVICE_[this.dev_id][id].hasOwnProperty('pin')){
+			value = _DEVICE_[this.dev_id][id]['pin'];
+			var obj = document.getElementById('GPIO'); 
+			for(var i=0;i<8;i++){
+				if(obj.options[i].value.indexOf(value)>=0){
+					obj.selectedIndex = i;
+					break;
+				}
+			}
+		}
 		else
 			document.getElementById('GPIO').value = '';
 		
@@ -137,8 +145,12 @@ function dev_set()
 		if(document.getElementById('IP').value.length>0)
 			_DEVICE_[this.dev_id][this.id]['ip'] = document.getElementById('IP').value; 
 		
-		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('GPIO'))
-			_DEVICE_[this.dev_id][this.id]['pin'] = document.getElementById('GPIO').value; 
+		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('pin')){
+			value = parseInt(document.getElementById('GPIO').options[document.getElementById('GPIO').selectedIndex].value);
+			_DEVICE_[this.dev_id][this.id]['pin'] = String(value); 
+			console.log(value);
+		}
+		
 		
 		if(document.getElementById('length').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('length'))
 			_DEVICE_[this.dev_id][this.id]['length'] = parseFloat(document.getElementById('length').value); 
@@ -146,7 +158,7 @@ function dev_set()
 		_DEVICE_[this.dev_id][this.id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
 		
 		param = "device_set=" + (JSON.stringify(_DEVICE_[this.dev_id][this.id])) + "&dev_id=" + this.dev_id + "&id=" + this.id;
-	//	console.log(param);
+		
 
 		//页面ajax请求
 		loadXMLDoc("/control",function()

@@ -17,7 +17,7 @@ import logging
 import threading
 import time
 
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_
+from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
 from g_data import GlobalVar
 		
 class WebSocket(tornado.websocket.WebSocketHandler):
@@ -30,6 +30,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         WebSocket.broadcast_curtain_status()
         WebSocket.broadcast_air_status()
         WebSocket.broadcast_tv_status()
+        WebSocket.broadcast_plugin_status()
     def on_close(self):
         WebSocket.socket_handlers.remove(self)
     def on_message(self, message):
@@ -94,6 +95,18 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         str1 += mode
         str1 += '\", \"id\":\"'
         str1 += GlobalVar.get_tv_id()
+        str1 += '\"}'
+
+        WebSocket.broadcast_messages(str1) 
+		
+    def broadcast_plugin_status():
+        mode = GlobalVar.get_mode()
+        str1 = '{\"event\": \"plugin\", \"data\":'
+        str1 += json.dumps(_PLUGIN_[mode])
+        str1 += ', \"mode\":\"'
+        str1 += mode
+        str1 += '\", \"id\":\"'
+        str1 += GlobalVar.get_plugin_id()
         str1 += '\"}'
 
         WebSocket.broadcast_messages(str1) 

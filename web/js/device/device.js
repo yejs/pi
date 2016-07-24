@@ -1,10 +1,11 @@
-document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/canvas.js"></script>');
-document.write('<script type="text/javascript" src="js/data.js"></script>');
+document.write('<script type="text/javascript" src="js/js/mymath.js"></script>');
+document.write('<script type="text/javascript" src="js/js/canvas.js"></script>');
+document.write('<script type="text/javascript" src="js/js/data.js"></script>');
 document.write('<script type="text/javascript" src="js/device/lamp.js"></script>');
 document.write('<script type="text/javascript" src="js/device/curtain.js"></script>');
 document.write('<script type="text/javascript" src="js/device/air_conditioner.js"></script>');
 document.write('<script type="text/javascript" src="js/device/tv.js"></script>');
+document.write('<script type="text/javascript" src="js/device/plugin.js"></script>');
 
 _device = null;//设备对象
 
@@ -13,8 +14,6 @@ dev_id = 'lamp';//设备类别
 mode = "normal";//当前模式，取值参照下面的_MODE_SET_
 
 bgColor = 'rgba(180, 180, 180, 1)';
-
-time_ack = null;
 
 
 _MODE_SET_ = {'normal':'回家模式', 'leave':'离家模式', 'night':'睡眠模式', 'getup':'晨起模式', 'guests':'会客模式', 'diner':'用餐模式'}
@@ -32,19 +31,16 @@ window.onload = function(){
 			_device = new lamp();
 		}
 		else if(dev_id == 'curtain'){
-		//	curtain.prototype = new device();
-		//	curtain.prototype.constructor = curtain;
 			_device = new curtain();
 		}
 		else if(dev_id == 'air_conditioner'){
-		//	air_conditioner.prototype = new device();
-		//	air_conditioner.prototype.constructor = air_conditioner;
 			_device = new air_conditioner();
 		}
 		else if(dev_id == 'tv'){
-		//	tv.prototype = new device();
-		//	tv.prototype.constructor = tv;
 			_device = new tv();
+		}
+		else if(dev_id == 'plugin'){
+			_device = new plugin();
 		}
 		_device.initIt();
 		_device.onresize();
@@ -97,6 +93,8 @@ function device()
 	this.getmessaged = false;
 	
 	this.ack = true;
+	this.time_ack = null;
+
 
 	this.arrayBtn = new Array();
 
@@ -180,7 +178,7 @@ function device()
 
 	this.onresize = function(){
 		this.rect = getWinRect();
-		this.rect.height = '720';
+		this.rect.height = '920';
 		this.canvas.width = this.canvasReport.width = this.canvasImage.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.canvasImage.height = this.rect.height;
 		offset = 20;
@@ -245,7 +243,7 @@ function device()
 			return;
 
 		if( json.event === "ack" ){
-			setTimeout(function(){_device.ack = true;}, 100);//每个命令的响应与下个命令之间留出100ms的时间间隔
+			setTimeout(function(){_device.ack = true;}, 50);//每个命令的响应与下个命令之间留出100ms的时间间隔
 		//	console.log('ack:' + JSON.stringify(json));
 		}
 		else if( json.event === "device" ){
@@ -284,8 +282,6 @@ function device()
 
 				_LAMP_[json.mode] = json.data;
 
-				mode = json.mode;
-
 				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 
 				for(var id in _LAMP_[mode]){
@@ -322,6 +318,29 @@ function device()
 			else if( json.event === "tv" ){
 				_TV_[json.mode] = json.data;
 			}
+			else if( json.event === "plugin" ){
+				_PLUGIN_[json.mode] = json.data;
+
+				for(var id in _PLUGIN_[mode]){
+					if(_DEVICE_["plugin"].hasOwnProperty(id.toString())){
+						if(_PLUGIN_[mode][id]['status'] === 'on')
+							document.getElementById(id).style.backgroundColor = '#e00';					
+						else
+							document.getElementById(id).style.backgroundColor = '#aaa';
+					}
+				}
+
+				//检查是不是所有灯的状态一样且为全开，如是则‘所有’灯的状态设为全开，否则为关的状态
+				for(var id in _PLUGIN_[mode]){
+					if(id == "all")
+						break;
+					if(_PLUGIN_[mode]['1']['status'] !== _PLUGIN_[mode][id]['status'] && _DEVICE_[dev_id][id]['hide'] == 'false'){
+						_PLUGIN_[mode]['all']['status'] = 'off';
+						document.getElementById('all').style.backgroundColor = '#aaa';
+						break;
+					}
+				}
+			}
 			
 			var id = json.id;
 			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
@@ -331,7 +350,7 @@ function device()
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
 			this.setID(id);
-			if( json.event != "lamp" )
+			if( json.event != "lamp"  && json.event != "plugin")
 				this.setFocus(id);
 		}
 		

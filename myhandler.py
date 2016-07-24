@@ -20,7 +20,7 @@ import time
 from my_gpio import RPi_GPIO
 from my_socket import SocketServer, Connection
 from my_websocket import WebSocket
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_
+from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
 from g_data import GlobalVar
 
 #客户端ajax请求处理
@@ -67,8 +67,8 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.air_conditioner(post_data) 
             elif dev_id == 'tv':
                 WebHandler.tv(post_data) 
-            elif dev_id == 'car':
-                WebHandler.car(post_data) 
+            elif dev_id == 'plugin':
+                WebHandler.plugin(post_data) 
             elif dev_id == None:
                 WebHandler.lamp(post_data)
                 WebHandler.curtain(post_data)
@@ -87,6 +87,7 @@ class WebHandler(tornado.web.RequestHandler):
         f.write('_CURTAIN_ = ' + json.dumps(_CURTAIN_) + '\n')  
         f.write('_AIR_CONDITIONER_ = ' + json.dumps(_AIR_CONDITIONER_) + '\n')  
         f.write('_TV_ = ' + json.dumps(_TV_) + '\n')  
+        f.write('_PLUGIN_ = ' + json.dumps(_PLUGIN_) + '\n')  
         f.close
 		
 	
@@ -106,6 +107,7 @@ class WebHandler(tornado.web.RequestHandler):
         if key == None:    							#模式指令
             key = 'command'
             value = item['status']
+
 		
         Connection.check_output()
         if _DEVICE_[dev_id].get(id):
@@ -136,6 +138,9 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'command'
             value = post_data[key][0]
             item['status'] = value
+            if id == 'all':
+                for k in _LAMP_[mode].keys():
+                    _LAMP_[mode][k]['status'] = value
         elif post_data.get('color'):#调光调色指令
             key = 'color'
             value = post_data[key][0]
@@ -319,29 +324,44 @@ class WebHandler(tornado.web.RequestHandler):
         WebSocket.broadcast_tv_status()
 		
 		
-    def car(post_data):
-        command = post_data['command'][0]
-        _CAR_ = {'INT1':11, 'INT2':12, 'INT3':13, 'INT4':15}
-        if command == 'front':
-            RPi_GPIO.output(_CAR_['INT1'], True)
-            RPi_GPIO.output(_CAR_['INT2'], False)
-            RPi_GPIO.output(_CAR_['INT3'], True)
-            RPi_GPIO.output(_CAR_['INT4'], False)
-        elif command == 'back':
-            RPi_GPIO.output(_CAR_['INT1'], False)
-            RPi_GPIO.output(_CAR_['INT2'], True)
-            RPi_GPIO.output(_CAR_['INT3'], False)
-            RPi_GPIO.output(_CAR_['INT4'], True)
-        elif command == 'stop':
-            RPi_GPIO.output(_CAR_['INT1'], False)
-            RPi_GPIO.output(_CAR_['INT2'], False)
-            RPi_GPIO.output(_CAR_['INT3'], False)
-            RPi_GPIO.output(_CAR_['INT4'], False)
+    def plugin(post_data):
+        last_mode = GlobalVar.get_last_mode()
+        mode = GlobalVar.get_mode()
+		
+        key = None
+        value = None
+		
+        if post_data.get('id'):
+            GlobalVar.set_plugin_id(post_data['id'][0])
+        else :
+            GlobalVar.set_plugin_id('1')
+        id = GlobalVar.get_plugin_id()
+
+        item = _PLUGIN_[mode][id]
+		
+        if post_data.get('command'):#开关指令
+            key = 'command'
+            value = post_data[key][0]
+            item['status'] = value
+            if id == 'all':
+                for k in _PLUGIN_[mode].keys():
+                    _PLUGIN_[mode][k]['status'] = value
+
+        if None == _PLUGIN_.get(mode):		
+            return
+			
+        if id == 'all' or key == None:
+            for k in _PLUGIN_[mode].keys():
+                WebHandler.output('plugin', k, key, value)
+
+        WebHandler.output('plugin', id, key, value)
+        WebSocket.broadcast_plugin_status()
 
     def device_set(post_data):
         if post_data.get('dev_id') == None or post_data.get('id') == None:
             return
         obj = json.loads(post_data['device_set'][0])
+        print("device_set,item:%s" %(json.dumps(obj)))
         obj['name'] = urllib.parse.unquote(obj['name'])
         _DEVICE_[post_data['dev_id'][0]][post_data['id'][0]] = obj
         WebSocket.broadcast_device()

@@ -20,7 +20,7 @@ import time
 from my_gpio import RPi_GPIO
 from my_websocket import WebSocket
 from lirc import LIRC
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_
+from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
 from g_data import GlobalVar
 
 class Connection(object):    
@@ -85,9 +85,14 @@ class Connection(object):
         for k,v in _DEVICE_['curtain'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
             if v.get('ip') == self._address[0]:
                 _CURTAIN_[mode][k]['status'] = 'close'
+				
+        for k,v in _DEVICE_['plugin'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
+            if v.get('ip') == self._address[0]:
+                _PLUGIN_[mode][k]['status'] = 'off'
 
         WebSocket.broadcast_lamp_status()
         WebSocket.broadcast_curtain_status()
+        WebSocket.broadcast_plugin_status()
 	
     def check_output():
         l = len(Connection.output_param)
@@ -127,6 +132,8 @@ class Connection(object):
             color = RPi_GPIO.get_colors(param['item'])#{'r' : 50, 'g' : 50, 'b' : 50} 转为'7f7f7f'字符串
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\", \"color\":\"%s\"}" %(dev_id, pin, key, value, color)
         elif dev_id.find('curtain') != -1:
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
+        elif dev_id.find('plugin') != -1:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
         elif dev_id.find('air_conditioner') != -1:#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
             LIRC_KEY = None

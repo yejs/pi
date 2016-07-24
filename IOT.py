@@ -7,6 +7,10 @@
   http://stackoverflow.com/questions/22652156/how-to-use-irrecord-with-2ms-timing-instead-of-the-default-5ms
   
   https://github.com/zzmp/juliusjs?utm_source=ourjs.com
+  
+  ets Jan  8 2013,rst cause:4, boot mode:(3,7)
+
+wdt reset
 """
 __author__ = 'yejs'
 __version__ = '1.0'

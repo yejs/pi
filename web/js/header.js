@@ -1,7 +1,7 @@
-document.write('<script type="text/javascript" src="js/mymath.js"></script>');
-document.write('<script type="text/javascript" src="js/canvas.js"></script>');
-document.write('<script type="text/javascript" src="js/data.js"></script>');
-document.write('<script type="text/javascript" src="js/jquery.min.js"></script>');
+document.write('<script type="text/javascript" src="js/js/mymath.js"></script>');
+document.write('<script type="text/javascript" src="js/js/canvas.js"></script>');
+document.write('<script type="text/javascript" src="js/js/data.js"></script>');
+document.write('<script type="text/javascript" src="js/js/jquery.min.js"></script>');
 
 var _font_family = "'Hiragino Sans GB','Microsoft Yahei',Helvetica,STHeiti";
 var _font36 = "36px " + _font_family;
@@ -129,9 +129,11 @@ function header(index)
 		//http://i2.sinaimg.cn/dy/main/weather/weatherplugin/wthIco/20_20/zhenyu_0.png
 		var img=new Image();
 		img.src = 'http://i2.sinaimg.cn/dy/main/weather/weatherplugin/wthIco/20_20/' + _f;
+		
 		img.onload = function(){
 			var ratio = getPixelRatio();
-			ctx.drawImage(img, 0, 0, img.width, img.height, (_header.rect.width/2 - img.width*1.5)*ratio, 5, img.width*3*ratio, img.height*3*ratio);
+			r = ratio == 3 ? 1 : (ratio == 2 ? 1.5 : 3);
+			ctx.drawImage(img, 0, 0, img.width, img.height, _header.rect.width/2 - (img.width*r*ratio)/2, 5, img.width*r*ratio, img.height*r*ratio);
 			_header.ctx.drawImage(_header.canvasReport, 0, 0);
 		};
 		
