@@ -72,7 +72,10 @@ class WebHandler(tornado.web.RequestHandler):
             elif dev_id == None:
                 WebHandler.lamp(post_data)
                 WebHandler.curtain(post_data)
-
+                WebHandler.air_conditioner(post_data) 
+                WebHandler.tv(post_data) 
+                WebHandler.plugin(post_data) 
+				
             timer = threading.Timer(5, WebHandler.perform_save)#延时5秒保存
             timer.start()
         else:										#设备参数设定指令
@@ -107,8 +110,8 @@ class WebHandler(tornado.web.RequestHandler):
         if key == None:    							#模式指令
             key = 'command'
             value = item['status']
-
-		
+            print('mode')
+	
         Connection.check_output()
         if _DEVICE_[dev_id].get(id):
 	
@@ -150,12 +153,15 @@ class WebHandler(tornado.web.RequestHandler):
 
         if None == _LAMP_.get(mode):		
             return
-			
-        if id == 'all' or key == None:
-            for k in _LAMP_[mode].keys():
-                WebHandler.output('lamp', k, key, value)
 
-        WebHandler.output('lamp', id, key, value)
+        if id == 'all' or key == None:
+            for id in _LAMP_[mode].keys():
+                last_value = _LAMP_[last_mode][id]['status']
+                now_value = _LAMP_[mode][id]['status']
+                if last_value != now_value:
+                    WebHandler.output('lamp', id, 'command', now_value)
+        else:
+            WebHandler.output('lamp', id, key, value)
         WebSocket.broadcast_lamp_status()
         #Connection.test()
 		
@@ -189,14 +195,14 @@ class WebHandler(tornado.web.RequestHandler):
 			
         if None == _CURTAIN_.get(mode):		
             return
-        
+    
         '''
         TODO:窗帘模式指令下切换有个问题，如果用户在当前模式下开合窗帘过程中按下stop停止指令，窗帘将会停在某个中间状态，
         当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
 		而与界面显示的状态不一致
         '''
         if id == 'all' or key == None:
-            for id in _CURTAIN_[mode].keys():
+            for id in _CURTAIN_[mode].keys():   
                 #WebHandler.output('curtain', id, key, value)
                 last_progress = _CURTAIN_[last_mode][id]['progress']
                 progress = _CURTAIN_[mode][id]['progress']
@@ -217,7 +223,7 @@ class WebHandler(tornado.web.RequestHandler):
             WebHandler.output('curtain', id, key, value)
 
         WebSocket.broadcast_curtain_status()
-		
+
 	#空调业务逻辑模块处理,协议：	mode=normal&dev_id=air_conditioner&id=1&command=power_on
     def air_conditioner(post_data):
         mode = GlobalVar.get_mode()
@@ -272,18 +278,18 @@ class WebHandler(tornado.web.RequestHandler):
             elif value.find('left_right_swept_') != -1:#调整左右风向指令（扫风、定向吹风）
                 item['left_right_swept'] = int(value[17:])
             #print("air_conditioner, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
-		
+
         if id == 'all' or key == None:
-            for k in _AIR_CONDITIONER_[mode].keys():
+            for id in _AIR_CONDITIONER_[mode].keys():
                 last_value = _AIR_CONDITIONER_[last_mode][id]['power_on']
                 now_value = _AIR_CONDITIONER_[mode][id]['power_on']
                 if last_value != now_value:
                     WebHandler.output('air_conditioner', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
-
-        WebHandler.output('air_conditioner', id, key, value)
+        else:
+            WebHandler.output('air_conditioner', id, key, value)
 
         WebSocket.broadcast_air_status()
-		
+
 	#电视业务逻辑模块处理,协议：	mode=normal&dev_id=tv&id=1&command=power_on	
     def tv(post_data):
         mode = GlobalVar.get_mode()
@@ -311,15 +317,14 @@ class WebHandler(tornado.web.RequestHandler):
                 item['status'] = 'off'
             #print("tv, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
 
-		
         if id == 'all' or key == None:
-            for k in _TV_[mode].keys():
+            for id in _TV_[mode].keys():
                 last_value = _TV_[last_mode][id]['status']
                 now_value = _TV_[mode][id]['status']
                 if last_value != now_value:
                     WebHandler.output('tv', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
-
-        WebHandler.output('tv', id, key, value)
+        else:
+            WebHandler.output('tv', id, key, value)
 
         WebSocket.broadcast_tv_status()
 		
@@ -349,12 +354,15 @@ class WebHandler(tornado.web.RequestHandler):
 
         if None == _PLUGIN_.get(mode):		
             return
-			
-        if id == 'all' or key == None:
-            for k in _PLUGIN_[mode].keys():
-                WebHandler.output('plugin', k, key, value)
 
-        WebHandler.output('plugin', id, key, value)
+        if id == 'all' or key == None:
+            for id in _PLUGIN_[mode].keys():
+                last_value = _PLUGIN_[last_mode][id]['status']
+                now_value = _PLUGIN_[mode][id]['status']
+                if last_value != now_value:
+                    WebHandler.output('plugin', id, 'command', now_value)
+        else:
+            WebHandler.output('plugin', id, key, value)
         WebSocket.broadcast_plugin_status()
 
     def device_set(post_data):

@@ -20,7 +20,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['灯光设置', '窗帘设置', '空调设置', '电视设置'];
+			var _title = ['灯光设置', '窗帘设置', '空调设置', '电视设置', '插座设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -34,10 +34,17 @@
 			doInitFooter('footer', 1);
 			doInitHeader('header', 0);
 			
+			window.onresize();
+			
 			ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 		}
 		
-		var titles = ["lamp", "curtain", "air_conditioner", "tv"];
+		window.onresize = function(){
+			_header.onresize();
+			_footer.onresize();
+		}
+		
+		var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin"];
 		showPage = function(title){
 			for(var i in titles){
 				if(titles[i] === title)
@@ -62,19 +69,7 @@
 					a.style.background = 'transparent';
 				}
 			}
-
-			if(0 == i){
-				showPage("lamp");
-			}
-			else if(1 == i){
-				showPage("curtain");
-			}
-			else if(2 == i){
-				showPage("air_conditioner");
-			}
-			else if(3 == i){
-				showPage("tv");
-			}
+			showPage(titles[i]);
 		}
 		
 
@@ -92,18 +87,53 @@
 			
 			if(_header)
 				_header.doDraw();
+			
+			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else if( json.event === "lamp" ){
 
 			_LAMP_[json.mode] = json.data;
 
 			mode = json.mode;
-		} 
 
-		window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		} 
+		else if( json.event === "curtain" ){
+
+			_CURTAIN_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "air_conditioner" ){
+
+			_AIR_CONDITIONER_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "tv" ){
+
+			_TV_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "plugin" ){
+
+			_PLUGIN_[json.mode] = json.data;
+
+			mode = json.mode;
+			
+			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
 	}
 	onopen = function()
 	{
@@ -130,17 +160,23 @@
 
 <div id = "wrap" style="display:none;overflow-y:auto;height: 100%; position: relative;width:100%;background:white;margin:0 auto;max-width:1080px;">
 	<div id = "div_header" align="left">
-		<div align="left">
-			<canvas id="header" align="left">
+		<div align="left" >
+			<canvas id="header" align="left" style="display:block;">
 		</div>
 		<div class="menu" id = "news" align="left">
 			<ul id = "news_ul">
 			</ul>
 		</div>
+		<button id="btn2" onclick="_header.doUI();">∧</button>
 	</div>
 	
-	<div><!--固定头的点位符-->
-		<canvas align="left" style="visibility:hidden;height: 240px;">
+	<div><!--固定头的占位符-->
+		<div>
+			<canvas align="left" id="_header" style="visibility:hidden;height: 180px;">
+		</div>
+		<div>
+			<canvas align="left" id="_news_ul" style="visibility:hidden;height: 60px;">
+		</div>
 	</div>
 	
 	<div id="lamp" style="display:block">
@@ -154,6 +190,9 @@
 	</div>
 	<div id="tv" style="display:none">
 		<iframe name="ftv" src='dev_set.html?dev_id=tv' class="myframe"></iframe>
+	</div>
+	<div id="plugin" style="display:none">
+		<iframe name="fplugin" src='dev_set.html?dev_id=plugin' class="myframe"></iframe>
 	</div>
 	<div id="div_footer"><canvas id="footer" align="left"></canvas></div>
 </div>

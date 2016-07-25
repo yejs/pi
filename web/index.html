@@ -22,17 +22,23 @@
 
 <div id = "wrap" style="display:none;overflow-y:auto;height: 100%; position: relative;width:100%;background:white;margin:0 auto;max-width:1080px;">
 	<div id = "div_header" align="left">
-		<div align="left">
-			<canvas id="header" align="left">
+		<div align="left" >
+			<canvas id="header" align="left" style="display:block;">
 		</div>
 		<div class="menu" id = "news" align="left">
 			<ul id = "news_ul">
 			</ul>
 		</div>
+		<button id="btn2" onclick="_header.doUI();">∧</button>
 	</div>
 	
-	<div><!--固定头的点位符-->
-		<canvas align="left" style="visibility:hidden;height: 240px;">
+	<div><!--固定头的占位符-->
+		<div>
+			<canvas align="left" id="_header" style="visibility:hidden;height: 180px;">
+		</div>
+		<div>
+			<canvas align="left" id="_news_ul" style="visibility:hidden;height: 60px;">
+		</div>
 	</div>
 	
 	<div id="lamp" style="display:block">

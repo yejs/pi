@@ -2,6 +2,7 @@ document.write('<script type="text/javascript" src="js/js/mymath.js"></script>')
 document.write('<script type="text/javascript" src="js/js/websocket.js"></script>');
 document.write('<script type="text/javascript" src="js/js/canvas.js"></script>');
 document.write('<script type="text/javascript" src="js/js/data.js"></script>');
+document.write('<script src="js/js/hidpi-canvas.min.js?ver=1"></script>');
 
 ws = null;
 timer = null;
@@ -9,7 +10,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['灯光', '窗帘', '空调', '电视', '插座', '场景模式', '视频监控'];
+	var _title = ['灯光', '窗帘', '空调', '电视', '插座', '场景模式', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -22,14 +23,11 @@ window.onload = function(){
 	setTimeout(function() {onNewsTitle(0);},200);
 	
 	doInitHeader('header', 0);
-	
 	doInitFooter('footer', 0);
 	
 	window.onresize();
 	
 	ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
-	
-
 }
 
 var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin", "scene", "video"];
@@ -45,7 +43,6 @@ showPage = function(title){
 window.onresize = function(){
 	_header.onresize();
 	_footer.onresize();
-
 }
 
 onNewsTitle = function(i){
@@ -126,46 +123,30 @@ window.addEventListener('message',function(e){
 			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
-		else if( json.event === "lamp" ){
-
-			_LAMP_[json.mode] = json.data;
-
+		else{
 			mode = json.mode;
-
-			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		} 
-		else if( json.event === "curtain" ){
-
-			_CURTAIN_[json.mode] = json.data;
-
-			mode = json.mode;
-			
-			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			if( json.event === "lamp" ){
+				_LAMP_[json.mode] = json.data;
+				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			} 
+			else if( json.event === "curtain" ){
+				_CURTAIN_[json.mode] = json.data;
+				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			}
+			else if( json.event === "air_conditioner" ){
+				_AIR_CONDITIONER_[json.mode] = json.data;
+				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			}
+			else if( json.event === "tv" ){
+				_TV_[json.mode] = json.data;
+				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			}
+			else if( json.event === "plugin" ){
+				_PLUGIN_[json.mode] = json.data;
+				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			}
 		}
-		else if( json.event === "air_conditioner" ){
-
-			_AIR_CONDITIONER_[json.mode] = json.data;
-
-			mode = json.mode;
-			
-			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		}
-		else if( json.event === "tv" ){
-
-			_TV_[json.mode] = json.data;
-
-			mode = json.mode;
-			
-			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		}
-		else if( json.event === "plugin" ){
-
-			_PLUGIN_[json.mode] = json.data;
-
-			mode = json.mode;
-			
-			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-		}
+		
 
 		
 	//	window.frames['fscene'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');

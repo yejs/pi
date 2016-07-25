@@ -129,13 +129,18 @@ function footer(index)
 		}
 		var loc = getPointOnCanvas(canvas, x, y); 
 		
+		if(document.getElementById('header').style.display === 'none')
+			show = 'hide';
+		else
+			show = 'show';
+		
 		for(var i=0;i<footer_title.length;i++){
 			if(this.arrayBtn[i].IsInRect(loc, 0) && this.index != i){
-				console.log(i);
+				
 				if(i == 0)
-					window.location.href = 'index.html';
+					window.location.href = 'index.html?header=' + show;
 				else if(i == 1)
-					window.location.href = 'setting.html';
+					window.location.href = 'setting.html?header=' + show;
 				break;
 			}
 		}

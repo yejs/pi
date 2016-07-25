@@ -65,6 +65,8 @@ refresh = function(){
 			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调光调色';
 		else if('curtain' == dev_id)
 			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
+		else if('plugin' == dev_id)
+			document.getElementById('color_title').style.display = 'none';
 		else
 			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节';
 		
@@ -274,6 +276,17 @@ function device()
 			return;
 		} 
 		else{
+			var id = json.id;
+			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
+				id = '1';
+
+			mode = json.mode;
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
+
+			this.setID(id);
+			if( json.event != "lamp"  && json.event != "plugin")
+				this.setFocus(id);
+			
 			if( json.event === "lamp" ){
 			//	console.log('lamp:' + JSON.stringify(json));
 			//这里是服务端所有灯的同步状态信息，即所有客户端显示的灯的状态必需与服务端的状态一致，
@@ -320,13 +333,13 @@ function device()
 			}
 			else if( json.event === "plugin" ){
 				_PLUGIN_[json.mode] = json.data;
-
 				for(var id in _PLUGIN_[mode]){
 					if(_DEVICE_["plugin"].hasOwnProperty(id.toString())){
 						if(_PLUGIN_[mode][id]['status'] === 'on')
 							document.getElementById(id).style.backgroundColor = '#e00';					
-						else
+						else{
 							document.getElementById(id).style.backgroundColor = '#aaa';
+						}
 					}
 				}
 
@@ -342,16 +355,7 @@ function device()
 				}
 			}
 			
-			var id = json.id;
-			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
-				id = '1';
-
-			mode = json.mode;
-			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
-
-			this.setID(id);
-			if( json.event != "lamp"  && json.event != "plugin")
-				this.setFocus(id);
+			
 		}
 		
 		this.setPos();

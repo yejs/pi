@@ -12,6 +12,13 @@ doInitHeader = function(canvas, index)
 {
 	_header = new header(index);
 	_header.doInit(canvas);	
+	
+	var url = location.search;
+	pos = url.indexOf('header');
+	if(pos>=0){
+		show = url.substr(pos+7);
+		_header.doUI(show);
+	}
 }
 
 function header(index)
@@ -22,6 +29,20 @@ function header(index)
 	this.arrayBtn = new Array();
 	this.city = null;
 	this.weather = null;
+	
+	this.doUI = function(show)
+	{
+		if((show === undefined && document.getElementById('header').style.display === 'none') || show === 'show'){
+			document.getElementById('header').style.display = 'block';
+			document.getElementById('_header').style.display = 'block';
+			document.getElementById('btn2').innerText = '∧';
+		}
+		else{
+			document.getElementById('header').style.display = 'none';
+			document.getElementById('_header').style.display = 'none';
+			document.getElementById('btn2').innerText = '∨';
+		}
+	}
 	
 	this.doInit = function(canvas)
 	{
@@ -132,8 +153,8 @@ function header(index)
 		
 		img.onload = function(){
 			var ratio = getPixelRatio();
-			r = ratio == 3 ? 1 : (ratio == 2 ? 1.5 : 3);
-			ctx.drawImage(img, 0, 0, img.width, img.height, _header.rect.width/2 - (img.width*r*ratio)/2, 5, img.width*r*ratio, img.height*r*ratio);
+			r = 9/ratio;
+			ctx.drawImage(img, 0, 0, img.width, img.height, (_header.rect.width - (img.width*r))*ratio/2, 5, img.width*r*ratio, img.height*r*ratio);
 			_header.ctx.drawImage(_header.canvasReport, 0, 0);
 		};
 		

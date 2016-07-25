@@ -350,6 +350,25 @@ div.item  input.mybtn
 }
 .btn:active{border: 3px solid #888;}
 
+#btn2
+{
+	margin: 0px 10px 0px 10px;
+	width: 1.2em;/*200px*/
+	height: 70px;line-height:70px;
+	border-top-left-radius:0px;
+	border-top-right-radius:0px;
+	border-bottom-left-radius:0px;
+	border-bottom-right-radius:0px;
+	background-color: #fff;
+	border: 1px solid #D7D7D7;
+	outline:none;
+	position: absolute;bottom: 0px;right: 0px;
+	filter:alpha(opacity=90);  
+    -moz-opacity:0.9;  
+    -khtml-opacity: 0.9;  
+    opacity: 0.9;
+	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:40px;
+}
 
 .title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;color:#aaa}
 .title2{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:32px;text-align:left;height: 60px;line-height:60px;color:#000}
