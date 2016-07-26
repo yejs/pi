@@ -75,10 +75,29 @@ refresh = function(){
 	}
 }
 
+//这 里是测试，发消息到主框架，主框架再发消息回来处理
+dotest = function(){
+	var speech;
+	if('lamp' == dev_id)
+		speech = '打开灯1';
+	else if('curtain' == dev_id)
+		speech = '打开窗帘1';
+	else if('air_conditioner' == dev_id)
+		speech = '打开空调1';
+	else if('tv' == dev_id)
+		speech = '打开电视1';
+	else if('plugin' == dev_id)
+		speech = '打开插座1';
+	window.parent.postMessage({'msg':'doSpeech', 'data':speech},'*');
+}
+
 window.addEventListener('message',function(e){
 	if('onmessage'===e.data.msg){
 		_device.onmessage(e.data.data);
 		//console.log(e.data.data);
+	}
+	else if('doSpeech'===e.data.msg){
+		_device.doSpeech(e.data.data);
 	}
 },false);
 
@@ -139,6 +158,20 @@ function device()
 			}, false);
 	}
 
+	//语音识别处理
+	this.doSpeech = function(speech){
+		for(var i=0;i<20;i++){
+			if(document.getElementById(i.toString())){
+				if(_DEVICE_[dev_id].hasOwnProperty(i.toString()) && _DEVICE_[dev_id][i.toString()]['hide'] === 'false'){
+					var name = document.getElementById(i.toString()).innerText;
+					var pos = speech.indexOf(name);
+					if(pos >= 0 && speech.length == pos + name.length)
+						console.log(speech);
+				}
+			}
+		}
+	}
+	
 	this.doMouse = function(event, mouse, down, up) { 
 		if(mouse){
 			var x = event.pageX; 

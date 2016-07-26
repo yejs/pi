@@ -10,7 +10,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['灯光', '窗帘', '空调', '电视', '插座', '场景模式', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
+	var _title = ['&nbsp&nbsp灯光&nbsp&nbsp', '&nbsp&nbsp窗帘&nbsp&nbsp', '&nbsp&nbsp空调&nbsp&nbsp', '&nbsp&nbsp电视&nbsp&nbsp', '&nbsp&nbsp插座&nbsp&nbsp', '&nbsp&nbsp场景模式&nbsp&nbsp', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -56,7 +56,7 @@ onNewsTitle = function(i){
 			a.style.background = getMenuImg(0);
 		}
 		else{
-			a.style.color = '#fff';
+			a.style.color = '#000';
 			a.style.background = 'transparent';
 		}
 	}
@@ -88,8 +88,25 @@ window.addEventListener('message',function(e){
 	if('getmode'===e.data.msg){
 		window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
 	}
+	else if('doSpeech'===e.data.msg){
+		doSpeech(e.data.data);
+	}
 },false);
 
+	//语音识别处理
+	doSpeech = function(speech){
+		if(speech.indexOf('灯') >=0)
+			window.frames['flamp'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
+		else if(speech.indexOf('窗帘') >=0)
+			window.frames['fcurtain'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
+		else if(speech.indexOf('空调') >=0)
+			window.frames['fair_conditioner'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
+		else if(speech.indexOf('电视') >=0)
+			window.frames['ftv'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
+		else if(speech.indexOf('插座') >=0)
+			window.frames['fplugin'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
+	}
+	
 	//websocket 处理函数
 	onmessage = function(evt)
 	{
@@ -170,3 +187,5 @@ window.addEventListener('message',function(e){
 			ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 			}, 5000);
 	}
+	
+	

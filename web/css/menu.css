@@ -57,7 +57,7 @@ div.menu
     overflow:auto;position:relative; width: 100%;max-width:100%;height:auto;
     margin: 0px; /* 与外界元素的距离为0 */
     padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
-	font-family:'Arial Regular', 'Arial';font-weight:600;font-style:normal;font-size:42px;
+	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;
 }
 
 /* 所有class为menu的div中的ul样式 */
@@ -71,9 +71,9 @@ div.menu ul
 	white-space:nowrap;
 	position:relative; 
 	overflow:visible;
-	background-color:#2ba4eb;
+	background-color:#fff;
 	outline:none;
-	border-bottom-color:#FFF;
+	border-bottom-color:#fff;
 }
 
 /* 所有class为menu的div中的ul中的li样式 */
@@ -83,12 +83,12 @@ div.menu ul li
 	display:inline-block;
 	padding: 0px 1px;
 	outline:none;
-	border-color:#FFF;
-	background-color:#2ba4eb;
+	border-color:#fff;
+	background-color:#fff;
 }
 div.menu ul li:hover
 {
-    background-color: #2ba4ff; /* 背景色 */
+    background-color: #fff; /* 背景色 */
 }
 /* 所有class为menu的div中的ul中的a样式(包括尚未点击的和点击过的样式) */
 div.menu ul li a
@@ -96,7 +96,7 @@ div.menu ul li a
     background-color: transparent; /* 背景色 */
     border: 0px #4e667d solid; /* 边框 */
 
-    color: #fff; /* 文字颜色 */
+    color: #000; /* 文字颜色 */
     display: block; /* 此元素将显示为块级元素，此元素前后会带有换行符 */
     line-height: 1.55em; /* 行高 */
     padding: 4px 20px; /* 内部填充的距离 */
@@ -104,66 +104,6 @@ div.menu ul li a
     white-space: nowrap; /* 对于文本内的空白处，不会换行，文本会在在同一行上继续，直到遇到 <br> 标签为止。 */
 }
 
-
-
-div.news_content 
-{
-    margin: 0px; /* 与外界元素的距离为0 */
-    padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
-}
-div.news_content ul
-{
-    list-style:none; /* 去掉ul前面的符号 */
-    margin: 0px; /* 与外界元素的距离为0 */
-    padding: 0px; /* 与内部元素的距离为0 */
-    width: auto; /* 宽度根据元素内容调整 */
-	display:block;
-	white-space:nowrap;
-	position:relative; 
-	overflow:auto;
-	background-color: transparent; /* 背景色 */
-}
-/* 所有class为menu的div中的ul中的li样式 */
-div.news_content ul li
-{
-	width: 100%;
-	background-color: transparent; /* 背景色 */
-}
-
-div.news_content ul li a
-{
-    background: transparent; /* 背景色 */
-    color: #f20; /* 文字颜色 */
-   /* display: block;  此元素将显示为块级元素，此元素前后会带有换行符 */
-    line-height: 1.35em; /* 行高 */
-    padding: 4px 20px; /* 内部填充的距离 */
-    text-decoration: none; /* 不显示超链接下划线 */
-    white-space: normal; 
-}
-
-div.news_content ul li a.title_red
-{
-    font-family:'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:16px;
-    color: #f20; /* 文字颜色 */
-	white-space: nowrap; /* 对于文本内的空白处，不会换行，文本会在在同一行上继续，直到遇到 <br> 标签为止。 */
-}
-
-div.news_content ul li a.title_black
-{
-    font-family:'Hiragino Sans GB','Microsoft Yahei','Helvetica','Arial';font-weight:600;font-style:normal;font-size:16px;
-    color: #000; /* 文字颜色 */
-	white-space: nowrap; /* 对于文本内的空白处，不会换行，文本会在在同一行上继续，直到遇到 <br> 标签为止。 */
-}
-
-div.news_content ul li a.content_red
-{
-    color: #f55; /* 文字颜色 */
-}
-
-div.news_content ul li a.content_black
-{
-    color: #000; /* 文字颜色 */
-}
 
 li.list_content 
 {
@@ -352,8 +292,9 @@ div.item  input.mybtn
 
 #btn2
 {
-	margin: 0px 10px 0px 10px;
-	width: 1.2em;/*200px*/
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 20px 0px;
+	width: 1.4em;/*200px*/
 	height: 70px;line-height:70px;
 	border-top-left-radius:0px;
 	border-top-right-radius:0px;
@@ -367,7 +308,7 @@ div.item  input.mybtn
     -moz-opacity:0.9;  
     -khtml-opacity: 0.9;  
     opacity: 0.9;
-	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:40px;
+	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:80px;
 }
 
 .title{font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:center;height: 100px;line-height:100px;color:#aaa}

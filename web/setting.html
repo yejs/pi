@@ -20,7 +20,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['灯光设置', '窗帘设置', '空调设置', '电视设置', '插座设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
+			var _title = ['&nbsp&nbsp灯光设置&nbsp&nbsp', '&nbsp&nbsp窗帘设置&nbsp&nbsp', '&nbsp&nbsp空调设置&nbsp&nbsp', '&nbsp&nbsp电视设置&nbsp&nbsp', '&nbsp&nbsp插座设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -65,7 +65,7 @@
 					a.style.background = getMenuImg(0);
 				}
 				else{
-					a.style.color = '#fff';
+					a.style.color = '#000';
 					a.style.background = 'transparent';
 				}
 			}

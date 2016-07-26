@@ -115,7 +115,8 @@ function dev_set()
 			document.getElementById('length').value = '';
 		
 		ii = parseInt(id);
-		if((ii < (this.dev_id == 'lamp' ? 12 : 6) && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true'))
+		var count = (this.dev_id == 'lamp' || this.dev_id == 'curtain' || this.dev_id == 'plugin') ? 12 : 6;
+		if((ii < count && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true'))
 			document.getElementById('hide').setAttribute("disabled","disabled");
 		else
 			document.getElementById('hide').removeAttribute("disabled");
@@ -125,8 +126,15 @@ function dev_set()
 		else
 			document.getElementById('hide').checked = false;
 		
-		if('all' === id)
+		if('all' === id){
 			document.getElementById('all').style.backgroundColor = '#e00';
+			document.getElementById('IP').setAttribute("disabled","disabled");
+			document.getElementById('GPIO').setAttribute("disabled","disabled");
+		}
+		else{
+			document.getElementById('IP').removeAttribute("disabled");
+			document.getElementById('GPIO').removeAttribute("disabled");
+		}
 
 		for(var i=0;i<20;i++){
 			if(document.getElementById(i.toString())){
