@@ -53,14 +53,24 @@ class LIRC():
 			key = line[s:e]
 			
 			if self.remote['is_raw'] == False:
+				'''
 				if len(key)>0 and key.find('flags') != -1: 
 					line = line[line.find(key) + len(key):].strip()
 					if line.find('RAW_CODES') != -1:
 						self.remote['is_raw'] = True 
-
-				elif len(key)>0 and line.find('begin') == -1 and line.find('end') == -1: 
+				'''
+				if len(key)>0 and key.find('begin') != -1: #  begin raw_codes   或   begin codes， 这里不用flags判断，否则begin raw_codes前的字段解析不到
 					line = line[line.find(key) + len(key):].strip()
+					if line.find('raw_codes') != -1:
+						self.remote['is_raw'] = True 
+						
+				elif len(key)>0 and line.find('begin') == -1 and line.find('end') == -1: 
+					if line.find('#') != -1:					#去掉注解
+						line = line[0:line.find('#')]
+					line = line[line.find(key) + len(key):].strip()
+
 					self.remote[key] = line
+
 			else:#is raw data
 				if len(key)>0 and (key.find('name') != -1 or key.find('end') != -1): 
 					if raw_key_name:				#先将上一个键、值保存处理好
@@ -128,14 +138,16 @@ class LIRC():
 
 		
 	def __del__(self):
-		self.f.close
+		if self.f:
+			self.f.close
 		
 if __name__ == "__main__":
 	try:
-		obj1 = LIRC("lircd_air.conf")
+		obj1 = LIRC("conf/lircd_air.conf")
 		#print('%s' % obj1.getKey('KEY_VOLUMEDOWN'))
-		#print('header1:%s, header2:%s' % obj1.getEx('header'))
+		print('header1:%s, header2:%s' % obj1.getEx('one'))
 		#print('header1:%s' % obj1.getEx('header'))
+
 	except:
 		pass
 	finally:
