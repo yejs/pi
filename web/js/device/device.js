@@ -79,7 +79,7 @@ refresh = function(){
 dotest = function(){
 	var speech;
 	if('lamp' == dev_id)
-		speech = '打开灯1';
+		speech = '关闭灯1';
 	else if('curtain' == dev_id)
 		speech = '打开窗帘1';
 	else if('air_conditioner' == dev_id)
@@ -96,7 +96,7 @@ window.addEventListener('message',function(e){
 		_device.onmessage(e.data.data);
 		//console.log(e.data.data);
 	}
-	else if('doSpeech'===e.data.msg){
+	else if('doSpeech'===e.data.msg){//主框架安装语音识别包，识别到语音后发送语音指令到终端处理
 		_device.doSpeech(e.data.data);
 	}
 },false);
@@ -158,15 +158,34 @@ function device()
 			}, false);
 	}
 
-	//语音识别处理
+	//终端语音识别处理
 	this.doSpeech = function(speech){
 		for(var i=0;i<20;i++){
 			if(document.getElementById(i.toString())){
 				if(_DEVICE_[dev_id].hasOwnProperty(i.toString()) && _DEVICE_[dev_id][i.toString()]['hide'] === 'false'){
 					var name = document.getElementById(i.toString()).innerText;
 					var pos = speech.indexOf(name);
-					if(pos >= 0 && speech.length == pos + name.length)
-						console.log(speech);
+					if(pos >= 0 && speech.length == pos + name.length){
+						
+						if(speech.indexOf('开')>=0 || speech.indexOf('关')>=0){
+							if(dev_id == 'lamp'){
+								_LAMP_[mode][i]['status'] = speech.indexOf('开')>=0 ? 'off' : 'on';//先将终端状态置反，docommand会将此状态重置
+								this.docommand(i);
+							}
+							else if(dev_id == 'curtain'){
+								this.docommand(i);
+								var loc = {x:this.bar1.x, y:this.bar1.y};
+								this.doIt(loc, 1, 0);
+							}
+							else if(dev_id == 'air_conditioner' || dev_id == 'tv'){					//暂时先只处理电源开、关
+								this.docommand(i, speech.indexOf('开')>=0 ? 'power_on' : 'power_off');
+							}
+							else if(dev_id == 'plugin'){
+								_PLUGIN_[mode][i]['status'] = speech.indexOf('开')>=0 ? 'off' : 'on';//先将终端状态置反，docommand会将此状态重置
+								this.docommand(i);
+							}
+						}
+					}
 				}
 			}
 		}

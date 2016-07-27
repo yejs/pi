@@ -88,7 +88,7 @@ window.addEventListener('message',function(e){
 	if('getmode'===e.data.msg){
 		window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
 	}
-	else if('doSpeech'===e.data.msg){
+	else if('doSpeech'===e.data.msg){//这个是测试处理
 		doSpeech(e.data.data);
 	}
 },false);
