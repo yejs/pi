@@ -33,6 +33,7 @@ class Connection(object):
     lirc_air = None
     lirc_tv = None
     sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
+    last_param = None
     def __init__(self, stream, address):   
         Connection.sock = self
         Connection.clients.add(self)   
@@ -63,7 +64,7 @@ class Connection(object):
                 WebSocket.broadcast_device();
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
-                print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+                #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
             print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
@@ -100,9 +101,14 @@ class Connection(object):
             Connection.output_param = Connection.output_param[l-4:-1]
 			
     def output(self, dev_id, ip, pin, key, value, item):
-        param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": value, "item": item}
+        if dev_id.find('tv') != -1 and time.time() - Connection.time_tick < 0.5 and Connection.last_param and Connection.lirc_tv.remote.get('repeat') and Connection.last_param["value"] == value and Connection.last_param["ip"] == ip:#电视连续按键处理
+            param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": "repeat", "item": item}
+        else:
+            param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": value, "item": item}
+            Connection.last_param = param
+			
         Connection.output_param.append(param)  
-
+		
         if Connection.timer:
             Connection.timer.cancel()
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
@@ -151,6 +157,7 @@ class Connection(object):
                 LIRC_KEY = 'KEY_DOWN'
             elif value.find('left_right_swept_') != -1:
                 LIRC_KEY = 'KEY_RIGHT'
+
             value = Connection.lirc_air.getKey(LIRC_KEY) if LIRC_KEY else None
             is_raw = Connection.lirc_air.is_raw()
             
@@ -181,13 +188,19 @@ class Connection(object):
                 LIRC_KEY = 'KEY_HOME'
             elif value == 'back':
                 LIRC_KEY = 'KEY_BACK'
-            value = Connection.lirc_tv.getKey(LIRC_KEY) if LIRC_KEY else None
-            is_raw = Connection.lirc_tv.is_raw()
+				
+				
+            if value.find('repeat') != -1:#电视连续按键处理
+                value = Connection.lirc_tv.remote['repeat'].replace('  ', ' ')
+                msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, True)
+            else:#非连续按键
+                value = Connection.lirc_tv.getKey(LIRC_KEY) if LIRC_KEY else None
+                is_raw = Connection.lirc_tv.is_raw()
 			
-            if value == None:
-                print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
-                return
-            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
+                if value == None:
+                    print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
+                    return
+                msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
         #print(msg)
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
