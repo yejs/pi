@@ -1,6 +1,7 @@
 document.write('<script type="text/javascript" src="js/js/mymath.js"></script>');
 document.write('<script type="text/javascript" src="js/js/canvas.js"></script>');
 document.write('<script type="text/javascript" src="js/js/data.js"></script>');
+document.write('<script type="text/javascript" src="js/js/scroll.js"></script>');
 document.write('<script type="text/javascript" src="js/device/lamp.js"></script>');
 document.write('<script type="text/javascript" src="js/device/curtain.js"></script>');
 document.write('<script type="text/javascript" src="js/device/air_conditioner.js"></script>');
@@ -115,6 +116,8 @@ function device()
 	
 	this.ack = true;
 	this.time_ack = null;
+	
+	this.scrolls = new scroll();
 
 
 	this.arrayBtn = new Array();
@@ -143,15 +146,15 @@ function device()
 			} 
 			}, false);
 		this.canvas.addEventListener('touchend', function(event) { 
-		    event.preventDefault();
+		//    event.preventDefault();
 			_device.doMouseUp(event, false);
 			}, false);
 		this.canvas.addEventListener('touchcancel', function(event) { 
-		    event.preventDefault();
+		//    event.preventDefault();
 			_device.doMouseUp(event, false);
 			}, false);
 		this.canvas.addEventListener('touchmove', function(event) { 
-		    event.preventDefault();
+		 //   event.preventDefault();
 			if (event.targetTouches.length == 1) { 
 			_device.doMouseMove(event, false);
 			} 
@@ -213,6 +216,13 @@ function device()
 		var loc = getPointOnCanvas(canvas, x, y); 
 
 		this.doIt(loc, down, up);
+		
+		if(down)
+			this.scrolls.doStart(x, y, null);
+		else if(up)
+			this.scrolls.doEnd(x, y);
+		else
+			this.scrolls.doScroll(x, y);
 	}
 	
 	this.isOnBar = function(x, y, bar){
@@ -232,7 +242,10 @@ function device()
 
 	this.onresize = function(){
 		this.rect = getWinRect();
-		this.rect.height = '920';
+		if('tv' == dev_id)
+			this.rect.height = '1020';
+		else
+			this.rect.height = '1020';
 		this.canvas.width = this.canvasReport.width = this.canvasImage.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.canvasImage.height = this.rect.height;
 		offset = 20;

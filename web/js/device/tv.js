@@ -41,18 +41,18 @@ function tv()
 	
 	this.initDraw = function()
 	{
-		var btn_w = 200, btn_h = 80, offset_x = 20, offset_y = 20;
-		r = 350;
-		this.arrayBtn[_TV_BTN_.vol_prog].doResize(this.rect.width/2 - r/2, offset_y + btn_h + 30, this.rect.width/2 + r/2, offset_y + btn_h + 30 + r);
-		o1 = offset_x + 220, o2 = offset_y + btn_h + 400;
-		this.arrayBtn[_TV_BTN_.vol].doResize(o1, o2, o1 + 100, o2 + 260);
-		this.arrayBtn[_TV_BTN_.prog].doResize(this.rect.width - o1 - 100, o2, this.rect.width - o1, o2 + 260);
+		var btn_w = 250, btn_h = 100, offset_x = 20, offset_y = 20;
+		r = 450;
+		this.arrayBtn[_TV_BTN_.vol_prog].doResize(this.rect.width/2 - r/2, offset_y + btn_h + 0, this.rect.width/2 + r/2, offset_y + btn_h + 30 + r);
+		o1 = offset_x + 220, o2 = offset_y + btn_h + 480;
+		this.arrayBtn[_TV_BTN_.vol].doResize(o1, o2, o1 + 130, o2 + 300);
+		this.arrayBtn[_TV_BTN_.prog].doResize(this.rect.width - o1 - 130, o2, this.rect.width - o1, o2 + 300);
 
 		this.arrayBtn[_TV_BTN_.power].doResize(offset_x, offset_y, offset_x + btn_w, offset_y + btn_h);
 		this.arrayBtn[_TV_BTN_.mute].doResize(this.rect.width - offset_x - btn_w, offset_y, this.rect.width - offset_x, offset_y + btn_h);
 		
 		var s = ((this.rect.width - offset_x - btn_w) - (offset_x))/2;
-		y = offset_y + btn_h + 700;
+		y = offset_y + btn_h + 800;
 		st = _TV_BTN_.av;
 		for(var i=st;i<this.arrayBtn.length;i++){
 			this.arrayBtn[i].doResize(offset_x + (i-st)*s, y, offset_x + (i-st)*s + btn_w, y + btn_h);
@@ -74,6 +74,7 @@ function tv()
 						return;
 				}
 			}
+			this.doDraw();
 			//与普通按键不同，按键按下时处理，非松开处理
 			this.doTVEx(loc);
 		}
@@ -87,9 +88,10 @@ function tv()
 				clearTimeout(this.time_series);
 				this.time_series = null;
 			}
+			this.doDraw();
 		//	this.ack = true; 
 		}
-		this.doDraw();
+		
 	}
 	
 	//这里处理电视遥控按键的连续点击
@@ -105,7 +107,7 @@ function tv()
 				_device.time_ack = null;
 			},1000);
 		}
-		this.time_series = setTimeout(function(){_device.doTVEx(loc);}, 100);
+		this.time_series = setTimeout(function(){_device.doTVEx(loc);}, 10);
 	}
 	//真正的TV按键处理
 	this.doTVKey = function(loc) { 
@@ -135,7 +137,7 @@ function tv()
 			this.doBtnFocus(_TV_BTN_.back);
 		}
 
-		else if(power_on){
+		else if(true){//power_on){
 			var x = this.rect.width/2;
 			var y = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].top + this.arrayBtn[_TV_BTN_.vol_prog].height/2);
 			var r = parseInt(this.arrayBtn[_TV_BTN_.vol_prog].height/2);
@@ -146,13 +148,13 @@ function tv()
 			for(var i=0;i<4;i++){
 				if(r1 < r-10 && r1 > r/2 && IsInRange(x, y, loc, -Math.PI/4 + i*Math.PI/2, Math.PI/4 + i*Math.PI/2)){
 					if(0 == i)//volume +
-						this.docommand(this.id, 'vol_up');
-					else if(1 == i)//channel_up
-						this.docommand(this.id, 'channel_up');
+						this.docommand(this.id, 'right');
+					else if(1 == i)//channel_down
+						this.docommand(this.id, 'down');
 					else if(2 == i)//volume -
-						this.docommand(this.id, 'vol_down');
-					else if(3 == i)//channel_down
-						this.docommand(this.id, 'channel_down');
+						this.docommand(this.id, 'left');
+					else if(3 == i)//channel_up
+						this.docommand(this.id, 'up');
 				}
 			}
 			if(r1 && r1 < r/2)
@@ -169,9 +171,9 @@ function tv()
 						else if(index==_TV_BTN_.vol && 1 == i)
 							this.docommand(this.id, 'vol_down');
 						else if(index==_TV_BTN_.prog && 0 == i)
-							this.docommand(this.id, 'channel_up');
+							this.docommand(this.id, 'up');//'channel_up');
 						else if(index==_TV_BTN_.prog && 1 == i)
-							this.docommand(this.id, 'channel_down');
+							this.docommand(this.id, 'down');//'channel_down');
 					}
 				}
 			}
@@ -289,7 +291,7 @@ function tv()
 		ctx.strokeStyle = tv_item.status == 'on' ? "rgb(250, 20, 20)" : "rgb(0, 140, 0)";
 		ctx.lineWidth = 5;
 		ctx.arcEx(this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2, this.arrayBtn[_TV_BTN_.power].top + this.arrayBtn[_TV_BTN_.power].height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
-		ctx.drawLine(this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2,this.arrayBtn[_TV_BTN_.power].top + 15,this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2,this.arrayBtn[_TV_BTN_.power].top + 30);
+		ctx.drawLine(this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2,this.arrayBtn[_TV_BTN_.power].top + 22,this.arrayBtn[_TV_BTN_.power].left + this.arrayBtn[_TV_BTN_.power].width/2,this.arrayBtn[_TV_BTN_.power].top + 40);
 		
 		this.drawTV(ctx, _TV_BTN_.vol);
 		this.drawTV(ctx, _TV_BTN_.prog);

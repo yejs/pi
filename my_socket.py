@@ -43,7 +43,7 @@ class Connection(object):
         self.read_message()    
         if Connection.lirc_air == None:
             Connection.lirc_air = LIRC("conf/lircd_air.conf")
-            Connection.lirc_tv = LIRC("conf/lircd_tv.conf")
+            Connection.lirc_tv = LIRC("conf/tv.conf")
         print("New connection: %s, " % address[0])
 
         if False == Connection.heart_beat_init:
@@ -109,14 +109,13 @@ class Connection(object):
 			
         Connection.output_param.append(param)  
 		
-        if Connection.timer:
-            Connection.timer.cancel()
+
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
-        if time.time() - Connection.time_tick > 2:
+        if time.time() - Connection.time_tick > 2 or len(Connection.output_param) == 1:
             Connection.output_ex()
-        else :
-            Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
-            Connection.timer.start()
+        #else :
+        #    Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
+        #    Connection.timer.start()
 
     def output_ex():
         Connection.time_tick = time.time()
@@ -126,6 +125,8 @@ class Connection(object):
             Connection.timer = None
             return;
 
+        if Connection.timer:
+            Connection.timer.cancel()
         Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
         Connection.timer.start()
         param = Connection.output_param.pop()
@@ -178,6 +179,16 @@ class Connection(object):
                 LIRC_KEY = 'KEY_CHANNELDOWN'
             elif value == 'channel_down':
                 LIRC_KEY = 'KEY_CHANNELUP'
+				
+            elif value == 'right':
+                LIRC_KEY = 'KEY_RIGHT'
+            elif value == 'down':
+                LIRC_KEY = 'KEY_DOWN'
+            elif value == 'left':
+                LIRC_KEY = 'KEY_LEFT'
+            elif value == 'up':
+                LIRC_KEY = 'KEY_UP'
+				
             elif value == 'ok':
                 LIRC_KEY = 'KEY_OK'
             elif value == 'mute':
