@@ -42,20 +42,20 @@ function tv()
 	this.initDraw = function()
 	{
 		var btn_w = 250, btn_h = 100, offset_x = 20, offset_y = 20;
-		r = 450;
+		var r = 450;
 		this.arrayBtn[_TV_BTN_.vol_prog].doResize(this.rect.width/2 - r/2, offset_y + btn_h + 0, this.rect.width/2 + r/2, offset_y + btn_h + 30 + r);
-		o1 = offset_x + 220, o2 = offset_y + btn_h + 480;
-		this.arrayBtn[_TV_BTN_.vol].doResize(o1, o2, o1 + 130, o2 + 300);
-		this.arrayBtn[_TV_BTN_.prog].doResize(this.rect.width - o1 - 130, o2, this.rect.width - o1, o2 + 300);
+		var o1 = offset_x + 220, y = offset_y + btn_h + r + 30, b = this.rect.height - btn_h - 20;
+		this.arrayBtn[_TV_BTN_.vol].doResize(o1, y, o1 + 110, b);
+		this.arrayBtn[_TV_BTN_.prog].doResize(this.rect.width - o1 - 110, y, this.rect.width - o1, b);
 
 		this.arrayBtn[_TV_BTN_.power].doResize(offset_x, offset_y, offset_x + btn_w, offset_y + btn_h);
 		this.arrayBtn[_TV_BTN_.mute].doResize(this.rect.width - offset_x - btn_w, offset_y, this.rect.width - offset_x, offset_y + btn_h);
 		
 		var s = ((this.rect.width - offset_x - btn_w) - (offset_x))/2;
-		y = offset_y + btn_h + 800;
-		st = _TV_BTN_.av;
-		for(var i=st;i<this.arrayBtn.length;i++){
-			this.arrayBtn[i].doResize(offset_x + (i-st)*s, y, offset_x + (i-st)*s + btn_w, y + btn_h);
+		y = this.rect.height - btn_h - 10;
+
+		for(var i=_TV_BTN_.av;i<this.arrayBtn.length;i++){
+			this.arrayBtn[i].doResize(offset_x + (i-_TV_BTN_.av)*s, y, offset_x + (i-_TV_BTN_.av)*s + btn_w, y + btn_h);
 		}
 	}
 

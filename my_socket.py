@@ -24,7 +24,6 @@ from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
 from g_data import GlobalVar
 
 class Connection(object):    
-    heart_beat_init = False
     heart_beat_timer = None
     clients = set()    
     output_param = list()#{"ip": "", "pin": "", "item": None}
@@ -46,9 +45,8 @@ class Connection(object):
             Connection.lirc_tv = LIRC("conf/tv.conf")
         print("New connection: %s, " % address[0])
 
-        if False == Connection.heart_beat_init:
-            Connection.heart_beat_init = True
-            Connection.heart_beat()        
+        if None == Connection.heart_beat_timer:
+            Connection.heart_beat()             
   
     def test():    
         pass#print(json.dumps(_LAMP_['normal']['1']))
@@ -107,15 +105,15 @@ class Connection(object):
             param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": value, "item": item}
             Connection.last_param = param
 			
-        Connection.output_param.append(param)  
+        Connection.output_param.append(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
 		
 
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
-        if time.time() - Connection.time_tick > 2 or len(Connection.output_param) == 1:
+        if time.time() - Connection.time_tick > 2 or (time.time() - Connection.time_tick > 0.5 and len(Connection.output_param) == 1):
             Connection.output_ex()
-        #else :
-        #    Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
-        #    Connection.timer.start()
+        else :
+            Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
+            Connection.timer.start()
 
     def output_ex():
         Connection.time_tick = time.time()
@@ -127,7 +125,7 @@ class Connection(object):
 
         if Connection.timer:
             Connection.timer.cancel()
-        Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.3秒输出
+        Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
         Connection.timer.start()
         param = Connection.output_param.pop()
         dev_id = param['dev_id']
@@ -226,7 +224,7 @@ class Connection(object):
             Connection.heart_beat_timer.cancel()
         Connection.heart_beat_timer = threading.Timer(5, Connection.heart_beat)#5秒心跳输出
         Connection.heart_beat_timer.start()
-		
+
         msg = "{\"event\":\"heart_beat\"}"
 
         for conn in Connection.clients:
