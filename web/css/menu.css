@@ -43,13 +43,26 @@ src:url("http://www.apple.com/wss/fonts/PingHei/v1/PingHei-light.woff") format("
 		top: 0px;
 		width: 100%;
 		clear:both;
-		background:#fff}
+		background:transparent}
 
 #div_footer {position: fixed;
 		bottom:0px;
 		height: 80px;
 		clear:both;
-		background:#fff}
+		background:transparent}
+		
+#div_footer_btn {position: fixed;
+		bottom:0px;
+		right:0px;
+		height: 80px;
+		clear:both;
+		background:transparent}
+		
+#div_number {position: relative;
+		bottom:500px;
+		clear:both;
+		background:#fff;
+		float:bottom;}
 		
 /* ul li以横排显示 */
 div.menu 
@@ -290,7 +303,7 @@ div.item  input.mybtn
 }
 .btn:active{border: 3px solid #888;}
 
-#btn2
+#header_btn, #footer_btn
 {
 	margin: 0px 0px 0px 0px;
 	padding: 0px 0px 20px 0px;

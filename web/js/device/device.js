@@ -100,6 +100,15 @@ window.addEventListener('message',function(e){
 	else if('doSpeech'===e.data.msg){//主框架安装语音识别包，识别到语音后发送语音指令到终端处理
 		_device.doSpeech(e.data.data);
 	}
+	else if( 'header_ui' === e.data.msg ){
+		_device.onresize();
+	}
+	else if( 'foot_ui' === e.data.msg ){
+		if(e.data.data === 'show')
+			document.getElementById('div_number').style.display = 'block';
+		else
+			document.getElementById('div_number').style.display = 'none';
+	}
 },false);
 
 //所有设备的父类，所有设备类继承于它
@@ -113,7 +122,7 @@ function device()
 	this.bar3 = null;
 	this.id = '1';
 	this.getmessaged = false;
-	
+
 	this.ack = true;
 	this.time_ack = null;
 	
@@ -234,6 +243,9 @@ function device()
 	this.doDraw = function(){
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
+		
+	//	this.contextReport.fillStyle = 'rgba(120, 120, 220, 1)';
+	//	this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);
 
 		this.drawIt(this.contextReport);
 		
@@ -241,14 +253,13 @@ function device()
 	}
 
 	this.onresize = function(){
+		var h = (window.parent.document.getElementById('header').style.display == 'block') ? 180 : 80;
 		this.rect = getWinRect();
-		if('tv' == dev_id)
-			this.rect.height = '1020';
-		else
-			this.rect.height = '1020';
+		this.rect.height = Math.max(getWinRect().height - 140 - h - this.canvas.offsetTop, 900);
+
 		this.canvas.width = this.canvasReport.width = this.canvasImage.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.canvasImage.height = this.rect.height;
-		offset = 20;
+		var offset = 20;
 		var width = this.rect.width-offset*2;
 		this.bar0 = {x:offset, y: 5, width:width, height:90, pos:0, isdown:false};
 		this.bar1 = {x:offset, y: 205, width:width, height:90, pos:50, isdown:false};
@@ -299,7 +310,7 @@ function device()
 	this.doMouseMove = function(event, mouse) { 
 		this.doMouse(event, mouse, false, false);
 	}
-
+	
 	//websocket 处理函数
 	this.onmessage = function(evt)
 	{

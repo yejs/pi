@@ -93,23 +93,28 @@ function footer(index)
 		this.contextReport.fillStyle = "rgb(43, 164, 235)";
 		this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);
 
-		var width = (this.rect.width-2)/footer_title.length;
+	//	var width = (this.rect.width-2)/footer_title.length;
 		this.contextReport.fillStyle = "rgb(255, 255, 255)";
 		this.contextReport.strokeStyle = "rgb(220, 0, 0)";
 		this.contextReport.lineWidth = 4;
-		this.contextReport.fillRect(this.index*width, 0, width, this.rect.height);
-		this.contextReport.drawLine(this.index*width, this.rect.height-4, (this.index+1)*width, this.rect.height-4);
+		var offset = 0;
+		for(var i=0;i<this.index;i++){
+			offset += this.arrayBtn[i].width;
+		}
+		this.contextReport.fillRect(offset, 0, this.arrayBtn[this.index].width, this.rect.height);
+		this.contextReport.drawLine(offset, this.rect.height-4, offset + this.arrayBtn[this.index].width, this.rect.height-4);
 
 		this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(255, 255, 255)";
 		this.contextReport.font = _font42;
 		this.contextReport.textBaseline="middle";
+		offset = 0;
 		for(var i=0;i<footer_title.length;i++){
-			
 			if(i == this.index)
 				this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(255, 0, 0)";
 			else
 				this.contextReport.fillStyle = this.contextReport.strokeStyle = "rgb(255, 255, 255)";
-			this.contextReport.fillText(footer_title[i], i*width + width/2 - this.contextReport.measureText(footer_title[i]).width/2, this.rect.height/2);
+			this.contextReport.fillText(footer_title[i], offset + this.arrayBtn[i].width/2 - this.contextReport.measureText(footer_title[i]).width/2, this.rect.height/2);
+			offset += this.arrayBtn[i].width;
 		}
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}

@@ -35,13 +35,24 @@ function header(index)
 		if((show === undefined && document.getElementById('header').style.display === 'none') || show === 'show'){
 			document.getElementById('header').style.display = 'block';
 			document.getElementById('_header').style.display = 'block';
-			document.getElementById('btn2').innerText = '∧';
+			document.getElementById('header_btn').innerText = '∧';
+			show = 'show';
 		}
 		else{
 			document.getElementById('header').style.display = 'none';
 			document.getElementById('_header').style.display = 'none';
-			document.getElementById('btn2').innerText = '∨';
+			document.getElementById('header_btn').innerText = '∨';
+			show = 'hide';
 		}
+		window.frames['flamp'].postMessage({'msg':'header_ui' , 'data':show},'*');
+		window.frames['fcurtain'].postMessage({'msg':'header_ui' , 'data':show},'*');
+		window.frames['fair_conditioner'].postMessage({'msg':'header_ui' , 'data':show},'*');
+		window.frames['ftv'].postMessage({'msg':'header_ui' , 'data':show},'*');
+		window.frames['fplugin'].postMessage({'msg':'header_ui' , 'data':show},'*');
+
+		var evObj = document.createEvent('HTMLEvents');
+        evObj.initEvent( 'resize', true, false );
+     //   window.dispatchEvent(evObj);
 	}
 	
 	this.doInit = function(canvas)

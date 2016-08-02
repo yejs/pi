@@ -21,6 +21,7 @@ window.onload = function(){
 		}
 		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner'){
 			document.getElementById('d_GPIO').style.display = 'none';
+			document.getElementById('d_brand').style.display = 'block';
 		}
 	}
 }
@@ -114,6 +115,11 @@ function dev_set()
 		else
 			document.getElementById('length').value = '';
 		
+		if(_DEVICE_[this.dev_id][id].hasOwnProperty('brand'))
+			document.getElementById('brand').value = _DEVICE_[this.dev_id][id]['brand'];
+		else
+			document.getElementById('brand').value = '';
+		
 		ii = parseInt(id);
 		var count = (this.dev_id == 'lamp' || this.dev_id == 'curtain' || this.dev_id == 'plugin') ? 12 : 6;
 		if((ii < count && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true'))
@@ -159,6 +165,8 @@ function dev_set()
 			console.log(value);
 		}
 		
+		if(document.getElementById('brand').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('brand'))
+			_DEVICE_[this.dev_id][this.id]['brand'] = encodeURIComponent(document.getElementById('brand').value); 
 		
 		if(document.getElementById('length').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('length'))
 			_DEVICE_[this.dev_id][this.id]['length'] = parseFloat(document.getElementById('length').value); 

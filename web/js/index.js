@@ -41,8 +41,10 @@ showPage = function(title){
 }
 
 window.onresize = function(){
-	_header.onresize();
-	_footer.onresize();
+	if(_header)
+		_header.onresize();
+	if(_footer)
+		_footer.onresize();
 }
 
 onNewsTitle = function(i){
@@ -64,6 +66,13 @@ onNewsTitle = function(i){
 	var elem_child = news.getElementsByTagName("iframe"); 
 	showPage(titles[i]);
 	
+	if('tv' != titles[i]){
+		document.getElementById("div_footer_btn").style.display = 'none';
+	}
+	else{
+		document.getElementById("div_footer_btn").style.display = 'block';
+	}
+	
 	if('video' != titles[i]){
 		if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
 			elem_child[0].src = "fake.html";
@@ -80,6 +89,19 @@ onNewsTitle = function(i){
 		elem_child[0].src = "http://" + src;
 	}
 }
+
+doShowNumber = function()
+{
+	if(document.getElementById('footer_btn').innerText == '∨'){
+		document.getElementById('footer_btn').innerText = '∧';
+		window.frames['ftv'].postMessage({'msg':'foot_ui' , 'data':'hide'},'*');
+	}
+	else{
+		document.getElementById('footer_btn').innerText = '∨';
+		window.frames['ftv'].postMessage({'msg':'foot_ui' , 'data':'show'},'*');
+	}
+}
+	
 var mode='normal';
 window.addEventListener('message',function(e){
 	if('http://' + window.location.host !== e.origin)
