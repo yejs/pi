@@ -197,7 +197,8 @@ class Connection(object):
                 LIRC_KEY = 'KEY_HOME'
             elif value == 'back':
                 LIRC_KEY = 'KEY_BACK'
-				
+            elif int(value) >=0 and int(value)<=9:
+                LIRC_KEY = 'KEY_' + value
 				
             if value.find('repeat') != -1:#电视连续按键处理
                 value = Connection.lirc_tv.remote['repeat'].replace('  ', ' ')
