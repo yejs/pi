@@ -51,7 +51,8 @@ class LIRC():
 			while line[e:e+1] != ' ' and e+1 < len(line):
 				e+=1
 			key = line[s:e]
-			
+
+				
 			if self.remote['is_raw'] == False:
 				'''
 				if len(key)>0 and key.find('flags') != -1: 
@@ -73,12 +74,14 @@ class LIRC():
 
 			else:#is raw data
 				if len(key)>0 and (key.find('name') != -1 or key.find('end') != -1): 
+					
 					if raw_key_name:				#先将上一个键、值保存处理好
 						self.remote[raw_key_name] = raw_code[:]
 						raw_code = ''
 						#print('key: %s, code: %s' %(raw_key_name, self.remote[raw_key_name]))
 					if key.find('name') != -1:		#当前键
 						raw_key_name = line[line.find(key) + len(key):].strip()
+
 					elif key.find('end') != -1:
 						break
 				elif len(key)>0 and raw_key_name:	#处理当前键的值
@@ -143,10 +146,11 @@ class LIRC():
 		
 if __name__ == "__main__":
 	try:
-		obj1 = LIRC("conf/lircd_air.conf")
-		#print('%s' % obj1.getKey('KEY_VOLUMEDOWN'))
-		print('header1:%s, header2:%s' % obj1.getEx('one'))
+		obj1 = LIRC("conf/tv.conf")
+		#print('%s' % obj1.getKey('KEY_POWER'))
+		#print('header1:%s, header2:%s' % obj1.getEx('one'))
 		#print('header1:%s' % obj1.getEx('header'))
+		#print('header1:%s' % json.dumps(obj1))
 
 	except:
 		pass

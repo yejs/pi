@@ -255,7 +255,7 @@ function device()
 	this.onresize = function(){
 		var h = (window.parent.document.getElementById('header').style.display == 'block') ? 180 : 80;
 		this.rect = getWinRect();
-		this.rect.height = Math.max(getWinRect().height - 140 - h - this.canvas.offsetTop, 900);
+		this.rect.height = Math.max(getWinRect().height - 140 - h - this.canvas.offsetTop, 1000);
 
 		this.canvas.width = this.canvasReport.width = this.canvasImage.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.canvasImage.height = this.rect.height;

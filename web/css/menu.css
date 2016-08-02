@@ -59,7 +59,7 @@ src:url("http://www.apple.com/wss/fonts/PingHei/v1/PingHei-light.woff") format("
 		background:transparent}
 		
 #div_number {position: relative;
-		bottom:500px;
+		bottom:680px;
 		clear:both;
 		background:#fff;
 		float:bottom;}
@@ -302,6 +302,22 @@ div.item  input.mybtn
 	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:40px;
 }
 .btn:active{border: 3px solid #888;}
+
+.btn2
+{
+	margin: 0px 10px 10px 10px;
+	width: 7em;/*200px*/
+	height: 3.5em;line-height:3.5em;
+	border-top-left-radius:13px;
+	border-top-right-radius:13px;
+	border-bottom-left-radius:13px;
+	border-bottom-right-radius:13px;
+	background-color: #aaa;
+	border: 1px solid #D7D7D7;
+	outline:none;
+	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:400;font-style:normal;font-size:40px;
+}
+.btn2:active{border: 3px solid #888;}
 
 #header_btn, #footer_btn
 {
