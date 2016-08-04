@@ -105,7 +105,6 @@ function air_conditioner()
 				this.time_ack = setTimeout(function() {//空调终端没返回应答时的超时处理
 					_device.ack = true; 
 					_device.time_ack = null;
-					console.log('air');
 				},1000);
 			}
 		}
@@ -353,7 +352,7 @@ function air_conditioner()
 	this.docommandIt = function(id, commandEx){
 		if(commandEx == undefined){
 
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(id).innerText + '\"调节';
 			this.setFocus(id);
 			this.setID(id);
 			this.setPos();

@@ -134,7 +134,7 @@ function curtain()
 			if(this.Progress.timer)
 				return null;
 			
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节开合进度';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(id).innerText + '\"调节开合进度';
 			this.setFocus(id);
 			this.setID(id);
 			this.setPos();

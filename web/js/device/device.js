@@ -59,17 +59,15 @@ window.onresize = function(){
 refresh = function(){
 	if(_device && _device.getmessaged){
 		document.getElementById('scene_title').innerText = mode;
-		document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
-		document.getElementById('color_title').innerText = '';
 		if('lamp' == dev_id)
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调光调色';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调光调色';
 		else if('curtain' == dev_id)
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
 		else if('plugin' == dev_id)
-			document.getElementById('color_title').style.display = 'none';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + (_PLUGIN_[mode][_device.id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
 		else
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(_device.id).innerText + '\"调节';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调节';
 		
 		if('air_conditioner' == dev_id || 'tv' == dev_id)
 			_device.setFocus(_device.id);
@@ -357,7 +355,6 @@ function device()
 				id = '1';
 
 			mode = json.mode;
-			document.getElementById('scene_title').innerText = _MODE_SET_[mode];
 
 			this.setID(id);
 			if( json.event != "lamp"  && json.event != "plugin")
@@ -371,7 +368,7 @@ function device()
 
 				_LAMP_[json.mode] = json.data;
 
-				document.getElementById('color_title').innerText = '\"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
+				document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
 
 				for(var id in _LAMP_[mode]){
 					if(_DEVICE_["lamp"].hasOwnProperty(id.toString())){
@@ -409,6 +406,9 @@ function device()
 			}
 			else if( json.event === "plugin" ){
 				_PLUGIN_[json.mode] = json.data;
+				
+				document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(json.id).innerText + (_PLUGIN_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
+				
 				for(var id in _PLUGIN_[mode]){
 					if(_DEVICE_["plugin"].hasOwnProperty(id.toString())){
 						if(_PLUGIN_[mode][id]['status'] === 'on')

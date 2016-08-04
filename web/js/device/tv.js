@@ -377,7 +377,7 @@ function tv()
 	this.docommandIt = function(id, commandEx){
 		if(commandEx == undefined){
 
-			document.getElementById('color_title').innerText = '\"' + document.getElementById(id).innerText + '\"调节';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(id).innerText + '\"调节';
 			this.setFocus(id);
 			this.setID(id);
 			this.setPos();
