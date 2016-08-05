@@ -314,7 +314,7 @@ class WebHandler(tornado.web.RequestHandler):
             if value == 'power_on':
                 item['status'] = 'on'
             elif value == 'power_off':
-                item['status'] = 'off'
+                item['status'] = 'on'#'off'#电源不保持状态，否则可能会出现界面与实际终端不同步的现象
             #print("tv, key:%s value:%s item:%s" %(key, value, json.dumps(item)))
 
         if id == 'all' or key == None:

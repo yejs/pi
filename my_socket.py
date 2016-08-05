@@ -62,9 +62,9 @@ class Connection(object):
                 WebSocket.broadcast_device();
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
-                #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+                print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
-            print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+            pass#print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
 		
     '''
@@ -115,6 +115,7 @@ class Connection(object):
                 Connection.timer.start()
             else:
                 Connection.output_ex()
+
         else :
             Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
             Connection.timer.start()
