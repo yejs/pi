@@ -286,6 +286,7 @@ function device()
 		}
 		else if('curtain' == dev_id){
 			this.bar1.pos = _CURTAIN_[mode][this.id]['progress'];
+			
 		}
 	}
 
@@ -321,6 +322,7 @@ function device()
 		if( json.event === "ack" ){
 			setTimeout(function(){_device.ack = true;}, 50);//每个命令的响应与下个命令之间留出100ms的时间间隔
 		//	console.log('ack:' + JSON.stringify(json));
+			return;
 		}
 		else if( json.event === "device" ){
 		//	console.log('device:' + JSON.stringify(json));
@@ -396,6 +398,7 @@ function device()
 			} 
 			else if( json.event === "curtain" ){
 				_CURTAIN_[json.mode] = json.data;
+				
 			} 
 			else if( json.event === "air_conditioner" ){
 				_AIR_CONDITIONER_[json.mode] = json.data;
@@ -430,10 +433,8 @@ function device()
 					}
 				}
 			}
-			
-			
 		}
-		
+
 		this.setPos();
 		this.doDraw();
 	}

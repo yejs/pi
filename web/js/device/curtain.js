@@ -122,10 +122,10 @@ function curtain()
 	this.drawCurtainImage = function(){
 		var w = this.bar1.pos*this.bar1.width/200;
 		var offset = this.bar1.height/2 + 25;
-			
+		
 		var h = parseInt(this.rect.height) - 20;
-		this.ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, h, this.bar1.x, this.bar1.y + offset, w, h);
-		this.ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
+		this.contextReport.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, h, this.bar1.x, this.bar1.y + offset, w, h);
+		this.contextReport.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
 	}
 	
 	this.docommandIt = function(id, commandEx){
