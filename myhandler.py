@@ -34,7 +34,10 @@ class WebHandler(tornado.web.RequestHandler):
         if post_data.get('mode'):
             if GlobalVar.get_mode() != post_data['mode'][0]:
                 GlobalVar.set_last_mode(GlobalVar.get_mode())
-            GlobalVar.set_mode(post_data['mode'][0])
+                GlobalVar.set_mode(post_data['mode'][0])
+                Connection.do_disarming()
+            else:
+                GlobalVar.set_mode(post_data['mode'][0])
         else:
             GlobalVar.set_mode("normal")
 			
@@ -83,6 +86,8 @@ class WebHandler(tornado.web.RequestHandler):
             WebHandler.perform_save()
         post_data.clear()
 
+
+	
     def perform_save(): 
         f = open('data.py','w')            
         f.write('_DEVICE_ = ' + json.dumps(_DEVICE_) + '\n')  
@@ -284,7 +289,7 @@ class WebHandler(tornado.web.RequestHandler):
                 last_value = _AIR_CONDITIONER_[last_mode][id]['power_on']
                 now_value = _AIR_CONDITIONER_[mode][id]['power_on']
                 if last_value != now_value:
-                    WebHandler.output('air_conditioner', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+                    WebHandler.output('air_conditioner', id, 'command', 'power_on' if now_value == 'on' else 'power_off' )#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
         else:
             WebHandler.output('air_conditioner', id, key, value)
 
@@ -322,7 +327,7 @@ class WebHandler(tornado.web.RequestHandler):
                 last_value = _TV_[last_mode][id]['status']
                 now_value = _TV_[mode][id]['status']
                 if last_value != now_value:
-                    WebHandler.output('tv', id, 'power_on', now_value)#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
+                    WebHandler.output('tv', id, 'command', 'power_on' if now_value == 'on' else 'power_off' )#TODO:模式指令时只关注电源开关，其它指令太复杂，待后续完善
         else:
             WebHandler.output('tv', id, key, value)
 

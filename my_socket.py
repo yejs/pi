@@ -44,7 +44,8 @@ class Connection(object):
             Connection.lirc_air = LIRC("conf/lircd_air.conf")
             Connection.lirc_tv = LIRC("conf/tv.conf")
         print("New connection: %s, " % address[0])
-
+        Connection.do_disarming()#根据场景模式撤防、布防处理
+		
         if None == Connection.heart_beat_timer:
             Connection.heart_beat()             
   
@@ -54,11 +55,20 @@ class Connection(object):
     def read_message(self):    
         self._stream.read_bytes(1024, self.doRecv, partial=True)
 
+    def set_dev_item(dev_id, ip, status):   #TODO,08/09
+        if _DEVICE_.get(dev_id) == None:
+            return
+			
+        for id in _DEVICE_[dev_id]:
+            if _DEVICE_[dev_id][id].get('status') and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['ip'] == ip:
+                _DEVICE_[dev_id][id]['status'] = status
+                print('set_dev_item, dev_id:%s, ip:%s, status:%s ' %(dev_id, ip, status)
+	
     def doRecv(self, data):    
         if data[:-1].decode().find('{') != -1 and data[:-1].decode().find('}') != -1:
             obj = json.loads(data[:-1].decode()) 
             if obj and obj.get('event') == 'report':    
-                set_dev_item(obj['dev_id'], self._address[0], obj['status'])
+                WebSocket.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                 WebSocket.broadcast_device();
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
@@ -202,8 +212,11 @@ class Connection(object):
                 LIRC_KEY = 'KEY_HOME'
             elif value == 'back':
                 LIRC_KEY = 'KEY_BACK'
-            elif int(value) >=0 and int(value)<=9:
+            elif value.isdigit() and int(value) >=0 and int(value)<=9:
                 LIRC_KEY = 'KEY_' + value
+            else:
+                print('value:%s' %(value))
+                return
 				
             if value.find('repeat') != -1:#电视连续按键处理
                 value = Connection.lirc_tv.remote['repeat'].replace('  ', ' ')
@@ -223,7 +236,21 @@ class Connection(object):
                     conn._stream.write(msg.encode())
                 except:
                     logging.error('Error sending message', exc_info=True)	
-		
+					
+    def do_disarming(): 
+        Disarming = 'false'
+        mode = GlobalVar.get_mode()
+        if "normal" == mode or "guests" == mode or "diner" == mode:#在‘回家’、‘会客’、‘用餐’场景模式下撤防，其它场景模式下布防
+            Disarming = 'true'
+
+        msg = "{\"event\":\"disarming\", \"data\":\"%s\"}" %Disarming
+
+        for conn in Connection.clients:
+            try:
+                conn._stream.write(msg.encode())
+            except:
+                logging.error('Error sending message', exc_info=True)	
+				
     #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
     def heart_beat():
         if Connection.heart_beat_timer != None:
