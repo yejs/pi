@@ -125,7 +125,32 @@ function header(index)
 			ctx.fillStyle = ctx.strokeStyle = "rgb(255, 50, 50)";
 		else
 			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
+		
 		ctx.fillText((_DEVICE_.door['1'].status == 'open' ? '开' : '关'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.door['1'].name + '：').width, 36);
+		
+		
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
+		title = _DEVICE_.flammable['1'].name + '：' + (_DEVICE_.flammable['1'].status == 'alert' ? '警报' : '安全');
+		ctx.fillText(_DEVICE_.flammable['1'].name + '：', this.rect.width*5/6 - ctx.measureText(title).width/2, 91);
+		
+		if(_DEVICE_.flammable['1'].status == 'alert')
+			ctx.fillStyle = ctx.strokeStyle = "rgb(255, 50, 50)";
+		else
+			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
+		
+		ctx.fillText((_DEVICE_.flammable['1'].status == 'alert' ? '警报' : '安全'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.flammable['1'].name + '：').width, 91);
+		
+		
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
+		title = _DEVICE_.fire['1'].name + '：' + (_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全');
+		ctx.fillText(_DEVICE_.fire['1'].name + '：', this.rect.width*5/6 - ctx.measureText(title).width/2, 146);
+		
+		if(_DEVICE_.fire['1'].status == 'alert')
+			ctx.fillStyle = ctx.strokeStyle = "rgb(255, 50, 50)";
+		else
+			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
+		
+		ctx.fillText((_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.fire['1'].name + '：').width, 146);
 	}
 	
 	this.drawWeather = function(ctx, rect)

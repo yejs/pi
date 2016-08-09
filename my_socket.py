@@ -62,13 +62,13 @@ class Connection(object):
         for id in _DEVICE_[dev_id]:
             if _DEVICE_[dev_id][id].get('status') and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['ip'] == ip:
                 _DEVICE_[dev_id][id]['status'] = status
-                print('set_dev_item, dev_id:%s, ip:%s, status:%s ' %(dev_id, ip, status)
-	
+        #print('set_dev_item, dev_id:%s, ip:%s, status:%s ' %(dev_id, ip, status))
+
     def doRecv(self, data):    
         if data[:-1].decode().find('{') != -1 and data[:-1].decode().find('}') != -1:
             obj = json.loads(data[:-1].decode()) 
             if obj and obj.get('event') == 'report':    
-                WebSocket.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
+                Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                 WebSocket.broadcast_device();
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
