@@ -17,7 +17,7 @@ function curtain()
 		img.onload = function(){
 			var offset = _device.bar1.height/2 - 5
 			_device.contextImage.drawImage(img, 0, 0, img.width, img.height, _device.bar1.x, _device.bar1.y + 30 + offset, _device.bar1.width, 500);
-			_device.drawCurtainImage();
+			_device.doDraw();
 		};
 	}
 	
@@ -116,16 +116,16 @@ function curtain()
 
 		ctx.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
 		
-		this.drawCurtainImage();
+		this.drawCurtainImage(ctx);
 	}
 	
-	this.drawCurtainImage = function(){
+	this.drawCurtainImage = function(ctx){
 		var w = this.bar1.pos*this.bar1.width/200;
 		var offset = this.bar1.height/2 + 25;
 		
 		var h = parseInt(this.rect.height) - 20;
-		this.contextReport.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, h, this.bar1.x, this.bar1.y + offset, w, h);
-		this.contextReport.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
+		ctx.drawImage(this.canvasImage, this.bar1.x, this.bar1.y + offset, w, h, this.bar1.x, this.bar1.y + offset, w, h);
+		ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
 	}
 	
 	this.docommandIt = function(id, commandEx){
