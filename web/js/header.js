@@ -101,15 +101,21 @@ function header(index)
 	this.doDraw = function()
 	{
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
+
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 
-		this.contextReport.fillStyle = "rgb(43, 64, 180)";
+		var grd=this.contextReport.createLinearGradient(0, 0, 0, this.rect.height); //颜色渐变的起始坐标和终点坐标
+		grd.addColorStop(0, "rgba(5, 39, 175, 255)"); 
+		grd.addColorStop(0.5, "rgba(5, 89, 175, 255)");
+		grd.addColorStop(1, "rgba(5, 139, 175, 255)");
+		
+		this.contextReport.fillStyle = grd;//"rgb(5, 39, 175)";
 		this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);
 		
 		var rect = {x:0, y:0, width:this.rect.width*2/3, height:this.rect.height};
 		this.drawWeather(this.contextReport, rect);
 
-		this.drawDoor(this.contextReport);
+		this.drawHumiture(this.contextReport);
 
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
@@ -151,6 +157,44 @@ function header(index)
 			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
 		
 		ctx.fillText((_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.fire['1'].name + '：').width, 146);
+	}
+	
+	this.drawHumiture = function(ctx)
+	{
+		var status = _DEVICE_.humiture['1'].status;
+		pos = status.indexOf(':');
+		
+		if(pos>=0){
+			temperature = status.substr(0, pos);
+			humidity = status.substr(pos+1);
+		}
+		else
+			return;
+		
+		ctx.font = _font36;
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
+		var disp_x1 = this.rect.width*5/6 - ctx.measureText('室内温度：35.6℃').width/2;
+		var disp_x2 = disp_x1 + ctx.measureText('室内温度：').width;
+		ctx.fillText('室内温度：', disp_x1, 36);
+		ctx.fillStyle = ctx.strokeStyle = (parseInt(temperature) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(temperature + '℃', disp_x2, 36);
+
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
+		ctx.fillText('相对湿度：', disp_x1, 91);
+		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(humidity + '%', disp_x2, 91);
+		
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
+		if(_DEVICE_.fire['1'].status != 'alert'){
+			ctx.fillText(_DEVICE_.flammable['1'].name + '：', disp_x1, 146);
+			ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.flammable['1'].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+			ctx.fillText((_DEVICE_.flammable['1'].status == 'alert' ? '警报' : '安全'), disp_x2, 146);
+		}
+		else{
+			ctx.fillText(_DEVICE_.fire['1'].name + '：', disp_x1, 146);
+			ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.fire['1'].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+			ctx.fillText((_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全'), disp_x2, 146);
+		}
 	}
 	
 	this.drawWeather = function(ctx, rect)
