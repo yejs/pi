@@ -122,10 +122,14 @@ function dev_set()
 		
 		ii = parseInt(id);
 		var count = (this.dev_id == 'lamp' || this.dev_id == 'curtain' || this.dev_id == 'plugin') ? 12 : 6;
-		if((ii < count && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true'))
-			document.getElementById('hide').setAttribute("disabled","disabled");
-		else
-			document.getElementById('hide').removeAttribute("disabled");
+		if((ii < count && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true')){
+		//	document.getElementById('hide').setAttribute("disabled","disabled");
+			document.getElementById('d_hide').style.display = 'none';
+		}
+		else{
+		//	document.getElementById('hide').removeAttribute("disabled");
+			document.getElementById('d_hide').style.display = 'block';
+		}
 		
 		if(_DEVICE_[this.dev_id][id].hasOwnProperty('hide'))
 			document.getElementById('hide').checked = _DEVICE_[this.dev_id][id]['hide'] == 'true' ? true : false;
@@ -136,10 +140,12 @@ function dev_set()
 			document.getElementById('all').style.backgroundColor = '#e00';
 			document.getElementById('IP').setAttribute("disabled","disabled");
 			document.getElementById('GPIO').setAttribute("disabled","disabled");
+			document.getElementById('length').setAttribute("disabled","disabled");
 		}
 		else{
 			document.getElementById('IP').removeAttribute("disabled");
 			document.getElementById('GPIO').removeAttribute("disabled");
+			document.getElementById('length').removeAttribute("disabled");
 		}
 
 		for(var i=0;i<20;i++){

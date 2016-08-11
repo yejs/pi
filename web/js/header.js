@@ -104,7 +104,7 @@ function header(index)
 
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 
-		var grd=this.contextReport.createLinearGradient(0, 0, 0, this.rect.height); //颜色渐变的起始坐标和终点坐标
+		var grd=this.contextReport.createLinearGradient(0, 0, 0, this.rect.height); //绘背景色
 		grd.addColorStop(0, "rgba(5, 39, 175, 255)"); 
 		grd.addColorStop(0.5, "rgba(5, 89, 175, 255)");
 		grd.addColorStop(1, "rgba(5, 139, 175, 255)");
@@ -115,86 +115,81 @@ function header(index)
 		var rect = {x:0, y:0, width:this.rect.width*2/3, height:this.rect.height};
 		this.drawWeather(this.contextReport, rect);
 
-		this.drawHumiture(this.contextReport);
+		this.drawSecurity(this.contextReport);
 
 		this.ctx.drawImage(this.canvasReport, 0, 0);
 	}
 	
-	this.drawDoor = function(ctx)
-	{
-		ctx.font = _font36;
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		var title = _DEVICE_.door['1'].name + '：' + (_DEVICE_.door['1'].status == 'open' ? '开' : '关');
-		ctx.fillText(_DEVICE_.door['1'].name + '：', this.rect.width*5/6 - ctx.measureText(title).width/2, 36);
-		
-		if(_DEVICE_.door['1'].status == 'open')
-			ctx.fillStyle = ctx.strokeStyle = "rgb(255, 50, 50)";
-		else
-			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
-		
-		ctx.fillText((_DEVICE_.door['1'].status == 'open' ? '开' : '关'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.door['1'].name + '：').width, 36);
-		
-		
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		title = _DEVICE_.flammable['1'].name + '：' + (_DEVICE_.flammable['1'].status == 'alert' ? '警报' : '安全');
-		ctx.fillText(_DEVICE_.flammable['1'].name + '：', this.rect.width*5/6 - ctx.measureText(title).width/2, 91);
-		
-		if(_DEVICE_.flammable['1'].status == 'alert')
-			ctx.fillStyle = ctx.strokeStyle = "rgb(255, 50, 50)";
-		else
-			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
-		
-		ctx.fillText((_DEVICE_.flammable['1'].status == 'alert' ? '警报' : '安全'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.flammable['1'].name + '：').width, 91);
-		
-		
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		title = _DEVICE_.fire['1'].name + '：' + (_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全');
-		ctx.fillText(_DEVICE_.fire['1'].name + '：', this.rect.width*5/6 - ctx.measureText(title).width/2, 146);
-		
-		if(_DEVICE_.fire['1'].status == 'alert')
-			ctx.fillStyle = ctx.strokeStyle = "rgb(255, 50, 50)";
-		else
-			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
-		
-		ctx.fillText((_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全'), this.rect.width*5/6 - ctx.measureText(title).width/2 + ctx.measureText(_DEVICE_.fire['1'].name + '：').width, 146);
+	//遍历指定设备状态是否等于指定关键字
+	this.checkInput = function(dev_id, key){
+		var id = null;
+		for(var i=1;i<12;i++){
+			if(_DEVICE_[dev_id].hasOwnProperty(i.toString())){
+				if(_DEVICE_[dev_id][i.toString()].status == key){
+					id = i.toString();
+					break;
+				}
+			}
+			else
+				break;
+		}
+		return id;
 	}
 	
-	this.drawHumiture = function(ctx)
+	this.drawSecurity = function(ctx)
 	{
-		var status = _DEVICE_.humiture['1'].status;
-		pos = status.indexOf(':');
+		var x = this.rect.width*5/6 - ctx.measureText('所有燃气检测：安全').width/2 + ctx.measureText('所有燃气检测：').width - 10;
 		
-		if(pos>=0){
-			temperature = status.substr(0, pos);
-			humidity = status.substr(pos+1);
+		//1.处理门、窗开闭检测设备
+		var id = this.checkInput('door', 'open');//先检测门
+		var dev_id = null;
+		if(id)
+			dev_id = 'door';
+		else{									//门全部关着，再检测窗
+			id = this.checkInput('window', 'open');
+			if(id)
+				dev_id = 'window';
+		}
+		if(!dev_id){//没有找到打开的门、窗（所有门窗都处于关闭状态）
+			dev_id = 'door';
+			id = '1';
+			var title = '所有门窗：';
 		}
 		else
-			return;
+			var title = _DEVICE_[dev_id][id].name + '：';
 		
-		ctx.font = _font36;
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		var disp_x1 = this.rect.width*5/6 - ctx.measureText('室内温度：35.6℃').width/2;
-		var disp_x2 = disp_x1 + ctx.measureText('室内温度：').width;
-		ctx.fillText('室内温度：', disp_x1, 36);
-		ctx.fillStyle = ctx.strokeStyle = (parseInt(temperature) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText(temperature + '℃', disp_x2, 36);
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
+		ctx.fillText(title, x - ctx.measureText(title).width, 36);
+		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_[dev_id][id].status == 'open') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText((_DEVICE_[dev_id][id].status == 'open' ? '开' : '关'), x, 36);
+		
+		//2.处理燃气检测设备
+		id = this.checkInput('flammable', 'alert');
+		if(!id){//所有燃气检测设备都处于安全状态
+			id = '1';
+			title = '所有燃气检测：';
+		}
+		else
+			title = _DEVICE_.flammable[id].name + '：';
+		
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
+		ctx.fillText(title, x - ctx.measureText(title).width, 91);
+		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.flammable[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText((_DEVICE_.flammable[id].status == 'alert' ? '警报' : '安全'), x, 91);
 
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		ctx.fillText('相对湿度：', disp_x1, 91);
-		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText(humidity + '%', disp_x2, 91);
+		//3.处理火警检测设备
+		id = this.checkInput('fire', 'alert');
+		if(!id){//所有火警检测设备都处于安全状态
+			id = '1';
+			title = '所有火警检测：';
+		}
+		else
+			title = _DEVICE_.fire[id].name + '：';
 		
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		if(_DEVICE_.fire['1'].status != 'alert'){
-			ctx.fillText(_DEVICE_.flammable['1'].name + '：', disp_x1, 146);
-			ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.flammable['1'].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-			ctx.fillText((_DEVICE_.flammable['1'].status == 'alert' ? '警报' : '安全'), disp_x2, 146);
-		}
-		else{
-			ctx.fillText(_DEVICE_.fire['1'].name + '：', disp_x1, 146);
-			ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.fire['1'].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-			ctx.fillText((_DEVICE_.fire['1'].status == 'alert' ? '警报' : '安全'), disp_x2, 146);
-		}
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
+		ctx.fillText(title, x - ctx.measureText(title).width, 146);
+		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.fire[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText((_DEVICE_.fire[id].status == 'alert' ? '警报' : '安全'), x, 146);
 	}
 	
 	this.drawWeather = function(ctx, rect)
@@ -204,23 +199,45 @@ function header(index)
 		var _w = this.weather;
 		
 		ctx.textBaseline="middle";
-		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.font = _font36;
-		var title = "今日天气";
+		
+	/*	var title = "今日天气";
 		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 36);
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.font = _font56;
 		title = this.city;
 		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 95);
+		*/
+
+		var status = _DEVICE_.humiture['1'].status;
+		pos = status.indexOf(':');
+		
+		if(pos>=0){
+			temperature = status.substr(0, pos);
+			humidity = status.substr(pos+1);
+		}
+		else
+			return;
+
+		var x = Math.max(rect.width/4 - ctx.measureText('室内温度：35.6℃').width/2 + 10, 0) + ctx.measureText('室内温度：').width;
+		ctx.fillText('室内温度：', x - ctx.measureText('室内温度：').width, 36);
+		ctx.fillStyle = ctx.strokeStyle = (parseInt(temperature) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(temperature + '℃', x, 36);
+
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
+		ctx.fillText('相对湿度：', x - ctx.measureText('相对湿度：').width, 91);
+		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(humidity + '%', x, 91);
+		
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
 		ctx.font = _font36;
 		if(_w.d2 + _w.p1 !== _w.d1 + _w.p1)
-			title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1;
+			var title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1;
 		else
-			title = _w.d1 + _w.p1;
+			var title = _w.d1 + _w.p1;
 		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 150);
 		
 	
