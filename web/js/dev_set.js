@@ -48,8 +48,11 @@ function dev_set()
 		var json = JSON.parse(evt);
 		if(!json)
 			return;
-		if( json.event === "device" ){
-			_DEVICE_ = json.data;
+		if( json.event === "device" || json.event === "the_device"){
+			if(json.event === "device")
+				_DEVICE_ = json.data;
+			else if(json.event === "the_device")
+				_DEVICE_[json.dev_id] = json.data;
 		//	window.parent.postMessage({'msg':'device' , 'data':json.data},'*');
 		//	console.log('device:' + JSON.stringify(_DEVICE_));
 			

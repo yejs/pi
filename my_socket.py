@@ -59,17 +59,30 @@ class Connection(object):
         if _DEVICE_.get(dev_id) == None:
             return
 			
+        if dev_id == 'humiture':#温湿度超过设定最大最小值
+            pos = status.find(':')
+            if pos != -1:
+                temperature = status[0:pos]
+                humidity = status[pos+1:]
+                if type(eval(temperature)) == float and type(eval(humidity)) == float:
+                    for id in _DEVICE_[dev_id]:
+                        if _DEVICE_[dev_id][id]['ip'] == ip and (float(temperature)>_DEVICE_[dev_id][id]['t_max'] or float(temperature)<_DEVICE_[dev_id][id]['t_min'] or float(humidity)>_DEVICE_[dev_id][id]['h_max'] or float(humidity)<_DEVICE_[dev_id][id]['h_min']):
+                            pass
+        elif (dev_id == 'flammable' or dev_id == 'fire') and status == 'alert':#燃气、火警报警处理
+            pass
+        elif dev_id == 'door' and status == 'open':#门、窗非法打开报警处理
+            pass
+			
         for id in _DEVICE_[dev_id]:
             if _DEVICE_[dev_id][id].get('status') and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['ip'] == ip:
                 _DEVICE_[dev_id][id]['status'] = status
-        #print('set_dev_item, dev_id:%s, ip:%s, status:%s ' %(dev_id, ip, status))
 
     def doRecv(self, data):    
         if data[:-1].decode().find('{') != -1 and data[:-1].decode().find('}') != -1:
             obj = json.loads(data[:-1].decode()) 
             if obj and obj.get('event') == 'report':    
                 Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
-                WebSocket.broadcast_device();
+                WebSocket.broadcast_the_device(obj['dev_id']);
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
                 print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  

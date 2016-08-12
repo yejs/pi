@@ -170,14 +170,13 @@ function device()
 
 	//终端语音识别处理
 	this.doSpeech = function(speech){
-		for(var i=0;i<20;i++){
-			if(document.getElementById(i.toString())){
-				if(_DEVICE_[dev_id].hasOwnProperty(i.toString()) && _DEVICE_[dev_id][i.toString()]['hide'] === 'false'){
-					var name = document.getElementById(i.toString()).innerText;
-					var pos = speech.indexOf(name);
-					if(pos >= 0 && speech.length == pos + name.length){
-						
-						if(speech.indexOf('开')>=0 || speech.indexOf('关')>=0){
+		if(speech.indexOf('开')>=0 || speech.indexOf('关')>=0){//开关指令
+			for(var i=0;i<20;i++){
+				if(document.getElementById(i.toString())){
+					if(_DEVICE_[dev_id].hasOwnProperty(i.toString()) && _DEVICE_[dev_id][i.toString()]['hide'] === 'false'){
+						var name = document.getElementById(i.toString()).innerText;
+						var pos = speech.indexOf(name);
+						if(pos >= 0 && speech.length == pos + name.length){
 							if(dev_id == 'lamp'){
 								_LAMP_[mode][i]['status'] = speech.indexOf('开')>=0 ? 'off' : 'on';//先将终端状态置反，docommand会将此状态重置
 								this.docommand(i);
@@ -198,6 +197,75 @@ function device()
 					}
 				}
 			}
+		}
+		else{
+			if(dev_id == 'tv'){//电视频道调节指令
+				var g = 0, s = 0;
+				if(speech.indexOf('十一')>=0)
+					g = 1;
+				else if(speech.indexOf('十二')>=0)
+					g = 2;
+				else if(speech.indexOf('十三')>=0)
+					g = 3;
+				else if(speech.indexOf('十四')>=0)
+					g = 4;
+				else if(speech.indexOf('十五')>=0)
+					g = 5;
+				else if(speech.indexOf('十六')>=0)
+					g = 6;
+				else if(speech.indexOf('十七')>=0)
+					g = 7;
+				else if(speech.indexOf('十八')>=0)
+					g = 8;
+				else if(speech.indexOf('十九')>=0)
+					g = 9;
+				else if(speech.indexOf('十')>=0){
+					g = 0;
+					s = 1;
+				}
+				else if(speech.indexOf('一十')<0 && speech.indexOf('二十')<0 && speech.indexOf('三十')<0 && speech.indexOf('四十')<0 && speech.indexOf('五十')<0
+				 && speech.indexOf('六十')<0 && speech.indexOf('七十')<0 && speech.indexOf('八十')<0 && speech.indexOf('九十')<0){
+					s = 0;
+					if(speech.indexOf('一')>=0)
+						g = 1;
+					else if(speech.indexOf('二')>=0)
+						g = 2;
+					else if(speech.indexOf('三')>=0)
+						g = 3;
+					else if(speech.indexOf('四')>=0)
+						g = 4;
+					else if(speech.indexOf('五')>=0)
+						g = 5;
+					else if(speech.indexOf('六')>=0)
+						g = 6;
+					else if(speech.indexOf('七')>=0)
+						g = 7;
+					else if(speech.indexOf('八')>=0)
+						g = 8;
+					else if(speech.indexOf('九')>=0)
+						g = 9;
+				}
+				
+				if(speech.indexOf('一十')>=0)
+					s = 1;
+				else if(speech.indexOf('二十')>=0)
+					s = 2;
+				else if(speech.indexOf('三十')>=0)
+					s = 3;
+				else if(speech.indexOf('四十')>=0)
+					s = 4;
+				else if(speech.indexOf('五十')>=0)
+					s = 5;
+				else if(speech.indexOf('六十')>=0)
+					s = 6;
+				else if(speech.indexOf('七十')>=0)
+					s = 7;
+				else if(speech.indexOf('八十')>=0)
+					s = 8;
+				else if(speech.indexOf('九十')>=0)
+					s = 9;
+			}
+			
 		}
 	}
 	
@@ -324,9 +392,12 @@ function device()
 		//	console.log('ack:' + JSON.stringify(json));
 			return;
 		}
-		else if( json.event === "device" ){
+		else if( json.event === "device" || json.event === "the_device"){
 		//	console.log('device:' + JSON.stringify(json));
-			_DEVICE_ = json.data;
+			if(json.event === "device")
+				_DEVICE_ = json.data;
+			else if(json.event === "the_device")
+				_DEVICE_[json.dev_id] = json.data;
 
 			var index = -1;
 			for(var i=0;i<20;i++){

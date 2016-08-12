@@ -377,7 +377,7 @@ class WebHandler(tornado.web.RequestHandler):
         print("device_set,item:%s" %(json.dumps(obj)))
         obj['name'] = urllib.parse.unquote(obj['name'])
         _DEVICE_[post_data['dev_id'][0]][post_data['id'][0]] = obj
-        WebSocket.broadcast_device()
+        WebSocket.broadcast_the_device(post_data['dev_id'][0])
 
 			
 if __name__ == "__main__":

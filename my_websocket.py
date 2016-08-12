@@ -51,6 +51,15 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
         WebSocket.broadcast_messages(str1) 
 		
+    def broadcast_the_device(dev_id):
+        str1 = '{\"event\": \"the_device\", \"data\":'
+        str1 += json.dumps(_DEVICE_[dev_id])
+        str1 += ', \"dev_id\":\"'
+        str1 += dev_id
+        str1 += '\"}'
+
+        WebSocket.broadcast_messages(str1) 
+		
     def broadcast_lamp_status():
         mode = GlobalVar.get_mode()
         str1 = '{\"event\": \"lamp\", \"data\":'

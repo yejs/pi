@@ -150,8 +150,11 @@ window.addEventListener('message',function(e){
 			else if( json.dev_id === "plugin" )
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
-		else if( json.event === "device" ){
-			_DEVICE_ = json.data;
+		else if( json.event === "device" || json.event === "the_device"){
+			if(json.event === "device")
+				_DEVICE_ = json.data;
+			else if(json.event === "the_device")
+				_DEVICE_[json.dev_id] = json.data;
 			
 			if(_header)
 				_header.doDraw();
