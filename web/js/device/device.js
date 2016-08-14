@@ -87,7 +87,7 @@ dotest = function(){
 		speech = '打开电视1';
 	else if('plugin' == dev_id)
 		speech = '打开插座1';
-	window.parent.postMessage({'msg':'doSpeech', 'data':speech},'*');
+	window.parent.postMessage({'msg':'doSpeech', 'data':'八百二十三频道'},'*');
 }
 
 window.addEventListener('message',function(e){
@@ -170,6 +170,7 @@ function device()
 
 	//终端语音识别处理
 	this.doSpeech = function(speech){
+		console.log('电视频道调节指令:' + speech);
 		if(speech.indexOf('开')>=0 || speech.indexOf('关')>=0){//开关指令
 			for(var i=0;i<20;i++){
 				if(document.getElementById(i.toString())){
@@ -200,7 +201,7 @@ function device()
 		}
 		else{
 			if(dev_id == 'tv'){//电视频道调节指令
-				var g = 0, s = 0;
+				var g = 0, s = 0, b = 0;
 				if(speech.indexOf('十一')>=0)
 					g = 1;
 				else if(speech.indexOf('十二')>=0)
@@ -219,10 +220,7 @@ function device()
 					g = 8;
 				else if(speech.indexOf('十九')>=0)
 					g = 9;
-				else if(speech.indexOf('十')>=0){
-					g = 0;
-					s = 1;
-				}
+				
 				else if(speech.indexOf('一十')<0 && speech.indexOf('二十')<0 && speech.indexOf('三十')<0 && speech.indexOf('四十')<0 && speech.indexOf('五十')<0
 				 && speech.indexOf('六十')<0 && speech.indexOf('七十')<0 && speech.indexOf('八十')<0 && speech.indexOf('九十')<0){
 					s = 0;
@@ -244,6 +242,7 @@ function device()
 						g = 8;
 					else if(speech.indexOf('九')>=0)
 						g = 9;
+					
 				}
 				
 				if(speech.indexOf('一十')>=0)
@@ -264,6 +263,47 @@ function device()
 					s = 8;
 				else if(speech.indexOf('九十')>=0)
 					s = 9;
+				else if(speech.indexOf('十')>=0)
+					s = 1;
+				
+				if(speech.indexOf('一百')>=0)
+					b = 1;
+				else if(speech.indexOf('二百')>=0)
+					b = 2;
+				else if(speech.indexOf('三百')>=0)
+					b = 3;
+				else if(speech.indexOf('四百')>=0)
+					b = 4;
+				else if(speech.indexOf('五百')>=0)
+					b = 5;
+				else if(speech.indexOf('六百')>=0)
+					b = 6;
+				else if(speech.indexOf('七百')>=0)
+					b = 7;
+				else if(speech.indexOf('八百')>=0)
+					b = 8;
+				else if(speech.indexOf('九百')>=0)
+					b = 9;
+				console.log('电视频道调节指令:' + b);
+				if(b>0){
+					this.docommand(this.id, b);
+					setTimeout(function(){
+						_device.docommand(_device.id, s);
+						console.log('电视频道调节指令:' + s);
+						setTimeout(function(){
+							_device.docommand(_device.id, g);
+							console.log('电视频道调节指令:' + g);
+						}, 100);
+					}, 100);
+				}
+				else if(b>0){
+					this.docommand(this.id, s);
+					setTimeout(function(){
+						_device.docommand(_device.id, g);
+					}, 100);
+				}
+				else
+					this.docommand(this.id, g);
 			}
 			
 		}

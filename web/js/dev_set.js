@@ -15,14 +15,13 @@ window.onload = function(){
 	pos = url.indexOf('dev_id');
 	if(pos>=0){
 		_dev_set.dev_id = url.substr(pos+7);
-		if(_dev_set.dev_id == 'curtain'){
-			document.getElementById('d_GPIO').style.display = 'none';
+		if(_dev_set.dev_id == 'curtain')
 			document.getElementById('d_length').style.display = 'block';
-		}
-		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner'){
-			document.getElementById('d_GPIO').style.display = 'none';
+		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner')
 			document.getElementById('d_brand').style.display = 'block';
-		}
+		
+		if(_dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input')
+			document.getElementById('d_GPIO').style.display = 'none';
 	}
 }
 
@@ -43,6 +42,8 @@ function dev_set()
 	this.id = '1';
 
 
+	var input_titles = ["door", "window", "humiture", "flammable", "fire"];
+	
 		//websocket 处理函数
 	this.onmessage = function(evt){
 		var json = JSON.parse(evt);
@@ -54,54 +55,121 @@ function dev_set()
 			else if(json.event === "the_device")
 				_DEVICE_[json.dev_id] = json.data;
 		//	window.parent.postMessage({'msg':'device' , 'data':json.data},'*');
-		//	console.log('device:' + JSON.stringify(_DEVICE_));
+		//	console.log('device:' + json.event);
 			
-			if(_DEVICE_.hasOwnProperty(_dev_set.dev_id)){
-				for(var i=0;i<20;i++){
-					if(document.getElementById(i.toString())){
-						if(!_DEVICE_[_dev_set.dev_id].hasOwnProperty(i.toString()))
-							document.getElementById(i.toString()).style.display = 'none';
+			if(json.event === "device"){
+				if(_DEVICE_.hasOwnProperty(_dev_set.dev_id)){
+					for(var i=0;i<20;i++){
+						if(document.getElementById(i.toString())){
+							
+							if(!_DEVICE_[_dev_set.dev_id].hasOwnProperty(i.toString())){
+								document.getElementById(i.toString()).style.display = 'none';
+								
+							}
+							else
+								document.getElementById(i.toString()).innerText = _DEVICE_[_dev_set.dev_id][i.toString()]['name'];	
+						}
+					}
+					if(document.getElementById('all')){
+						if(_DEVICE_[_dev_set.dev_id].hasOwnProperty('all'))
+							document.getElementById('all').innerText = _DEVICE_[_dev_set.dev_id]['all']['name'];
 						else
-							document.getElementById(i.toString()).innerText = _DEVICE_[_dev_set.dev_id][i.toString()]['name'];	
+							document.getElementById('all').style.display = 'none';
+					}	
+				}
+				else if('input' == _dev_set.dev_id){//燃气检测、火警检测、温湿度检测、门窗检测等输入设备
+					document.getElementById('all').style.display = 'none';
+					var j = 1, index = 0;
+
+					for(var i=1;i<20;i++){
+						if(document.getElementById(i.toString())){
+							if(!_DEVICE_[input_titles[index]].hasOwnProperty(j.toString())){
+								
+								if(index < input_titles.length-1){
+									j = 0;
+									i--;
+									index++
+								}
+								else
+									document.getElementById(i.toString()).style.display = 'none';
+							}
+							else{
+								document.getElementById(i.toString()).innerText = _DEVICE_[input_titles[index]][j.toString()]['name'];	
+								
+							}
+							j++;
+						}
 					}
 				}
-				if(document.getElementById('all')){
-					if(_DEVICE_[_dev_set.dev_id].hasOwnProperty('all'))
-						document.getElementById('all').innerText = _DEVICE_[_dev_set.dev_id]['all']['name'];
-					else
-						document.getElementById('all').style.display = 'none';
-				}	
-			}
-			else{
-				for(var i=0;i<20;i++){
-					if(document.getElementById(i.toString()))
-						document.getElementById(i.toString()).style.display = 'none';
+				else{
+					for(var i=0;i<20;i++){
+						if(document.getElementById(i.toString()))
+							document.getElementById(i.toString()).style.display = 'none';
+					}
+					if(document.getElementById('all'))
+						document.getElementById('all').style.display = 'none';	
 				}
-				if(document.getElementById('all'))
-					document.getElementById('all').style.display = 'none';	
+				_dev_set.docommand(_dev_set.id);
 			}
-			_dev_set.docommand(_dev_set.id);
 		} 
 	}
 	
+	this.getDev_id = function(id){
+		var dev_id = this.dev_id;
+
+		if('input' == this.dev_id){//燃气检测、火警检测、温湿度检测、门窗检测等输入设备
+			
+			var j = 1, index = 0;
+			dev_id = input_titles[index];
+			
+			for(var i=1;i<20;i++){
+				if(document.getElementById(i.toString())){
+					if(!_DEVICE_[dev_id].hasOwnProperty(j.toString())){
+						
+						if(index < input_titles.length-1){
+							j = 0;
+							i--;
+							index++;
+							dev_id = input_titles[index];
+						}
+					}
+					else{
+						if(i == id){
+							id = j;
+							break;
+						}
+					}
+					j++;
+				}
+			}
+		}
+
+		return {'dev_id':dev_id, 'id':id};
+	}
+	
 	this.docommand = function(id){
-		if(!_DEVICE_.hasOwnProperty(this.dev_id))
+		if(!_DEVICE_.hasOwnProperty(this.dev_id) && 'input' != this.dev_id)
 			return;
 
 		this.id = id;
+		
+		var obj = this.getDev_id(id);
+		var dev_id = obj.dev_id;
+		id = obj.id;
+
 	//	document.getElementById('dev_title').innerText = document.getElementById(id).innerText + '设置';
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('name'))
-			document.getElementById('name').value = _DEVICE_[this.dev_id][id]['name'];
+		if(_DEVICE_[dev_id][id].hasOwnProperty('name'))
+			document.getElementById('name').value = _DEVICE_[dev_id][id]['name'];
 		else
 			document.getElementById('name').value = '';
 		
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('ip'))
-			document.getElementById('IP').value = _DEVICE_[this.dev_id][id]['ip'];
+		if(_DEVICE_[dev_id][id].hasOwnProperty('ip'))
+			document.getElementById('IP').value = _DEVICE_[dev_id][id]['ip'];
 		else
 			document.getElementById('IP').value = '';
 		
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('pin')){
-			value = _DEVICE_[this.dev_id][id]['pin'];
+		if(_DEVICE_[dev_id][id].hasOwnProperty('pin')){
+			value = _DEVICE_[dev_id][id]['pin'];
 			var obj = document.getElementById('GPIO'); 
 			for(var i=0;i<8;i++){
 				if(obj.options[i].value.indexOf(value)>=0){
@@ -113,19 +181,19 @@ function dev_set()
 		else
 			document.getElementById('GPIO').value = '';
 		
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('length'))
-			document.getElementById('length').value = _DEVICE_[this.dev_id][id]['length'];
+		if(_DEVICE_[dev_id][id].hasOwnProperty('length'))
+			document.getElementById('length').value = _DEVICE_[dev_id][id]['length'];
 		else
 			document.getElementById('length').value = '';
 		
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('brand'))
-			document.getElementById('brand').value = _DEVICE_[this.dev_id][id]['brand'];
+		if(_DEVICE_[dev_id][id].hasOwnProperty('brand'))
+			document.getElementById('brand').value = _DEVICE_[dev_id][id]['brand'];
 		else
 			document.getElementById('brand').value = '';
 		
 		ii = parseInt(id);
-		var count = (this.dev_id == 'lamp' || this.dev_id == 'curtain' || this.dev_id == 'plugin') ? 12 : 6;
-		if((ii < count && _DEVICE_[this.dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[this.dev_id][(ii-1).toString()]['hide'] === 'true')){
+		var count = (dev_id == 'lamp' || dev_id == 'curtain' || dev_id == 'plugin') ? 12 : 6;
+		if((_DEVICE_[dev_id][id].hasOwnProperty('hide') && (ii < count && _DEVICE_[dev_id][(ii+1).toString()]['hide'] === 'false') || (ii > 1 && _DEVICE_[dev_id][(ii-1).toString()]['hide'] === 'true'))  || !_DEVICE_[dev_id][id].hasOwnProperty('hide')){
 		//	document.getElementById('hide').setAttribute("disabled","disabled");
 			document.getElementById('d_hide').style.display = 'none';
 		}
@@ -134,8 +202,8 @@ function dev_set()
 			document.getElementById('d_hide').style.display = 'block';
 		}
 		
-		if(_DEVICE_[this.dev_id][id].hasOwnProperty('hide'))
-			document.getElementById('hide').checked = _DEVICE_[this.dev_id][id]['hide'] == 'true' ? true : false;
+		if(_DEVICE_[dev_id][id].hasOwnProperty('hide'))
+			document.getElementById('hide').checked = _DEVICE_[dev_id][id]['hide'] == 'true' ? true : false;
 		else
 			document.getElementById('hide').checked = false;
 		
@@ -150,10 +218,12 @@ function dev_set()
 			document.getElementById('GPIO').removeAttribute("disabled");
 			document.getElementById('length').removeAttribute("disabled");
 		}
+		
+		
 
 		for(var i=0;i<20;i++){
 			if(document.getElementById(i.toString())){
-				if(i.toString() === id){
+				if(i.toString() === this.id){
 					document.getElementById(i).style.backgroundColor = '#e00';
 					document.getElementById('all').style.backgroundColor = '#aaa';
 				}
@@ -164,25 +234,32 @@ function dev_set()
 	}
 
 	this.dosubmit = function(){
-		_DEVICE_[this.dev_id][this.id]['name'] = encodeURIComponent(document.getElementById('name').value); 
-		if(document.getElementById('IP').value.length>0)
-			_DEVICE_[this.dev_id][this.id]['ip'] = document.getElementById('IP').value; 
+		var id = this.id;
 		
-		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('pin')){
+		var obj = this.getDev_id(id);
+		var dev_id = obj.dev_id;
+		id = obj.id;
+		
+		_DEVICE_[dev_id][id]['name'] = encodeURIComponent(document.getElementById('name').value); 
+		if(document.getElementById('IP').value.length>0)
+			_DEVICE_[dev_id][id]['ip'] = document.getElementById('IP').value; 
+		
+		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('pin')){
 			value = parseInt(document.getElementById('GPIO').options[document.getElementById('GPIO').selectedIndex].value);
-			_DEVICE_[this.dev_id][this.id]['pin'] = String(value); 
+			_DEVICE_[dev_id][id]['pin'] = String(value); 
 			console.log(value);
 		}
 		
-		if(document.getElementById('brand').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('brand'))
-			_DEVICE_[this.dev_id][this.id]['brand'] = encodeURIComponent(document.getElementById('brand').value); 
+		if(document.getElementById('brand').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('brand'))
+			_DEVICE_[dev_id][id]['brand'] = encodeURIComponent(document.getElementById('brand').value); 
 		
-		if(document.getElementById('length').value.length>0 && _DEVICE_[this.dev_id][this.id].hasOwnProperty('length'))
-			_DEVICE_[this.dev_id][this.id]['length'] = parseFloat(document.getElementById('length').value); 
+		if(document.getElementById('length').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('length'))
+			_DEVICE_[dev_id][id]['length'] = parseFloat(document.getElementById('length').value); 
 		
-		_DEVICE_[this.dev_id][this.id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
+		if(_DEVICE_[dev_id][id].hasOwnProperty('hide'))
+			_DEVICE_[dev_id][id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
 		
-		param = "device_set=" + (JSON.stringify(_DEVICE_[this.dev_id][this.id])) + "&dev_id=" + this.dev_id + "&id=" + this.id;
+		param = "device_set=" + (JSON.stringify(_DEVICE_[dev_id][id])) + "&dev_id=" + dev_id + "&id=" + id;
 		
 
 		//页面ajax请求

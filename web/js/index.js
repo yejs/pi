@@ -123,7 +123,7 @@ window.addEventListener('message',function(e){
 			window.frames['fcurtain'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
 		else if(speech.indexOf('空调') >=0)
 			window.frames['fair_conditioner'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
-		else if(speech.indexOf('电视') >=0)
+		else if(speech.indexOf('电视') >=0 || speech.indexOf('频道') >=0 || speech.indexOf('台') >=0)
 			window.frames['ftv'].postMessage({'msg':'doSpeech' , 'data':speech},'*');
 		else if(speech.indexOf('插座') >=0)
 			window.frames['fplugin'].postMessage({'msg':'doSpeech' , 'data':speech},'*');

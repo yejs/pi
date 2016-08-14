@@ -20,7 +20,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['&nbsp&nbsp灯光设置&nbsp&nbsp', '&nbsp&nbsp窗帘设置&nbsp&nbsp', '&nbsp&nbsp空调设置&nbsp&nbsp', '&nbsp&nbsp电视设置&nbsp&nbsp', '&nbsp&nbsp插座设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
+			var _title = ['&nbsp&nbsp灯光设置&nbsp&nbsp', '&nbsp&nbsp窗帘设置&nbsp&nbsp', '&nbsp&nbsp空调设置&nbsp&nbsp', '&nbsp&nbsp电视设置&nbsp&nbsp', '&nbsp&nbsp插座设置&nbsp&nbsp', '&nbsp&nbsp输入设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -44,7 +44,7 @@
 			_footer.onresize();
 		}
 		
-		var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin"];
+		var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin", "input"];
 		showPage = function(title){
 			for(var i in titles){
 				if(titles[i] === title)
@@ -96,6 +96,7 @@
 			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['finput'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else if( json.event === "lamp" ){
 
@@ -196,6 +197,9 @@
 	</div>
 	<div id="plugin" style="display:none">
 		<iframe name="fplugin" src='dev_set.html?dev_id=plugin' class="myframe"></iframe>
+	</div>
+	<div id="input" style="display:none">
+		<iframe name="finput" src='dev_set.html?dev_id=input' class="myframe"></iframe>
 	</div>
 	<div id="div_footer"><canvas id="footer" align="left"></canvas></div>
 </div>

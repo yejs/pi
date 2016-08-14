@@ -228,7 +228,7 @@ function header(index)
 
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText('相对湿度：', x - ctx.measureText('相对湿度：').width, 91);
-		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 70) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
 		ctx.fillText(humidity + '%', x, 91);
 		
 		

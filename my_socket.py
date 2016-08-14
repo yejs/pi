@@ -78,16 +78,19 @@ class Connection(object):
                 _DEVICE_[dev_id][id]['status'] = status
 
     def doRecv(self, data):    
-        if data[:-1].decode().find('{') != -1 and data[:-1].decode().find('}') != -1:
+        if data[:-1].decode().find('{') == 0 and data[:-1].decode().find('}') == len(data[:-1].decode())-1:
             obj = json.loads(data[:-1].decode()) 
             if obj and obj.get('event') == 'report':    
                 Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                 WebSocket.broadcast_the_device(obj['dev_id']);
+                #print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
-                print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+                #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+            elif obj and obj.get('event') == 'heart_beat':    
+                #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
-            pass#print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+            print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
 		
     '''
@@ -140,13 +143,13 @@ class Connection(object):
                 Connection.output_ex()
 
         else :
-            Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
+            Connection.timer = threading.Timer(0.5, Connection.output_ex)#延时0.1秒输出
             Connection.timer.start()
 
     def output_ex():
         Connection.time_tick = time.time()
 		
-        if len(Connection.output_param) == 0:
+        if len(Connection.output_param) == 0 and Connection.timer:
             Connection.timer.cancel()
             Connection.timer = None
             return;
@@ -271,13 +274,14 @@ class Connection(object):
         Connection.heart_beat_timer = threading.Timer(5, Connection.heart_beat)#5秒心跳输出
         Connection.heart_beat_timer.start()
 
-        msg = "{\"event\":\"heart_beat\"}"
+        if time.time() - Connection.time_tick > 5:
+            msg = "{\"event\":\"heart_beat\"}"
 
-        for conn in Connection.clients:
-            try:
-                conn._stream.write(msg.encode())
-            except:
-                logging.error('Error sending message', exc_info=True)	
+            for conn in Connection.clients:
+                try:
+                    conn._stream.write(msg.encode())
+                except:
+                    logging.error('Error sending message', exc_info=True)	
 				
 class SocketServer(TCPServer):    
     def handle_stream(self, stream, address):   
