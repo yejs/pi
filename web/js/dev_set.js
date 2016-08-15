@@ -19,7 +19,7 @@ window.onload = function(){
 			document.getElementById('d_length').style.display = 'block';
 		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner')
 			document.getElementById('d_brand').style.display = 'block';
-		
+
 		if(_dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input')
 			document.getElementById('d_GPIO').style.display = 'none';
 	}
@@ -79,25 +79,14 @@ function dev_set()
 				}
 				else if('input' == _dev_set.dev_id){//燃气检测、火警检测、温湿度检测、门窗检测等输入设备
 					document.getElementById('all').style.display = 'none';
-					var j = 1, index = 0;
 
 					for(var i=1;i<20;i++){
 						if(document.getElementById(i.toString())){
-							if(!_DEVICE_[input_titles[index]].hasOwnProperty(j.toString())){
-								
-								if(index < input_titles.length-1){
-									j = 0;
-									i--;
-									index++
-								}
-								else
-									document.getElementById(i.toString()).style.display = 'none';
-							}
-							else{
-								document.getElementById(i.toString()).innerText = _DEVICE_[input_titles[index]][j.toString()]['name'];	
-								
-							}
-							j++;
+							var obj = this.getInput_id(i);
+							if(obj)
+								document.getElementById(i.toString()).innerText = _DEVICE_[obj.dev_id][obj.id.toString()]['name'];	
+							else
+								document.getElementById(i.toString()).style.display = 'none';
 						}
 					}
 				}
@@ -114,14 +103,14 @@ function dev_set()
 		} 
 	}
 	
-	this.getDev_id = function(id){
+	this.getInput_id = function(id){
 		var dev_id = this.dev_id;
 
 		if('input' == this.dev_id){//燃气检测、火警检测、温湿度检测、门窗检测等输入设备
 			
 			var j = 1, index = 0;
 			dev_id = input_titles[index];
-			
+
 			for(var i=1;i<20;i++){
 				if(document.getElementById(i.toString())){
 					if(!_DEVICE_[dev_id].hasOwnProperty(j.toString())){
@@ -136,12 +125,14 @@ function dev_set()
 					else{
 						if(i == id){
 							id = j;
+							return {'dev_id':dev_id, 'id':id};
 							break;
 						}
 					}
 					j++;
 				}
 			}
+			return null;
 		}
 
 		return {'dev_id':dev_id, 'id':id};
@@ -153,7 +144,7 @@ function dev_set()
 
 		this.id = id;
 		
-		var obj = this.getDev_id(id);
+		var obj = this.getInput_id(id);
 		var dev_id = obj.dev_id;
 		id = obj.id;
 
@@ -202,6 +193,16 @@ function dev_set()
 			document.getElementById('d_hide').style.display = 'block';
 		}
 		
+		if(dev_id == 'humiture'){
+			document.getElementById('d_humiture').style.display = 'block';
+			document.getElementById('t_min').value = _DEVICE_[dev_id][id]['t_min'];
+			document.getElementById('t_max').value = _DEVICE_[dev_id][id]['t_max'];
+			document.getElementById('h_min').value = _DEVICE_[dev_id][id]['h_min'];
+			document.getElementById('h_max').value = _DEVICE_[dev_id][id]['h_max'];
+		}
+		else
+			document.getElementById('d_humiture').style.display = 'none';
+		
 		if(_DEVICE_[dev_id][id].hasOwnProperty('hide'))
 			document.getElementById('hide').checked = _DEVICE_[dev_id][id]['hide'] == 'true' ? true : false;
 		else
@@ -236,7 +237,7 @@ function dev_set()
 	this.dosubmit = function(){
 		var id = this.id;
 		
-		var obj = this.getDev_id(id);
+		var obj = this.getInput_id(id);
 		var dev_id = obj.dev_id;
 		id = obj.id;
 		
@@ -258,6 +259,13 @@ function dev_set()
 		
 		if(_DEVICE_[dev_id][id].hasOwnProperty('hide'))
 			_DEVICE_[dev_id][id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
+		
+		if(dev_id == 'humiture'){
+			_DEVICE_[dev_id][id]['t_min'] = document.getElementById('t_min').value;
+			_DEVICE_[dev_id][id]['t_max'] = document.getElementById('t_max').value;
+			_DEVICE_[dev_id][id]['h_min'] = document.getElementById('h_min').value;
+			_DEVICE_[dev_id][id]['h_max'] = document.getElementById('h_max').value;
+		}
 		
 		param = "device_set=" + (JSON.stringify(_DEVICE_[dev_id][id])) + "&dev_id=" + dev_id + "&id=" + id;
 		

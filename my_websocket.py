@@ -17,7 +17,7 @@ import logging
 import threading
 import time
 
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
+from data import *
 from g_data import GlobalVar
 		
 class WebSocket(tornado.websocket.WebSocketHandler):

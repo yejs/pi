@@ -57,6 +57,7 @@
 	<div class="wrap" id="d_GPIO">	
 		<span class="title">GPIO设置</span>
 		<!--input id="GPIO" type="text" placeholder="请输入GPIO"/><br/-->
+		<!--作为输入引脚的只有：4 、5 、12（PWM） 、 13（PWM） 、 14 ,如果用为了输入，尽量不要用作输出-->
 		<select id="GPIO"><br/-->
 			<option >0</option>
 			<option>2</option>
@@ -64,7 +65,7 @@
 			<option>5  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp可燃气检测</option>
 			<option>12 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp门磁开关</option>
 			<option>13 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp红外输入 输出</option>
-			<option>14</option>
+			<option>14 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp火警检测</option>
 			<option>15</option>
 		</select>
 	</div>
@@ -75,6 +76,24 @@
 	<div class="wrap" id="d_length" style="display:none">	
 		<span class="title">窗帘长度</span>
 		<input id="length" type="text" placeholder="请输入窗帘长度"/>
+	</div>
+	<div id="d_humiture" style="display:none">	
+			<div class="wrap">	
+				<span class="title">最小温度</span>
+				<input id="t_min" type="text" placeholder="请输入最小报警温度"/>
+			</div>
+			<div class="wrap">	
+				<span class="title">最大温度</span>
+				<input id="t_max" type="text" placeholder="请输入最大报警温度"/>
+			</div>
+			<div class="wrap">	
+				<span class="title">最小湿度</span>
+				<input id="h_min" type="text" placeholder="请输入最小报警湿度"/>
+			</div>
+			<div class="wrap">	
+				<span class="title">最大湿度</span>
+				<input id="h_max" type="text" placeholder="请输入最大报警湿度"/>
+			</div>
 	</div>
 	<div class="wrap" id="d_hide" >	
 		<span class="title">是否隐藏</span>

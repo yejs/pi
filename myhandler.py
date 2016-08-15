@@ -20,7 +20,7 @@ import time
 from my_gpio import RPi_GPIO
 from my_socket import SocketServer, Connection
 from my_websocket import WebSocket
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
+from data import *
 from g_data import GlobalVar
 
 #客户端ajax请求处理
@@ -90,6 +90,7 @@ class WebHandler(tornado.web.RequestHandler):
 	
     def perform_save(): 
         f = open('data.py','w')            
+        f.write('__all__ = ["_DEVICE_", "_LAMP_", "_CURTAIN_", "_AIR_CONDITIONER_", "_TV_", "_PLUGIN_"]\n')  
         f.write('_DEVICE_ = ' + json.dumps(_DEVICE_) + '\n')  
         f.write('_LAMP_ = ' + json.dumps(_LAMP_) + '\n')  
         f.write('_CURTAIN_ = ' + json.dumps(_CURTAIN_) + '\n')  

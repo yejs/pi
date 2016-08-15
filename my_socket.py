@@ -20,8 +20,10 @@ import time
 from my_gpio import RPi_GPIO
 from my_websocket import WebSocket
 from lirc import LIRC
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_, _TV_, _PLUGIN_
+from data import *
 from g_data import GlobalVar
+
+__all__ = ["Connection", "SocketServer"]
 
 class Connection(object):    
     heart_beat_timer = None
@@ -88,7 +90,7 @@ class Connection(object):
                 WebSocket.broadcast_messages(data[:-1].decode());
                 #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
             elif obj and obj.get('event') == 'heart_beat':    
-                #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+                pass#print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
             print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
