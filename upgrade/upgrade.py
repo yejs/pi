@@ -5,6 +5,10 @@ import os
 import sys
 import ftplib
 import filecmp
+from update import md5_encode
+
+web_root = 'http://192.168.152.144:8000/web/'
+local_root = '../test/'
 
 def Schedule(a,b,c):
     '''''
@@ -15,8 +19,67 @@ def Schedule(a,b,c):
     per = 100.0 * a * b / c
     if per > 100 :
         per = 100
-    print('%.2f%%' % per)
+    #print('%.2f%%' % per)
 
+def get_file(file):
+	file = file.replace('\\','/')
+	pos = file.rfind('/')
+	if pos>=0:
+		path = local_root + file[0:pos]
+		if not os.path.exists(path):
+			os.makedirs(path)
+			#print('makedirs:%s , web:%s' %(path, web_root + file))
+	str = web_root + file
+	str = str[0:7] + str[7:len(str)].replace('//','/')
+	#print(str)
+	urllib.request.urlretrieve(str, local_root + file, Schedule)
+
+def check_filelist():
+	old_file = local_root + 'old_filelist.txt'
+	if os.path.exists(old_file):
+		os.remove(old_file)
+		
+	os.rename(local_root + 'filelist.txt', old_file)
+	
+	fo = open(old_file, 'r')  
+	try:
+		buf = fo.read( )
+	finally:
+		fo.close( )
+	
+	get_file('filelist.txt')
+	fl = open(local_root + 'filelist.txt','r')  
+	
+	list_of_all_the_lines = fl.readlines( )
+
+	for line in list_of_all_the_lines:
+		va = line.split(' ')
+		f = va[0]
+		path = (local_root + f).replace('\\','/').replace('//','/')
+
+		if (buf.find(line) == -1) or (not os.path.exists(path)):
+			get_file(f)
+		'''
+		va = line.split(' ')
+		f = va[0]
+		path = (local_root + f).replace('\\','/').replace('//','/')
+		if os.path.exists(path):
+			
+			fo = open(path,'rb')  
+			try:
+				buf = fo.read( )
+			finally:
+				fo.close( )
+			value = md5_encode(buf)
+			print('file:%s, old:%s, new:%s' %(f, va[1], value))
+			if value != va[1]:
+				
+				get_file(f)
+		else:
+			get_file(f)
+		'''		
+	fl.close
+	
 #local = url.split('/')[0:-1]
 #local = os.path.join('./','setting.html')
 #urllib.request.urlretrieve(url,local,Schedule)
@@ -25,49 +88,7 @@ def Schedule(a,b,c):
 #x.report()
 #print(x.diff_files)
 
-
-class FTPSync(object):
-    def __init__(self):
-        #print(help(ftplib.FTP))
-        self.conn = ftplib.FTP('43.254.148.23', 'caiweijie', 'FZXr43zJejHGojpC5ewd')
-        self.conn.connect('43.254.148.23', 18021)
-        self.conn.cwd('/')        # 远端FTP目录
-        os.chdir('/data/')        # 本地下载目录
-    def get_dirs_files(self):
-        u''' 得到当前目录和文件, 放入dir_res列表 '''
-        dir_res = []
-        self.conn.dir('.', dir_res.append)
-        files = [f.split(None, 8)[-1] for f in dir_res if f.startswith('-')]
-        dirs = [f.split(None, 8)[-1] for f in dir_res if f.startswith('d')]
-        return (files, dirs)
-    def walk(self, next_dir):
-        print('Walking to', next_dir)
-        self.conn.cwd(next_dir)
-        try:
-            os.mkdir(next_dir)
-        except OSError:
-            pass
-        os.chdir(next_dir)
-        ftp_curr_dir = self.conn.pwd()
-        local_curr_dir = os.getcwd()
-        files, dirs = self.get_dirs_files()
-        print("FILES: ", files)
-        print("DIRS: ", dirs)
-        for f in files:
-            print(next_dir, ':', f)
-            outf = open(f, 'wb')
-            try:
-                self.conn.retrbinary('RETR %s' % f, outf.write)
-            finally:
-                outf.close()
-        for d in dirs:
-            os.chdir(local_curr_dir)
-            self.conn.cwd(ftp_curr_dir)
-            self.walk(d)
-    def run(self):
-        self.walk('.')
 def main():
-    f = FTPSync()
-    f.run()
+    check_filelist()
 if __name__ == '__main__':
     main()

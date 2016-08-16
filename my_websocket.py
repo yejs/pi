@@ -20,6 +20,7 @@ import time
 from data.data import *
 from data.g_data import GlobalVar
 		
+
 class WebSocket(tornado.websocket.WebSocketHandler):
     socket_handlers = set()
     def open(self):

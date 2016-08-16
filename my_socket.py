@@ -23,7 +23,6 @@ from lirc import LIRC
 from data.data import *
 from data.g_data import GlobalVar
 
-__all__ = ["Connection", "SocketServer"]
 
 class Connection(object):    
     heart_beat_timer = None
@@ -145,7 +144,7 @@ class Connection(object):
                 Connection.output_ex()
 
         else :
-            Connection.timer = threading.Timer(0.5, Connection.output_ex)#延时0.1秒输出
+            Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
             Connection.timer.start()
 
     def output_ex():

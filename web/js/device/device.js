@@ -24,7 +24,6 @@ window.onload = function(){
 	if(pos>=0){
 		dev_id = url.substr(pos+7);
 	}
-	
 	if(document.getElementById('lamp')){
 		if(dev_id == 'lamp'){
 		//	lamp.prototype = new device();
@@ -37,6 +36,7 @@ window.onload = function(){
 		else if(dev_id == 'air_conditioner'){
 			_device = new air_conditioner();
 		}
+		
 		else if(dev_id == 'tv'){
 			_device = new tv();
 		}

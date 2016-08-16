@@ -16,7 +16,8 @@ wdt reset
 __author__ = 'yejs'
 __version__ = '1.0'
 
-from myhandler import WebHandler, WebSocket
+from myhandler import WebHandler
+from my_websocket import WebSocket
 from my_socket import SocketServer, Connection
 from my_gpio import RPi_GPIO
 
@@ -30,7 +31,8 @@ import signal
 import logging
 
 from tornado.options import define, options
-define("port", default=8000, help="run on the given port", type=int)
+define("http_port", default=8000, help="run on the given port", type=int)
+define("websocket_port", default=5000, help="run on the given port", type=int)
 
 is_closing = False
 
@@ -64,10 +66,10 @@ if __name__ == "__main__":
         tornado.options.parse_command_line()
         signal.signal(signal.SIGINT, signal_handler)       
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-        http_server.listen(options.port)
+        http_server.listen(options.http_port)
         server = SocketServer()    
-        server.listen(5000)
-        print ("webserver 127.0.0.1:%s start..." % options.port)
+        server.listen(options.websocket_port)
+        print ("webserver 127.0.0.1:%s start..." % options.http_port)
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:
