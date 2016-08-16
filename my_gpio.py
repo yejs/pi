@@ -14,7 +14,7 @@ import json
 import base64
 import urllib
 import logging
-from data import _DEVICE_, _LAMP_ , _CURTAIN_, _AIR_CONDITIONER_
+from data.data import *
 
 class RPi_GPIO():
 	_is_exist = False;

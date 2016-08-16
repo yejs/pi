@@ -108,10 +108,11 @@ function dev_set()
 
 		if('input' == this.dev_id){//燃气检测、火警检测、温湿度检测、门窗检测等输入设备
 			
-			var j = 1, index = 0;
+			var j = 0, index = 0;
 			dev_id = input_titles[index];
 
 			for(var i=1;i<20;i++){
+				j++;
 				if(document.getElementById(i.toString())){
 					if(!_DEVICE_[dev_id].hasOwnProperty(j.toString())){
 						
@@ -129,7 +130,6 @@ function dev_set()
 							break;
 						}
 					}
-					j++;
 				}
 			}
 			return null;

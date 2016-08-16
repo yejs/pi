@@ -17,8 +17,8 @@ import logging
 import threading
 import time
 
-from data import *
-from g_data import GlobalVar
+from data.data import *
+from data.g_data import GlobalVar
 		
 class WebSocket(tornado.websocket.WebSocketHandler):
     socket_handlers = set()

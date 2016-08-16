@@ -20,8 +20,8 @@ import time
 from my_gpio import RPi_GPIO
 from my_websocket import WebSocket
 from lirc import LIRC
-from data import *
-from g_data import GlobalVar
+from data.data import *
+from data.g_data import GlobalVar
 
 __all__ = ["Connection", "SocketServer"]
 
