@@ -261,10 +261,10 @@ function dev_set()
 			_DEVICE_[dev_id][id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
 		
 		if(dev_id == 'humiture'){
-			_DEVICE_[dev_id][id]['t_min'] = document.getElementById('t_min').value;
-			_DEVICE_[dev_id][id]['t_max'] = document.getElementById('t_max').value;
-			_DEVICE_[dev_id][id]['h_min'] = document.getElementById('h_min').value;
-			_DEVICE_[dev_id][id]['h_max'] = document.getElementById('h_max').value;
+			_DEVICE_[dev_id][id]['t_min'] = parseFloat(document.getElementById('t_min').value);
+			_DEVICE_[dev_id][id]['t_max'] = parseFloat(document.getElementById('t_max').value);
+			_DEVICE_[dev_id][id]['h_min'] = parseFloat(document.getElementById('h_min').value);
+			_DEVICE_[dev_id][id]['h_max'] = parseFloat(document.getElementById('h_max').value);
 		}
 		
 		param = "device_set=" + (JSON.stringify(_DEVICE_[dev_id][id])) + "&dev_id=" + dev_id + "&id=" + id;
