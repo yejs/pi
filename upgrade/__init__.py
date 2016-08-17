@@ -1,1 +1,1 @@
-__all__ = ["WebHandler", "WebSocket", "Connection", "RPi_GPIO", "SocketServer"]
+__all__ = ["upgrade", "update"]
