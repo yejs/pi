@@ -35,7 +35,7 @@ import upgrade.upgrade
 
 from tornado.options import define, options
 define("http_port", default=8000, help="run on the given port", type=int)
-define("websocket_port", default=5000, help="run on the given port", type=int)
+define("socket_port", default=5000, help="run on the given port", type=int)
 
 is_closing = False
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
         http_server.listen(options.http_port)
         server = SocketServer()    
-        server.listen(options.websocket_port)
+        server.listen(options.socket_port)
         print ("webserver 127.0.0.1:%s start..." % options.http_port)
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()

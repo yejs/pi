@@ -84,15 +84,26 @@ class Connection(object):
             if obj and obj.get('event') == 'report':    
                 Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                 WebSocket.broadcast_the_device(obj['dev_id']);
-                #print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
+                print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
                 #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
             elif obj and obj.get('event') == 'heart_beat':    
                 pass#print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
-            print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+            if len(data) == 0:
+                print("recv from %s: 0" % (self._address[0]))  
+                on_close()
+                return
+            #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
+		
+    def do_write(self, msg):
+        if self._stream.closed():
+            print("do_write: closed")  
+            on_close()
+        else:
+            self._stream.write(msg.encode())
 		
     '''
     def broadcast_messages(self, data):    
@@ -130,7 +141,8 @@ class Connection(object):
             param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": "repeat", "item": item}
         else:
             param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": value, "item": item}
-            Connection.last_param = param
+            if dev_id.find('tv') != -1:
+                Connection.last_param = param
 			
         Connection.output_param.append(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
 		
@@ -235,25 +247,26 @@ class Connection(object):
                 print('value:%s' %(value))
                 return
 				
+            is_raw = Connection.lirc_tv.is_raw()
             if value.find('repeat') != -1:#电视连续按键处理
                 value = Connection.lirc_tv.remote['repeat'].replace('  ', ' ')
-                msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, True)
             else:#非连续按键
                 value = Connection.lirc_tv.getKey(LIRC_KEY) if LIRC_KEY else None
-                is_raw = Connection.lirc_tv.is_raw()
-			
+
                 if value == None:
                     print('%s is not find the key %s in this lircd.conf file!!!!!!!!' %(value, LIRC_KEY))
                     return
-                msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
         #print(msg)
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 try:
-                    conn._stream.write(msg.encode())
+                    conn.do_write(msg)
                 except:
                     logging.error('Error sending message', exc_info=True)	
 					
+
+			
     def do_disarming(): 
         Disarming = 'false'
         mode = GlobalVar.get_mode()
@@ -264,7 +277,7 @@ class Connection(object):
 
         for conn in Connection.clients:
             try:
-                conn._stream.write(msg.encode())
+                conn.do_write(msg)
             except:
                 logging.error('Error sending message', exc_info=True)	
 				
@@ -280,7 +293,7 @@ class Connection(object):
 
             for conn in Connection.clients:
                 try:
-                    conn._stream.write(msg.encode())
+                    conn.do_write(msg)
                 except:
                     logging.error('Error sending message', exc_info=True)	
 				
