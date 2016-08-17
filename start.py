@@ -21,22 +21,24 @@ def signal_handler(signum, frame):
 
 def open(name):
     programPath = sys.path[0] +  name
+	#注意！如果传递带参数的命令，则需要在Popen中的列表内填写“参数”，  
+    #例如本例传递命令是： python IOT.py
     prog = subprocess.Popen(['python', programPath], shell=False, stdout=True)  
     print('Current PID: ', prog.pid)  
     return prog
 	
 if __name__ == '__main__' :  
     signal.signal(signal.SIGINT, signal_handler)       
-    prog = open('/IOT.py')
-    #注意！如果传递带参数的命令，则需要在Popen中的列表内填写“参数”，  
-    #例如本例传递命令是： python IOT.py
+    
     try:
+        prog = open('/IOT.py')
+		
         while (True):   
             time.sleep(1)  
             retCode = subprocess.Popen.poll(prog)   
 
             restart = False
-            if time.time() - check_time > 60:#60分钟检测一次升级版本filelist
+            if time.time() - check_time > 10:#60分钟检测一次升级版本filelist
                 check_time = time.time()
                 if upgrade.upgrade.doUpgrade():#更新后，重启IOT 主进程
                     if platform.system().find('Linux')>=0:
