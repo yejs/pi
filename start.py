@@ -38,7 +38,7 @@ if __name__ == '__main__' :
             retCode = subprocess.Popen.poll(prog)   
 
             restart = False
-            if time.time() - check_time > 10:#60分钟检测一次升级版本filelist
+            if time.time() - check_time > 600:#10分钟检测一次升级版本filelist
                 check_time = time.time()
                 if upgrade.upgrade.doUpgrade():#更新后，重启IOT 主进程
                     if platform.system().find('Linux')>=0:
