@@ -1,3 +1,4 @@
+
 class GlobalVar:
 	mode = 'normal'
 	last_mode = 'normal'
@@ -6,6 +7,7 @@ class GlobalVar:
 	air_conditioner_id = '1'
 	tv_id = '1'
 	plugin_id = '1'
+	Serial_No = 1#用户序列号
 	def set_mode(value):
 		GlobalVar.mode = value
 	def get_mode():
@@ -34,3 +36,5 @@ class GlobalVar:
 		GlobalVar.plugin_id = value
 	def get_plugin_id():
 		return GlobalVar.plugin_id
+	def get_Serial_No():
+		return GlobalVar.Serial_No
