@@ -94,12 +94,14 @@ function header(index)
 		this.canvas.height = this.canvasReport.height = this.rect.height;
 		this.contextReport = this.canvasReport.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
-
-		this.doDraw();
+		this.doDraw();	
 	}
 
 	this.doDraw = function()
 	{
+		if(!this.ctx)
+			return;
+		
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);

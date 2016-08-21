@@ -67,7 +67,7 @@ src:url("http://www.apple.com/wss/fonts/PingHei/v1/PingHei-light.woff") format("
 /* ul li以横排显示 */
 div.menu 
 {
-    overflow:auto;position:relative; width: 100%;max-width:100%;height:auto;
+    overflow:auto;position:relative; width: 100%;max-width:1080px;height:auto;
     margin: 0px; /* 与外界元素的距离为0 */
     padding: 0px 0px 0px 1px; /* 与内部元素的距离为0 */
 	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;
