@@ -84,18 +84,21 @@ class Connection(object):
             if obj and obj.get('event') == 'report':    
                 Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                 WebSocket.broadcast_the_device(obj['dev_id']);
+                try:
+                    self.do_write("{\"event\":\"ack\"}")
+                except:
+                    logging.error('Error sending message', exc_info=True)	
                 print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
             elif obj and obj.get('event') == 'ack':    
                 WebSocket.broadcast_messages(data[:-1].decode());
-                #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+                #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
             elif obj and obj.get('event') == 'heart_beat':    
                 pass#print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
+            print("recv from %s: 0" % (self._address[0]))  
             if len(data) == 0:
-                print("recv from %s: 0" % (self._address[0]))  
                 on_close()
                 return
-            #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
         self.read_message()
 		
     def do_write(self, msg):
