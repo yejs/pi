@@ -294,7 +294,7 @@ class Connection(object):
             for conn in Connection.clients:
                 try:
                     conn.do_write(msg)
-                    print(msg)
+                    #print(msg)
                 except:
                     logging.error('Error sending message', exc_info=True)	
 				
