@@ -201,7 +201,7 @@ class WebHandler(tornado.web.RequestHandler):
 			
         if None == _CURTAIN_.get(mode):		
             return
-    
+
         '''
         TODO:窗帘模式指令下切换有个问题，如果用户在当前模式下开合窗帘过程中按下stop停止指令，窗帘将会停在某个中间状态，
         当用户按下模式指令从别的模式切换回该模式时，会自动执行最后stop指令前的开合指令到结束而不会回到用户态的中间状态,
@@ -219,12 +219,12 @@ class WebHandler(tornado.web.RequestHandler):
                 else :
                     continue
                 WebHandler.output('curtain', id, 'command', command)
-				
-                length = float(_DEVICE_['curtain'][id]['length']);
-                n = float(abs(last_progress - progress)*length/100)/0.2
-                #print("last_progress:%s progress:%s length:%s, f:%s" %(last_progress, progress, length, n))
-                timer = threading.Timer(n, WebHandler.output, ('curtain', id, 'command', 'stop', ))#延时停止输出
-                timer.start()
+                if _DEVICE_['curtain'][id].get('length'):
+                    length = float(_DEVICE_['curtain'][id]['length']);
+                    n = float(abs(last_progress - progress)*length/100)/0.2
+                    #print("last_progress:%s progress:%s length:%s, f:%s" %(last_progress, progress, length, n))
+                    timer = threading.Timer(n, WebHandler.output, ('curtain', id, 'command', 'stop', ))#延时停止输出
+                    timer.start()
         else:
             WebHandler.output('curtain', id, key, value)
 

@@ -28,6 +28,7 @@ class Connection(object):
     heart_beat_timer = None
     clients = set()    
     output_param = list()#{"ip": "", "pin": "", "item": None}
+    last_msg = None
     time_tick = 0
     timer = None
     lirc_air = None
@@ -39,20 +40,22 @@ class Connection(object):
         Connection.clients.add(self)   
         self._stream = stream    
         self._address = address    
+        self.heart_beat_ack = True    
+        self.heart_beat_ack_timer = None
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         if Connection.lirc_air == None:
             Connection.lirc_air = LIRC("conf/lircd_air.conf")
             Connection.lirc_tv = LIRC("conf/tv.conf")
         print("New connection: %s, " % address[0])
-        Connection.do_disarming()#根据场景模式撤防、布防处理
+		
+        Connection.timer = threading.Timer(0.1, Connection.do_disarming)#延时0.1秒输出
+        Connection.timer.start()
+        #Connection.do_disarming()#根据场景模式撤防、布防处理
 		
         if None == Connection.heart_beat_timer:
             Connection.heart_beat()             
   
-    def test():    
-        pass#print(json.dumps(_LAMP_['normal']['1']))
-		
     def read_message(self):    
         self._stream.read_bytes(1024, self.doRecv, partial=True)
 
@@ -90,18 +93,18 @@ class Connection(object):
                 WebSocket.broadcast_messages(data[:-1].decode());
                 #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
             elif obj and obj.get('event') == 'heart_beat':    
-                pass#print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+                self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
         else:
             print("recv from %s: 0" % (self._address[0]))  
             if len(data) == 0:
-                on_close()
+                self.on_close()
                 return
         self.read_message()
 		
     def do_write(self, msg):
         if self._stream.closed():
             print("do_write: closed")  
-            on_close()
+            self.on_close()
         else:
             self._stream.write(msg.encode())
 		
@@ -112,6 +115,8 @@ class Connection(object):
             conn._stream.write(data)  	
     '''
     def on_close(self):    
+        if self not in Connection.clients:
+            return
         Connection.clients.remove(self)    
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
         mode = GlobalVar.get_mode()
@@ -146,7 +151,10 @@ class Connection(object):
 			
         Connection.output_param.append(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
 		
-
+        if Connection.timer:
+            Connection.timer.cancel()
+            Connection.timer = None
+			
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
         if time.time() - Connection.time_tick > 2 or (time.time() - Connection.time_tick > 0.5 and len(Connection.output_param) == 1):
             if dev_id.find('tv') != -1 and value.isdigit() and int(value) >=0 and int(value)<=9:#如果是电视的首个数字键则延时0.5秒，否则第二个数字键来不及按被误当作两个独立的按键输出
@@ -161,17 +169,20 @@ class Connection(object):
 
     def output_ex():
         Connection.time_tick = time.time()
-		
-        if len(Connection.output_param) == 0 and Connection.timer:
-            Connection.timer.cancel()
-            Connection.timer = None
-            return;
-
         if Connection.timer:
             Connection.timer.cancel()
+            Connection.timer = None
+			
+        if len(Connection.output_param) == 0:
+            return;
+		
+        for param in Connection.output_param:
+            Connection.output_param.remove(param)
+            break
+			
         Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
         Connection.timer.start()
-        param = Connection.output_param.pop()
+        #param = Connection.output_param.pop()
         dev_id = param['dev_id']
         ip = param['ip']
         pin = param['pin']
@@ -281,6 +292,11 @@ class Connection(object):
             except:
                 logging.error('Error sending message', exc_info=True)	
 				
+    def heart_beat_ack_func(self):
+        if not self.heart_beat_ack:
+            self.heart_beat_ack = True
+            print('heart_beat has no ack: %s!' %Connection.last_msg)
+		
     #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
     def heart_beat():
         if Connection.heart_beat_timer != None:
@@ -289,11 +305,15 @@ class Connection(object):
         Connection.heart_beat_timer.start()
 
         if time.time() - Connection.time_tick > 5:
-            msg = "{\"event\":\"heart_beat\"}"
-
+            msg = "{\"event\":\"heart_beat\", \"time\":\"%d\"}" %time.time()
+            Connection.last_msg = msg
             for conn in Connection.clients:
                 try:
-                    conn.do_write(msg)
+                    if conn.heart_beat_ack:
+                        conn.do_write(msg)
+                        conn.heart_beat_ack = False
+                        conn.heart_beat_ack_timer = threading.Timer(3, conn.heart_beat_ack_func)#5秒心跳输出
+                        conn.heart_beat_ack_timer.start()
                     #print(msg)
                 except:
                     logging.error('Error sending message', exc_info=True)	
