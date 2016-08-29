@@ -28,7 +28,7 @@ class Connection(object):
     heart_beat_timer = None
     clients = set()    
     output_param = list()#{"ip": "", "pin": "", "item": None}
-    last_msg = None
+    last_heart_beat_msg = None
     time_tick = 0
     timer = None
     lirc_air = None
@@ -40,8 +40,11 @@ class Connection(object):
         Connection.clients.add(self)   
         self._stream = stream    
         self._address = address    
-        self.heart_beat_ack = True    
-        self.heart_beat_ack_timer = None
+        self.heart_beat_ack = True    			#心跳应答标志位
+        self.heart_beat_ack_timer = None		#心跳应答超时定时器
+        self.write_success = True	  			#发送成功标志位
+        self.write_ack_timer = None	  			#发送超时定时器
+        self.last_write_msg = None
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         if Connection.lirc_air == None:
@@ -82,38 +85,57 @@ class Connection(object):
                 _DEVICE_[dev_id][id]['status'] = status
 
     def doRecv(self, data):    
-        if data[:-1].decode().find('{') == 0 and data[:-1].decode().find('}') == len(data[:-1].decode())-1:
-            obj = json.loads(data[:-1].decode()) 
-            if obj and obj.get('event') == 'report':    
-                Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
-                WebSocket.broadcast_the_device(obj['dev_id']);
-
-                print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
-            elif obj and obj.get('event') == 'ack':    
-                WebSocket.broadcast_messages(data[:-1].decode());
-                #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
-            elif obj and obj.get('event') == 'heart_beat':    
-                self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+        if len(data) == 0:
+            self.on_close()
+            return
+			
+        if data[:].decode().find('{') == 0 and data[:].decode().find('}'):# == len(data[:].decode())-1:
+            obj = json.loads(data[:].decode()) 
+            if obj:
+                if obj.get('event') == 'report':    
+                    Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
+                    WebSocket.broadcast_the_device(obj['dev_id']);
+                    #print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
+                elif obj.get('event') == 'ack':    
+                    WebSocket.broadcast_messages(data[:-1].decode());
+                    #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+                elif obj.get('event') == 'heart_beat':    
+                    self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+                    if self.heart_beat_ack_timer:
+                        self.heart_beat_ack_timer.cancel()
+                        self.heart_beat_ack_timer = None
         else:
-            print("recv from %s: 0" % (self._address[0]))  
-            if len(data) == 0:
-                self.on_close()
-                return
+            print("recv from %s: %s" % (self._address[0], data[:].decode()))  
+
         self.read_message()
+		
+    def do_write_callback(self):
+        self.write_success = True
+        if self.write_ack_timer:
+            self.write_ack_timer.cancel()
+            self.write_ack_timer = None
+		
+    def do_write_overtime(self):
+        self.write_success = True
+        if self.last_write_msg:
+            self.do_write(self.last_write_msg)
+        print('do_write overtime')
 		
     def do_write(self, msg):
         if self._stream.closed():
             print("do_write: closed")  
             self.on_close()
+            return
+        elif self.write_success:
+            self._stream.write(msg.encode(), self.do_write_callback)
+            self.write_success = False
+            self.last_write_msg = None
         else:
-            self._stream.write(msg.encode())
+            self.last_write_msg = msg
+			
+        self.write_ack_timer = threading.Timer(1, self.do_write_overtime)#发送超时处理
+        self.write_ack_timer.start()
 		
-    '''
-    def broadcast_messages(self, data):    
-        print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
-        for conn in Connection.clients:    
-            conn._stream.write(data)  	
-    '''
     def on_close(self):    
         if self not in Connection.clients:
             return
@@ -167,22 +189,27 @@ class Connection(object):
             Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
             Connection.timer.start()
 
+    def front(sets):
+        if len(sets) == 0:
+            return None;
+		
+        for param in sets:
+            sets.remove(param)
+            return param
+			
     def output_ex():
         Connection.time_tick = time.time()
         if Connection.timer:
             Connection.timer.cancel()
             Connection.timer = None
 			
-        if len(Connection.output_param) == 0:
+        #param = Connection.output_param.pop()
+        param = Connection.front(Connection.output_param)
+        if param == None:
             return;
-		
-        for param in Connection.output_param:
-            Connection.output_param.remove(param)
-            break
-			
+
         Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
         Connection.timer.start()
-        #param = Connection.output_param.pop()
         dev_id = param['dev_id']
         ip = param['ip']
         pin = param['pin']
@@ -292,10 +319,11 @@ class Connection(object):
             except:
                 logging.error('Error sending message', exc_info=True)	
 				
-    def heart_beat_ack_func(self):
+	#收到心跳包应答超时处理
+    def heart_beat_overtime(self):
         if not self.heart_beat_ack:
             self.heart_beat_ack = True
-            print('heart_beat has no ack: %s!' %Connection.last_msg)
+            print('heart_beat has no ack: %s!' %Connection.last_heart_beat_msg)
 		
     #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
     def heart_beat():
@@ -306,13 +334,13 @@ class Connection(object):
 
         if time.time() - Connection.time_tick > 5:
             msg = "{\"event\":\"heart_beat\", \"time\":\"%d\"}" %time.time()
-            Connection.last_msg = msg
+            Connection.last_heart_beat_msg = msg
             for conn in Connection.clients:
                 try:
                     if conn.heart_beat_ack:
                         conn.do_write(msg)
                         conn.heart_beat_ack = False
-                        conn.heart_beat_ack_timer = threading.Timer(3, conn.heart_beat_ack_func)#5秒心跳输出
+                        conn.heart_beat_ack_timer = threading.Timer(3, conn.heart_beat_overtime)#5秒心跳应答超时处理
                         conn.heart_beat_ack_timer.start()
                     #print(msg)
                 except:
