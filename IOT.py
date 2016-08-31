@@ -10,8 +10,8 @@
   https://github.com/zzmp/juliusjs?utm_source=ourjs.com
   
   http://wiki.dfrobot.com.cn/index.php/(SKU:DFR0177)%E4%B8%AD%E6%96%87%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB%E6%A8%A1%E5%9D%97Voice_Recognition
+http://www.waveshare.net/wiki/LD3320_Board_(B)
 
-wdt reset
 """
 __author__ = 'yejs'
 __version__ = '1.0'
