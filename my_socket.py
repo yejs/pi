@@ -89,7 +89,7 @@ class Connection(object):
             self.on_close()
             return
 			
-        if data[:].decode().find('{') == 0 and data[:].decode().find('}'):# == len(data[:].decode())-1:
+        if data[:].decode().find('{') == 0 and (data[:].decode().find('}') == len(data[:].decode())-1 or data[:].decode().find('}') == len(data[:].decode())-2):
             obj = json.loads(data[:].decode()) 
             if obj:
                 if obj.get('event') == 'report':    
