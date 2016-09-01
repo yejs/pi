@@ -95,12 +95,12 @@ class Connection(object):
                 if obj.get('event') == 'report':    
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
-                    #print("recv from %s: %s" % (self._address[0], data[:-1].decode())) 
+                    print("recv from %s: %s" % (self._address[0], data[:].decode())) 
                 elif obj.get('event') == 'ack':    
                     WebSocket.broadcast_messages(data[:-1].decode());
-                    #print("recv from %s: %s" % (self._address[0], data[:-1].decode()))  
+                    #print("recv from %s: %s" % (self._address[0], data[:].decode()))  
                 elif obj.get('event') == 'heart_beat':    
-                    self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:-1].decode()))  
+                    self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:].decode()))  
                     if self.heart_beat_ack_timer:
                         self.heart_beat_ack_timer.cancel()
                         self.heart_beat_ack_timer = None
