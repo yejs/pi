@@ -45,6 +45,9 @@ window.onresize = function(){
 		_header.onresize();
 	if(_footer)
 		_footer.onresize();
+	
+//	window.resizeTo(screen.width, screen.height);
+//    window.moveTo(0, 0);
 }
 
 onNewsTitle = function(i){

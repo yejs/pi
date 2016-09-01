@@ -20,7 +20,7 @@ window.onload = function(){
 		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner')
 			document.getElementById('d_brand').style.display = 'block';
 
-		if(_dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input')
+		if(_dev_set.dev_id == 'lamp' || _dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input')
 			document.getElementById('d_GPIO').style.display = 'none';
 	}
 }
@@ -162,7 +162,7 @@ function dev_set()
 		if(_DEVICE_[dev_id][id].hasOwnProperty('pin')){
 			value = _DEVICE_[dev_id][id]['pin'];
 			var obj = document.getElementById('GPIO'); 
-			for(var i=0;i<8;i++){
+			for(var i=0;i<2;i++){
 				if(obj.options[i].value.indexOf(value)>=0){
 					obj.selectedIndex = i;
 					break;
