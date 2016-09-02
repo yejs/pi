@@ -29,6 +29,7 @@ function header(index)
 	this.arrayBtn = new Array();
 	this.city = null;
 	this.weather = null;
+	this.last_id = {'dev_id':null, 'id':'1'};
 	
 	this.doUI = function(show)
 	{
@@ -153,12 +154,23 @@ function header(index)
 				dev_id = 'window';
 		}
 		if(!dev_id){//没有找到打开的门、窗（所有门窗都处于关闭状态）
-			dev_id = 'door';
-			id = '1';
-			var title = '所有门窗：';
+			if(this.last_id.dev_id){
+				dev_id = this.last_id.dev_id;
+				id = this.last_id.id;
+				var title = _DEVICE_[dev_id][id].name + '：';
+			}
+			else{
+				dev_id = 'door';
+				id = '1';
+				var title = '所有门窗：';
+			}
 		}
-		else
+		else{
+			this.last_id.dev_id = dev_id;
+			this.last_id.id = id;
 			var title = _DEVICE_[dev_id][id].name + '：';
+		}
+		
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText(title, x - ctx.measureText(title).width, 36);
