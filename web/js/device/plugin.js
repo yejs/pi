@@ -19,7 +19,7 @@ function plugin()
 
 	}
 	
-	this.docommandIt = function(id, commandEx){
+	this.doParam = function(id, commandEx){
 		if(commandEx == undefined){
 			if(_PLUGIN_[mode][id]['status'] === 'on')
 				command = 'off';

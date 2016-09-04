@@ -113,9 +113,7 @@ window.addEventListener('message',function(e){
 	if('getmode'===e.data.msg){
 		window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
 	}
-	else if('doSpeech'===e.data.msg){//这个是测试处理
-		doSpeech(e.data.data);
-	}
+
 },false);
 
 	//语音识别处理
@@ -151,6 +149,19 @@ window.addEventListener('message',function(e){
 			else if( json.dev_id === "tv" )
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if( json.dev_id === "plugin" )
+				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "asr" ){//自动语音识别
+			var speech = json.data;
+			if(speech.indexOf('灯') >=0)
+				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if(speech.indexOf('窗帘') >=0)
+				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if(speech.indexOf('空调') >=0)
+				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if(speech.indexOf('电视') >=0 || speech.indexOf('频道') >=0 || speech.indexOf('台') >=0)
+				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if(speech.indexOf('插座') >=0)
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 		else if( json.event === "device" || json.event === "the_device"){

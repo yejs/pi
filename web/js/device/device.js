@@ -73,29 +73,11 @@ refresh = function(){
 	}
 }
 
-//这 里是测试，发消息到主框架，主框架再发消息回来处理
-dotest = function(){
-	var speech;
-	if('lamp' == dev_id)
-		speech = '关闭灯1';
-	else if('curtain' == dev_id)
-		speech = '打开窗帘1';
-	else if('air_conditioner' == dev_id)
-		speech = '打开空调1';
-	else if('tv' == dev_id)
-		speech = '打开电视1';
-	else if('plugin' == dev_id)
-		speech = '打开插座1';
-	window.parent.postMessage({'msg':'doSpeech', 'data':'八百二十三频道'},'*');
-}
 
 window.addEventListener('message',function(e){
 	if('onmessage'===e.data.msg){
 		_device.onmessage(e.data.data);
 		//console.log(e.data.data);
-	}
-	else if('doSpeech'===e.data.msg){//主框架安装语音识别包，识别到语音后发送语音指令到终端处理
-		_device.doSpeech(e.data.data);
 	}
 	else if( 'header_ui' === e.data.msg ){
 		_device.onresize();
@@ -169,7 +151,7 @@ function device()
 
 	//终端语音识别处理
 	this.doSpeech = function(speech){
-		console.log('电视频道调节指令:' + speech);
+		console.log('语音识别处理指令:' + speech);
 		if(speech.indexOf('开')>=0 || speech.indexOf('关')>=0){//开关指令
 			for(var i=0;i<20;i++){
 				if(document.getElementById(i.toString())){
@@ -431,6 +413,9 @@ function device()
 		//	console.log('ack:' + JSON.stringify(json));
 			return;
 		}
+		else if( json.event === "asr" ){//自动语音识别
+			this.doSpeech(json.data);
+		}
 		else if( json.event === "device" || json.event === "the_device"){
 		//	console.log('device:' + JSON.stringify(json));
 			if(json.event === "device")
@@ -564,7 +549,7 @@ function device()
 	}
 	this.docommand = function(id, commandEx){
 
-		param = this.docommandIt(id, commandEx);
+		param = this.doParam(id, commandEx);
 		if(!param)
 			return;
 

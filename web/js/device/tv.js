@@ -374,7 +374,7 @@ function tv()
 		}
 	}
 	
-	this.docommandIt = function(id, commandEx){
+	this.doParam = function(id, commandEx){
 		if(commandEx == undefined){
 
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(id).innerText + '\"调节';

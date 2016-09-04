@@ -95,6 +95,7 @@ class Connection(object):
                 if obj.get('event') == 'report':    
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
+                    self.do_write("{\"event\":\"ack\"}")
                     print("recv from %s: %s" % (self._address[0], data[:].decode())) 
                 elif obj.get('event') == 'ack':    
                     WebSocket.broadcast_messages(data[:-1].decode());
@@ -119,11 +120,9 @@ class Connection(object):
         self.write_success = True
         if self.last_write_msg:
             self.do_write(self.last_write_msg)
-        print('do_write overtime')
 		
     def do_write(self, msg):
         if self._stream.closed():
-            print("do_write: closed")  
             self.on_close()
             return
         elif self.write_success:
@@ -132,7 +131,9 @@ class Connection(object):
             self.last_write_msg = None
         else:
             self.last_write_msg = msg
-			
+
+        if self.write_ack_timer:
+            self.write_ack_timer.cancel()			
         self.write_ack_timer = threading.Timer(1, self.do_write_overtime)#发送超时处理
         self.write_ack_timer.start()
 		
@@ -323,16 +324,16 @@ class Connection(object):
     def heart_beat_overtime(self):
         if not self.heart_beat_ack:
             self.heart_beat_ack = True
-            print('heart_beat has no ack: %s!' %Connection.last_heart_beat_msg)
+            #print('heart_beat has no ack: %s!' %Connection.last_heart_beat_msg)
 		
     #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
     def heart_beat():
         if Connection.heart_beat_timer != None:
             Connection.heart_beat_timer.cancel()
-        Connection.heart_beat_timer = threading.Timer(5, Connection.heart_beat)#5秒心跳输出
+        Connection.heart_beat_timer = threading.Timer(10, Connection.heart_beat)#10秒心跳输出
         Connection.heart_beat_timer.start()
 
-        if time.time() - Connection.time_tick > 5:
+        if time.time() - Connection.time_tick > 10:
             msg = "{\"event\":\"heart_beat\", \"time\":\"%d\"}" %time.time()
             Connection.last_heart_beat_msg = msg
             for conn in Connection.clients:
@@ -340,6 +341,8 @@ class Connection(object):
                     if conn.heart_beat_ack:
                         conn.do_write(msg)
                         conn.heart_beat_ack = False
+                        if conn.heart_beat_ack_timer:
+                            conn.heart_beat_ack_timer.cancel()
                         conn.heart_beat_ack_timer = threading.Timer(3, conn.heart_beat_overtime)#5秒心跳应答超时处理
                         conn.heart_beat_ack_timer.start()
                     #print(msg)

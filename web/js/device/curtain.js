@@ -128,7 +128,7 @@ function curtain()
 		ctx.drawImage(this.canvasImage, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h, this.bar1.x + this.bar1.width - w, this.bar1.y + offset, w, h);
 	}
 	
-	this.docommandIt = function(id, commandEx){
+	this.doParam = function(id, commandEx){
 		if(commandEx == undefined){
 			
 			if(this.Progress.timer)

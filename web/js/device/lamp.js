@@ -129,7 +129,7 @@ function lamp()
 		ctx.fill();
 	}
 	
-	this.docommandIt = function(id, commandEx){
+	this.doParam = function(id, commandEx){
 		if(commandEx == undefined){
 			if(_LAMP_[mode][id]['status'] === 'on'){
 				if(this.id != id){
