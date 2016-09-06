@@ -53,6 +53,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         WebSocket.broadcast_messages(str1) 
 		
     def broadcast_the_device(dev_id):
+        if _DEVICE_.get(dev_id) == None:
+            return
         str1 = '{\"event\": \"the_device\", \"data\":'
         str1 += json.dumps(_DEVICE_[dev_id])
         str1 += ', \"dev_id\":\"'

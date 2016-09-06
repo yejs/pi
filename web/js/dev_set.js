@@ -42,7 +42,7 @@ function dev_set()
 	this.id = '1';
 
 
-	var input_titles = ["door", "window", "humiture", "flammable", "fire"];
+	var input_titles = ["door", "window", "humiture", "flammable", "fire", "ir_in"];
 	
 		//websocket 处理函数
 	this.onmessage = function(evt){
@@ -62,10 +62,8 @@ function dev_set()
 					for(var i=0;i<20;i++){
 						if(document.getElementById(i.toString())){
 							
-							if(!_DEVICE_[_dev_set.dev_id].hasOwnProperty(i.toString())){
+							if(!_DEVICE_[_dev_set.dev_id].hasOwnProperty(i.toString()))
 								document.getElementById(i.toString()).style.display = 'none';
-								
-							}
 							else
 								document.getElementById(i.toString()).innerText = _DEVICE_[_dev_set.dev_id][i.toString()]['name'];	
 						}
