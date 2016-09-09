@@ -33,6 +33,20 @@ window.onload = function(){
 var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
+	/*	if(!document.getElementById(titles[i])){
+			var wrap=document.getElementById("wrap");	
+			var div = create_element(wrap, 'div', null, titles[i], null);
+			var myframe = create_element(div, 'iframe', 'myframe', null, null);
+			myframe.setAttribute("name", 'f' + titles[i]);
+			if('scene' == titles[i])
+				myframe.setAttribute("src", 'scene.html?param=work');
+			else if('video' == titles[i])
+				myframe.setAttribute("src", '');
+			else
+				myframe.setAttribute("src", 'device.html?dev_id=' + titles[i]);
+
+			window.frames['f' + titles[i]].postMessage({'msg':'onmessage' , 'data':str},'*');
+		}*/
 		if(titles[i] === title)
 			document.getElementById(titles[i]).style.display="block";
 		else
@@ -65,32 +79,35 @@ onNewsTitle = function(i){
 			a.style.background = 'transparent';
 		}
 	}
-	var news=document.getElementById("video");
-	var elem_child = news.getElementsByTagName("iframe"); 
+	
 	showPage(titles[i]);
 	
-	if('tv' != titles[i]){
-		document.getElementById("div_footer_btn").style.display = 'none';
-	}
-	else{
-		document.getElementById("div_footer_btn").style.display = 'block';
+	var news=document.getElementById("video");
+	if(news){
+		var elem_child = news.getElementsByTagName("iframe"); 
+		if(elem_child){
+				if('video' != titles[i]){
+				if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
+					elem_child[0].src = "fake.html";
+					
+				window.frames['f' + titles[i]].window.refresh();
+			}
+			else if('video' == titles[i]){//video
+				var src = window.location.host;
+				var npos = src.indexOf(":");
+
+				if(npos >= 0)
+					src = src.substr(0,npos);
+				src += ":8080/javascript_simple.html";
+				elem_child[0].src = "http://" + src;
+			}
+		}
 	}
 	
-	if('video' != titles[i]){
-		if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
-			elem_child[0].src = "fake.html";
-			
-		window.frames['f' + titles[i]].window.refresh();
-	}
-	else if('video' == titles[i]){//video
-		var src = window.location.host;
-		var npos = src.indexOf(":");
-
-		if(npos >= 0)
-			src = src.substr(0,npos);
-		src += ":8080/javascript_simple.html";
-		elem_child[0].src = "http://" + src;
-	}
+	if('tv' != titles[i])
+		document.getElementById("div_footer_btn").style.display = 'none';
+	else
+		document.getElementById("div_footer_btn").style.display = 'block';
 }
 
 doShowNumber = function()
@@ -110,10 +127,12 @@ window.addEventListener('message',function(e){
 	if('http://' + window.location.host !== e.origin)
 		return;
 		
-	if('getmode'===e.data.msg){
+	if('getmode'===e.data.msg && window.frames['fscene']){
 		window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
 	}
-
+	else if('send'===e.data.msg){
+		ws.send(e.data.data)
+	}
 },false);
 
 	//语音识别处理
@@ -140,28 +159,28 @@ window.addEventListener('message',function(e){
 			return;
 		
 		if( json.event === "ack" ){
-			if( json.dev_id === "lamp" )
+			if( json.dev_id === "lamp" && window.frames['flamp'])
 				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if( json.dev_id === "curtain" )
+			else if( json.dev_id === "curtain" && window.frames['flamp'] )
 				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if( json.dev_id === "air_conditioner" )
+			else if( json.dev_id === "air_conditioner"  && window.frames['flamp'])
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if( json.dev_id === "tv" )
+			else if( json.dev_id === "tv"  && window.frames['flamp'])
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if( json.dev_id === "plugin" )
+			else if( json.dev_id === "plugin"  && window.frames['flamp'])
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 		else if( json.event === "asr" ){//自动语音识别
 			var speech = json.data;
-			if(speech.indexOf('灯') >=0)
+			if(speech.indexOf('灯') >=0 && window.frames['flamp'])
 				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if(speech.indexOf('窗帘') >=0)
+			else if(speech.indexOf('窗帘') >=0  && window.frames['fcurtain'])
 				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if(speech.indexOf('空调') >=0)
+			else if(speech.indexOf('空调') >=0 && window.frames['fair_conditioner'])
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if(speech.indexOf('电视') >=0 || speech.indexOf('频道') >=0 || speech.indexOf('台') >=0)
+			else if((speech.indexOf('电视') >=0 || speech.indexOf('频道') >=0 || speech.indexOf('台') >=0) && window.frames['ftv'])
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if(speech.indexOf('插座') >=0)
+			else if(speech.indexOf('插座') >=0 && window.frames['fplugin'])
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 		else if( json.event === "device" || json.event === "the_device"){
@@ -172,32 +191,36 @@ window.addEventListener('message',function(e){
 			
 			if(_header)
 				_header.doDraw();
-			
-			window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			if(window.frames['flamp'])
+				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			if(window.frames['fcurtain'])
+				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			if(window.frames['fair_conditioner'])
+				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			if(window.frames['ftv'])
+				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			if(window.frames['fplugin'])
+				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else{
 			mode = json.mode;
-			if( json.event === "lamp" ){
+			if( json.event === "lamp" && window.frames['lamp']){
 				_LAMP_[json.mode] = json.data;
 				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			} 
-			else if( json.event === "curtain" ){
+			else if( json.event === "curtain" && window.frames['fcurtain']){
 				_CURTAIN_[json.mode] = json.data;
 				window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}
-			else if( json.event === "air_conditioner" ){
+			else if( json.event === "air_conditioner" && window.frames['fair_conditioner']){
 				_AIR_CONDITIONER_[json.mode] = json.data;
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}
-			else if( json.event === "tv" ){
+			else if( json.event === "tv"  && window.frames['ftv']){
 				_TV_[json.mode] = json.data;
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}
-			else if( json.event === "plugin" ){
+			else if( json.event === "plugin" && window.frames['fplugin']){
 				_PLUGIN_[json.mode] = json.data;
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}

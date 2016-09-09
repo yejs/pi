@@ -45,6 +45,7 @@ function lamp()
 		
 		color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
 		this.docommand(this.id, color);
+	//	window.parent.postMessage({'msg':'send' , 'data':'dsdsfdfdf'},'*');
 		
 		this.doDraw();
 	}

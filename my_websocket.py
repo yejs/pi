@@ -33,9 +33,9 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         WebSocket.broadcast_tv_status()
         WebSocket.broadcast_plugin_status()
     def on_close(self):
-        WebSocket.socket_handlers.remove(self)
+        WebSocket.socket_handlers.remove(self) 
     def on_message(self, message):
-        WebSocket.broadcast_messages(message)
+        pass#print(message)#WebSocket.broadcast_messages(message)
 	
     def broadcast_messages(message):
         for handler in WebSocket.socket_handlers:
