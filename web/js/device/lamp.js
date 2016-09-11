@@ -72,17 +72,26 @@ function lamp()
 		
 		bar.pos = pos;
 		color = {r:0, g:0, b:0};
-		if(pos>=0 && pos<25){
-			color.r = 255, color.g = pos*255/25, color.b = 0; 
+		var c = 100.0/6.0;
+
+		if(pos>=0 && pos<parseInt(c)){
+			color.r = 255, color.g = pos*255/c, color.b = 0; 
 		}
-		else if(pos>=25 && pos<50){
-			color.r = (50-pos)*255/25, color.g = 255, color.b = 0; 
+		else if(pos>=parseInt(c) && pos<parseInt(c*2.0)){
+			color.r = Math.min((parseInt(c*2.0)-pos)*255/c, 255), color.g = 255, color.b = 0; 
 		}
-		else if(pos>=50 && pos<75){
-			color.r = 0, color.g = 255, color.b = (pos-50)*255/25; 
+		else if(pos>=parseInt(c*2.0) && pos<parseInt(c*3.0)){
+			color.r = 0, color.g = 255, color.b = Math.min((pos-parseInt(c*2.0))*255/c, 255); 
 		}
-		else if(pos>=75 && pos<=100){
-			color.r = 0, color.g = (100-pos)*255/25, color.b = 255; 
+		else if(pos>=parseInt(c*3.0) && pos<=parseInt(c*4.0)){
+			color.r = 0, color.g = Math.min((parseInt(c*4.0)-pos)*255/c, 255), color.b = 255; 
+		}
+		
+		else if(pos>=parseInt(c*4.0) && pos<parseInt(c*5.0)){
+			color.r = Math.min((pos-parseInt(c*4.0))*255/c, 255), color.g = 0, color.b = 255; 
+		}
+		else if(pos>=parseInt(c*5.0) && pos<=parseInt(c*6.0)){
+			color.r = 255, color.g = 0, color.b = Math.min((parseInt(c*6.0)-pos)*255/c, 255); 
 		}
 
 		return color;
@@ -122,10 +131,12 @@ function lamp()
 		ctx.closePath();
 		var grd=ctx.createLinearGradient(this.bar0.x,this.bar0.y,this.bar0.width,0); //颜色渐变的起始坐标和终点坐标
 		grd.addColorStop(0, "rgba(255, 0, 0, 1)"); //0表示起点..0.1 0.2 ...1表示终点，配置颜色
-		grd.addColorStop(0.25, "rgba(255, 255, 0, 1)");
-		grd.addColorStop(0.5, "rgba(0, 255, 0, 1)");
-		grd.addColorStop(0.75, "rgba(0, 255, 255, 1)");
-		grd.addColorStop(1, "rgba(0, 0, 255, 1)");
+		grd.addColorStop(0.17, "rgba(255, 255, 0, 1)");
+		grd.addColorStop(0.33, "rgba(0, 255, 0, 1)");
+		grd.addColorStop(0.50, "rgba(0, 255, 255, 1)");
+		grd.addColorStop(0.67, "rgba(0, 0, 255, 1)");
+		grd.addColorStop(0.83, "rgba(255, 0, 255, 1)");
+		grd.addColorStop(1, "rgba(255, 0, 0, 1)");
 		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
 		ctx.fill();
 	}

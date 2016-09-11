@@ -22,10 +22,13 @@ from my_websocket import WebSocket
 from lirc import LIRC
 from data.data import *
 from data.g_data import GlobalVar
-
+import types 
 
 class Connection(object):    
+    do_disarming_timer = None
     heart_beat_timer = None
+    close_timer = None	  				#关闭超时定时器
+    close_ip = None
     clients = set()    
     output_param = list()#{"ip": "", "pin": "", "item": None}
     last_heart_beat_msg = None
@@ -88,38 +91,43 @@ class Connection(object):
         if len(data) == 0:
             self.on_close()
             return
+
+        if Connection.close_timer and Connection.close_ip == self._address[0]:
+            Connection.close_timer.cancel()	
+            Connection.close_timer = None
 			
-        if data[:].decode().find('{') == 0 and (data[:].decode().find('}') == len(data[:].decode())-1 or data[:].decode().find('}') == len(data[:].decode())-2):
-            obj = json.loads(data[:].decode()) 
+        if isinstance(data, (bytes)):
+            data = data[:].decode() 
+        if data[:].find('{') == 0 and (data[:].find('}') == len(data[:])-1 or data[:].find('}') == len(data[:])-2):
+            obj = json.loads(data[:]) 
             if obj:
                 if obj.get('event') == 'report':    
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
                     self.do_write("{\"event\":\"ack\"}")
-                    print("recv from %s: %s" % (self._address[0], data[:].decode())) 
+                    print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
-                    WebSocket.broadcast_messages(data[:-1].decode());
-                    #print("recv from %s: %s" % (self._address[0], data[:].decode()))  
+                    WebSocket.broadcast_messages(data[:]);
+                    #print("recv from %s: %s" % (self._address[0], data[:]))  
                 elif obj.get('event') == 'heart_beat':    
-                    self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:].decode()))  
+                    self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:]))  
                     if self.heart_beat_ack_timer:
                         self.heart_beat_ack_timer.cancel()
                         self.heart_beat_ack_timer = None
         else:
-            print("recv from %s: %s" % (self._address[0], data[:].decode()))  
+            print("recv from %s: %s" % (self._address[0], data[:]))  
 
         self.read_message()
 		
     def do_write_callback(self):
         self.write_success = True
-        if self.write_ack_timer:
-            self.write_ack_timer.cancel()
-            self.write_ack_timer = None
+
 		
     def do_write_overtime(self):
         self.write_success = True
         if self.last_write_msg:
             self.do_write(self.last_write_msg)
+
 		
     def do_write(self, msg):
         if self._stream.closed():
@@ -131,17 +139,29 @@ class Connection(object):
             self.last_write_msg = None
         else:
             self.last_write_msg = msg
-
+			
         if self.write_ack_timer:
             self.write_ack_timer.cancel()			
-        self.write_ack_timer = threading.Timer(1, self.do_write_overtime)#发送超时处理
+        self.write_ack_timer = threading.Timer(0.5, self.do_write_overtime)#发送超时处理
         self.write_ack_timer.start()
 		
     def on_close(self):    
         if self not in Connection.clients:
             return
         Connection.clients.remove(self)    
+        Connection.close_ip = self._address[0]
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
+        if Connection.close_timer:
+            Connection.close_timer.cancel()	
+            Connection.close_timer = None
+        Connection.close_timer = threading.Timer(2, self.doClose)
+        Connection.close_timer.start()
+		
+    def doClose(self):    
+        if Connection.close_timer:
+            Connection.close_timer.cancel()	
+            Connection.close_timer = None
+        print("%s closed, connection2222 num %d" % (self._address[0], len(Connection.clients)))  
         mode = GlobalVar.get_mode()
         for k,v in _DEVICE_['lamp'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
             if v.get('ip') == self._address[0]:
@@ -297,16 +317,22 @@ class Connection(object):
                     return
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
         #print(msg)
+
+        conn = Connection.is_online(ip)
+        if conn:
+            try:
+                conn.do_write(msg)
+            except:
+                logging.error('Error sending message', exc_info=True)	
+					
+    def is_online(ip): 
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
-                try:
-                    conn.do_write(msg)
-                except:
-                    logging.error('Error sending message', exc_info=True)	
-					
-
-			
+                return conn
+        return None
+		
     def do_disarming(): 
+        Connection.do_disarming_timer = None
         Disarming = 'false'
         mode = GlobalVar.get_mode()
         if "normal" == mode or "guests" == mode or "diner" == mode:#在‘回家’、‘会客’、‘用餐’场景模式下撤防，其它场景模式下布防

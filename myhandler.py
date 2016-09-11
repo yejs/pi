@@ -25,6 +25,7 @@ from data.g_data import GlobalVar
 
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
+
     def post(self, *args, **kwargs):
         post_data = {}
 
@@ -35,7 +36,12 @@ class WebHandler(tornado.web.RequestHandler):
             if GlobalVar.get_mode() != post_data['mode'][0]:
                 GlobalVar.set_last_mode(GlobalVar.get_mode())
                 GlobalVar.set_mode(post_data['mode'][0])
-                Connection.do_disarming()
+				
+                if Connection.do_disarming_timer:
+                    Connection.do_disarming_timer.cancel()
+                Connection.do_disarming_timer = threading.Timer(1, Connection.do_disarming)#发送超时处理
+                Connection.do_disarming_timer.start()
+                #Connection.do_disarming()
             else:
                 GlobalVar.set_mode(post_data['mode'][0])
         else:
@@ -124,7 +130,7 @@ class WebHandler(tornado.web.RequestHandler):
             if _DEVICE_[dev_id][id].get('pin') and key:
                 RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
 
-            if Connection.sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false':
+            if Connection.sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false' and Connection.is_online(_DEVICE_[dev_id][id]['ip']):
                 Connection.sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'] if _DEVICE_[dev_id][id].get('pin') else None, key, value, item)
 				
 	#灯业务逻辑模块处理,协议：	mode=normal&dev_id=lamp&id=1&command=on（开关指令） 或 mode=normal&dev_id=lamp&id=1&color=aabbcc（调光调色指令）
@@ -148,6 +154,7 @@ class WebHandler(tornado.web.RequestHandler):
             value = post_data[key][0]
             item['status'] = value
             if id == 'all':
+                print('output all, value: %s, id: %s!' %(value, id))
                 for k in _LAMP_[mode].keys():
                     _LAMP_[mode][k]['status'] = value
         elif post_data.get('color'):#调光调色指令
@@ -164,8 +171,10 @@ class WebHandler(tornado.web.RequestHandler):
             for id in _LAMP_[mode].keys():
                 last_value = _LAMP_[last_mode][id]['status']
                 now_value = _LAMP_[mode][id]['status']
-                if last_value != now_value:
-                    WebHandler.output('lamp', id, 'command', now_value)
+                #print('output, last_value:%s, now_value: %s, id: %s, last_mode:%s, mode:%s!' %(last_value, now_value, id, last_mode, mode))
+                #if (last_mode != mode and last_value != now_value) or last_mode == mode:
+
+                WebHandler.output('lamp', id, 'command', now_value)
         else:
             WebHandler.output('lamp', id, key, value)
         WebSocket.broadcast_lamp_status()
