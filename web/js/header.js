@@ -141,7 +141,8 @@ function header(index)
 	
 	this.drawSecurity = function(ctx)
 	{
-		var x = this.rect.width*5/6 - ctx.measureText('所有燃气检测：安全').width/2 + ctx.measureText('所有燃气检测：').width - 10;
+		ctx.font = _font30;
+		var x = this.rect.width*5/6 - ctx.measureText('所有燃气：安全').width/2 + ctx.measureText('所有燃气：').width + 10;
 		
 		//1.处理门、窗开闭检测设备
 		var id = this.checkInput('door', 'open');//先检测门
@@ -181,7 +182,7 @@ function header(index)
 		id = this.checkInput('flammable', 'alert');
 		if(!id){//所有燃气检测设备都处于安全状态
 			id = '1';
-			title = '所有燃气检测：';
+			title = '所有燃气：';
 		}
 		else
 			title = _DEVICE_.flammable[id].name + '：';
@@ -195,7 +196,7 @@ function header(index)
 		id = this.checkInput('fire', 'alert');
 		if(!id){//所有火警检测设备都处于安全状态
 			id = '1';
-			title = '所有火警检测：';
+			title = '所有火警：';
 		}
 		else
 			title = _DEVICE_.fire[id].name + '：';
@@ -204,27 +205,8 @@ function header(index)
 		ctx.fillText(title, x - ctx.measureText(title).width, 146);
 		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.fire[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
 		ctx.fillText((_DEVICE_.fire[id].status == 'alert' ? '警报' : '安全'), x, 146);
-	}
-	
-	this.drawWeather = function(ctx, rect)
-	{
-		if(!this.weather)
-			return;
-		var _w = this.weather;
 		
-		ctx.textBaseline="middle";
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
-		ctx.font = _font36;
 		
-	/*	var title = "今日天气";
-		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 36);
-		
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
-		ctx.font = _font56;
-		title = this.city;
-		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 95);
-		*/
-
 		var status = _DEVICE_.humiture['1'].status;
 		pos = status.indexOf(':');
 		
@@ -234,8 +216,10 @@ function header(index)
 		}
 		else
 			return;
-
-		var x = Math.max(rect.width/4 - ctx.measureText('室内温度：35.6℃').width/2 + 10, 0) + ctx.measureText('室内温度：').width;
+		
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
+		var rect = {x:0, y:0, width:this.rect.width*2/3, height:this.rect.height};
+		x = Math.max(rect.width/4 - ctx.measureText('室内温度：35.6℃').width/2 - 10, 0) + ctx.measureText('室内温度：').width;
 		ctx.fillText('室内温度：', x - ctx.measureText('室内温度：').width, 36);
 		ctx.fillStyle = ctx.strokeStyle = (parseInt(temperature) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
 		ctx.fillText(temperature + '℃', x, 36);
@@ -245,14 +229,38 @@ function header(index)
 		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 70) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
 		ctx.fillText(humidity + '%', x, 91);
 		
+		//4.处理火警检测设备
+		id = this.checkInput('ir_in', 'alert');
+		if(!id){//所有火警检测设备都处于安全状态
+			id = '1';
+			title = '所有红外：';
+		}
+		else
+			title = _DEVICE_.ir_in[id].name + '：';
+
+		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
+		ctx.fillText(title, x - ctx.measureText(title).width, 146);
+		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.ir_in[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText((_DEVICE_.ir_in[id].status == 'alert' ? '警报' : '安全'), x, 146);
+	}
+	
+	this.drawWeather = function(ctx, rect)
+	{
+		if(!this.weather)
+			return;
+		var _w = this.weather;
 		
+		ctx.textBaseline="middle";
+
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
 		ctx.font = _font36;
 		if(_w.d2 + _w.p1 !== _w.d1 + _w.p1)
-			var title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1;
+			var title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1 + ' ';
 		else
-			var title = _w.d1 + _w.p1;
-		ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 150);
+			var title = _w.d1 + _w.p1 + ' ';
+		
+
+	//	ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 150);
 		
 	
 		var _f = _w.f1 + "_0.png";
@@ -278,11 +286,16 @@ function header(index)
 		ctx.fillText(title, rect.width*3/4 - ctx.measureText(title).width/2, 95);
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		ctx.font = _font36;
+		ctx.font = _font30;
 		if(_w.s1 !== _w.s2)
-			title = _w.s1 + "转" + _w.s2;
+			title = _w.s1 + "转" + _w.s2 + ' ';
 		else
-			title = _w.s1;
+			title = _w.s1 + ' ';
+		
+		if(_w.d2 + _w.p1 !== _w.d1 + _w.p1)
+			title += _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1 + ' ';
+		else
+			title += _w.d1 + _w.p1 + ' ';
 		ctx.fillText(title, rect.width*3/4 - ctx.measureText(title).width/2, 150);
 	}
 }

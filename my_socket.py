@@ -161,7 +161,7 @@ class Connection(object):
         if Connection.close_timer:
             Connection.close_timer.cancel()	
             Connection.close_timer = None
-        print("%s closed, connection2222 num %d" % (self._address[0], len(Connection.clients)))  
+
         mode = GlobalVar.get_mode()
         for k,v in _DEVICE_['lamp'].items():#当连接断开后，需要将设备的状态设为off,并广播到客户端同步
             if v.get('ip') == self._address[0]:

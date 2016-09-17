@@ -84,6 +84,7 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.air_conditioner(post_data) 
                 WebHandler.tv(post_data) 
                 WebHandler.plugin(post_data) 
+                #print('mode:%s' %post_data)
 				
             timer = threading.Timer(5, WebHandler.perform_save)#延时5秒保存
             timer.start()
