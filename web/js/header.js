@@ -229,9 +229,9 @@ function header(index)
 		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 70) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
 		ctx.fillText(humidity + '%', x, 91);
 		
-		//4.处理火警检测设备
+		//4.处理红外检测设备
 		id = this.checkInput('ir_in', 'alert');
-		if(!id){//所有火警检测设备都处于安全状态
+		if(!id){//所有红外检测设备都处于安全状态
 			id = '1';
 			title = '所有红外：';
 		}

@@ -338,7 +338,7 @@ class Connection(object):
         if "normal" == mode or "guests" == mode or "diner" == mode:#在‘回家’、‘会客’、‘用餐’场景模式下撤防，其它场景模式下布防
             Disarming = 'true'
 
-        msg = "{\"event\":\"disarming\", \"data\":\"%s\"}" %Disarming
+        msg = "{\"event\":\"disarming\", \"data\":\"%s\", \"mode\":\"%s\"}" %(Disarming, mode)
 
         for conn in Connection.clients:
             try:
