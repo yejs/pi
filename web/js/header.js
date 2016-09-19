@@ -141,7 +141,7 @@ function header(index)
 	
 	this.drawSecurity = function(ctx)
 	{
-		ctx.font = _font30;
+		ctx.font = _font34;
 		var x = this.rect.width*5/6 - ctx.measureText('所有燃气：安全').width/2 + ctx.measureText('所有燃气：').width + 10;
 		
 		//1.处理门、窗开闭检测设备
@@ -252,16 +252,6 @@ function header(index)
 		
 		ctx.textBaseline="middle";
 
-		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		ctx.font = _font36;
-		if(_w.d2 + _w.p1 !== _w.d1 + _w.p1)
-			var title = _w.d1 + _w.p1 + " 转 " + _w.d2 + _w.p1 + ' ';
-		else
-			var title = _w.d1 + _w.p1 + ' ';
-		
-
-	//	ctx.fillText(title, rect.width/4 - ctx.measureText(title).width/2, 150);
-		
 	
 		var _f = _w.f1 + "_0.png";
 		if (new Date().getHours() > 17) 
@@ -282,11 +272,11 @@ function header(index)
 		else
 			ctx.fillStyle = ctx.strokeStyle = "rgb(50, 255, 50)";
 		ctx.font = _font56;
-		title = _w.t1 + "～" + _w.t2 + "℃ ";
+		var title = _w.t1 + "～" + _w.t2 + "℃ ";
 		ctx.fillText(title, rect.width*3/4 - ctx.measureText(title).width/2, 95);
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 255)";
-		ctx.font = _font30;
+		ctx.font = _font34;
 		if(_w.s1 !== _w.s2)
 			title = _w.s1 + "转" + _w.s2 + ' ';
 		else

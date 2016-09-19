@@ -8,6 +8,7 @@ var _font56 = "bold 56px " + _font_family;
 var _font42 = "bold  42px " + _font_family;
 var _font38 = "bold 36px " + _font_family;
 var _font36 = "36px " + _font_family;
+var _font34 = "34px " + _font_family;
 var _font30 = "30px " + _font_family;
 var _font25 = "25px " + _font_family;
 var _font23 = "23px " + _font_family;
