@@ -241,7 +241,7 @@ function header(index)
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText(title, x - ctx.measureText(title).width, 146);
 		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.ir_in[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText((_DEVICE_.ir_in[id].status == 'alert' ? '警报' : '安全'), x, 146);
+		ctx.fillText((_DEVICE_.ir_in[id].status == 'alert' ? '有人' : '无人'), x, 146);
 	}
 	
 	this.drawWeather = function(ctx, rect)
