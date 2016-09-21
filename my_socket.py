@@ -19,6 +19,7 @@ import threading
 import time
 from my_gpio import RPi_GPIO
 from my_websocket import WebSocket
+#from myhandler import WebHandler
 from lirc import LIRC
 from data.data import *
 from data.g_data import GlobalVar
@@ -86,7 +87,12 @@ class Connection(object):
         for id in _DEVICE_[dev_id]:
             if _DEVICE_[dev_id][id].get('status') and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['ip'] == ip:
                 _DEVICE_[dev_id][id]['status'] = status
-
+				
+				
+    def do_uart_recv(data): 
+        print("do_uart_recv: %s" % (data[:]))
+        #do_post1(None, None)
+		
     def doRecv(self, data):    
         if len(data) == 0:
             self.on_close()
@@ -105,7 +111,7 @@ class Connection(object):
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
                     self.do_write("{\"event\":\"ack\"}")
-                    print("recv from %s: %s" % (self._address[0], data[:])) 
+                    #print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
                     WebSocket.broadcast_messages(data[:]);
                     #print("recv from %s: %s" % (self._address[0], data[:]))  
@@ -114,6 +120,8 @@ class Connection(object):
                     if self.heart_beat_ack_timer:
                         self.heart_beat_ack_timer.cancel()
                         self.heart_beat_ack_timer = None
+                elif obj.get('event') == 'uart':    
+                    Connection.do_uart_recv(data[:])
         else:
             print("recv from %s: %s" % (self._address[0], data[:]))  
 

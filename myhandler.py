@@ -23,6 +23,11 @@ from my_websocket import WebSocket
 from data.data import *
 from data.g_data import GlobalVar
 
+def do_post1(this, post_data):
+    if None == post_data:
+        print('post_data is None')
+        return
+			
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
 
@@ -31,6 +36,13 @@ class WebHandler(tornado.web.RequestHandler):
 
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
+			
+        WebHandler.do_post(self, post_data)
+
+    def do_post(this, post_data):
+        if None == post_data:
+            print('post_data is None')
+            return
 			
         if post_data.get('mode'):
             if GlobalVar.get_mode() != post_data['mode'][0]:
@@ -65,7 +77,8 @@ class WebHandler(tornado.web.RequestHandler):
         elif dev_id == None:			#模式指令
             str1 = '{\"mode\":\"'+GlobalVar.get_mode() + '\"}'
         			
-        self.write(str1)#base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
+        if this:
+            this.write(str1)#base64.encodestring(str1.encode('gbk')))#响应页面post请求（数据base64简单加密处理）
 
         if post_data.get('device_set') == None:#设备控制指令
             if dev_id == 'lamp':
@@ -92,8 +105,6 @@ class WebHandler(tornado.web.RequestHandler):
             WebHandler.device_set(post_data)
             WebHandler.perform_save()
         post_data.clear()
-
-
 	
     def perform_save(): 
         f = open('data/data.py','w')            

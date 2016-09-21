@@ -246,7 +246,7 @@ function dev_set()
 		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('pin')){
 			value = parseInt(document.getElementById('GPIO').options[document.getElementById('GPIO').selectedIndex].value);
 			_DEVICE_[dev_id][id]['pin'] = String(value); 
-			console.log(value);
+		//	console.log(value);
 		}
 		
 		if(document.getElementById('brand').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('brand'))
