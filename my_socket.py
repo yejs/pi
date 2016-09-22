@@ -23,6 +23,7 @@ from my_websocket import WebSocket
 from lirc import LIRC
 from data.data import *
 from data.g_data import GlobalVar
+from data.asr import asr
 import types 
 
 class Connection(object):    
@@ -66,7 +67,7 @@ class Connection(object):
     def read_message(self):    
         self._stream.read_bytes(1024, self.doRecv, partial=True)
 
-    def set_dev_item(dev_id, ip, status):   #TODO,08/09
+    def set_dev_item(dev_id, ip, status):
         if _DEVICE_.get(dev_id) == None:
             return
 			
@@ -89,9 +90,7 @@ class Connection(object):
                 _DEVICE_[dev_id][id]['status'] = status
 				
 				
-    def do_uart_recv(data): 
-        print("do_uart_recv: %s" % (data[:]))
-        #do_post1(None, None)
+
 		
     def doRecv(self, data):    
         if len(data) == 0:
@@ -120,8 +119,8 @@ class Connection(object):
                     if self.heart_beat_ack_timer:
                         self.heart_beat_ack_timer.cancel()
                         self.heart_beat_ack_timer = None
-                elif obj.get('event') == 'uart':    
-                    Connection.do_uart_recv(data[:])
+                elif obj.get('event') == 'asr' and obj.get('data'):    #语音识别
+                    asr.do_recv(obj['data'])
         else:
             print("recv from %s: %s" % (self._address[0], data[:]))  
 

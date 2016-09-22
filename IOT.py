@@ -72,6 +72,7 @@ if __name__ == "__main__":
         server = SocketServer()    
         server.listen(options.socket_port)
         print ("webserver 127.0.0.1:%s start..." % options.http_port)
+        WebHandler.set_asr_callback()
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:

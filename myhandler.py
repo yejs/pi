@@ -22,27 +22,25 @@ from my_socket import SocketServer, Connection
 from my_websocket import WebSocket
 from data.data import *
 from data.g_data import GlobalVar
+from data.asr import asr
 
-def do_post1(this, post_data):
-    if None == post_data:
-        print('post_data is None')
-        return
-			
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
-
+    def set_asr_callback():#初始化设置语音识别回调函数
+        asr.asr_callback = WebHandler.do_post
+        #print('set Connection.asr_callback')
+			
     def post(self, *args, **kwargs):
         post_data = {}
 
         for key in self.request.arguments:
             post_data[key] = self.get_arguments(key)
-			
+
         WebHandler.do_post(self, post_data)
 
     def do_post(this, post_data):
-        if None == post_data:
-            print('post_data is None')
-            return
+        #if None == this:
+        print('do_post, post_data: %s' %post_data)
 			
         if post_data.get('mode'):
             if GlobalVar.get_mode() != post_data['mode'][0]:
@@ -61,6 +59,7 @@ class WebHandler(tornado.web.RequestHandler):
 			
         if post_data.get('dev_id'):
             dev_id = post_data['dev_id'][0]
+            GlobalVar.set_dev_id(dev_id)
         else :
             dev_id = None
 			
