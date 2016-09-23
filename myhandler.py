@@ -27,7 +27,7 @@ from data.asr import asr
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
     def set_asr_callback():#初始化设置语音识别回调函数
-        asr.asr_callback = WebHandler.do_post
+        asr.do_post = WebHandler.do_post
         #print('set Connection.asr_callback')
 			
     def post(self, *args, **kwargs):
