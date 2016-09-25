@@ -11,7 +11,7 @@ class asr:
 
 	mode_set = {'回家':'normal', '离家':'leave', '睡眠':'night', '睡觉':'night', '起夜':'getup', '会客':'guests', '用餐':'diner', '吃饭':'diner'}
 
-	asr_set = {0:'开', 1:'关', 2:'停止', 3:'音量增加', 4:'音量减小', 5:'上一频道', 6:'下一频道', 7:'', 8:'', 9:'20', 10:'40', 11:'60', 12:'80', 13:'温度增加', 14:'温度减小', 15:'白色', 16:'红色', 17:'绿色', 18:'蓝色', 18:'紫色', 19:'黄色', 20:'卧室', 21:'主卧', 22:'次卧', 23:'客厅', 24:'餐厅', 25:'厨房', 26:'书房', 27:'回家', 28:'离家', 29:'睡觉', 30:'起夜', 31:'会客', 32:'用餐', 33:'吃饭', 34:'灯', 35:'窗帘', 36:'空调', 37:'电视', 38:'插座', 39:'', 40:'开灯', 41:'关灯', 42:'开窗帘', 43:'关窗帘', 44:'开关电视', 45:'开关空调', 46:'开插座', 47:'关插座',48:'开主卧灯',49:'关主卧灯',50:'开客厅灯'}
+	asr_set = {0:'开', 1:'关', 2:'停止', 3:'音量增加', 4:'音量减小', 5:'上一频道', 6:'下一频道', 7:'', 8:'', 9:'20', 10:'40', 11:'60', 12:'80', 13:'温度增加', 14:'温度减小', 15:'白色', 16:'红色', 17:'绿色', 18:'蓝色', 18:'紫色', 19:'黄色', 20:'卧室', 21:'主卧', 22:'次卧', 23:'客厅', 24:'餐厅', 25:'厨房', 26:'书房', 27:'回家', 28:'离家', 29:'睡觉', 30:'起夜', 31:'会客', 32:'用餐', 33:'吃饭', 34:'灯', 35:'窗帘', 36:'空调', 37:'电视', 38:'插座', 39:'', 40:'开灯', 41:'关灯', 42:'开窗帘', 43:'关窗帘', 44:'开电视', 45:'关电视', 46:'开空调', 47:'关空调', 48:'开插座', 49:'关插座', 50:'开客厅灯'}
 
 	do_post = None
 	name = None
@@ -20,13 +20,14 @@ class asr:
 	timer = None
 	
 	def do_recv(data): 
-		if None == asr.asr_set.get(int(data)):
+		if False == data.isdigit() or (data.isdigit() and None == asr.asr_set.get(int(data))):
 			print('asr_set not found %s' %data)
 			return
+		idata = int(data)
 		post_data = {}
 		id = None
 
-		asr_cmd = asr.asr_set.get(int(data))
+		asr_cmd = asr.asr_set.get(idata)
 		if asr.mode_set.get(asr_cmd):			#模式指令27~33
 			post_data['mode'] = [asr.mode_set.get(asr_cmd)]
 			
@@ -40,12 +41,14 @@ class asr:
 			id = asr.get_id(asr.dev_id, asr.name)
 			
 			
-		elif int(data) < 20:
+		elif idata < 20:
 			if '开' == asr_cmd or '关' == asr_cmd:
-				if 'lamp' == asr.dev_id or 'tv' == asr.dev_id or 'plugin' == asr.dev_id:
+				if 'lamp' == asr.dev_id or 'plugin' == asr.dev_id:
 					asr.command = ('on' if '开' == asr_cmd else 'off')
 				elif 'curtain' == asr.dev_id:
 					asr.command = ('open' if '开' == asr_cmd else 'close')
+				elif 'tv' == asr.dev_id:
+					asr.command = ('power_on' if '开' == asr_cmd else 'power_off')
 				elif 'air_conditioner' == asr.dev_id:
 					asr.command = ('power_on' if '开' == asr_cmd else 'power_off')
 			elif '音量增加' == asr_cmd or '音量减小' == asr_cmd:
@@ -102,7 +105,7 @@ class asr:
 				else:
 					return
 				
-		elif int(data) >= 40:				#复合指令，如开灯（开+灯）、关灯...
+		elif idata >= 40:				#复合指令，如开灯（开+灯）、关灯...
 			if asr.get_name(asr.name_set, asr_cmd, True):#复合指令中带有设备名称如卧室、客厅、 餐厅、 厨房、 书房
 				asr.name = asr.get_name(asr.name_set, asr_cmd, True)
 
@@ -114,10 +117,12 @@ class asr:
 			if asr.name:
 				id = asr.get_id(asr.dev_id, asr.name)
 				
-			if 'lamp' == asr.dev_id or 'tv' == asr.dev_id or 'plugin' == asr.dev_id:
+			if 'lamp' == asr.dev_id or 'plugin' == asr.dev_id:
 				asr.command = ('on' if asr_cmd.find('开') != -1 else 'off')
 			elif 'curtain' == asr.dev_id:
 				asr.command = ('open' if asr_cmd.find('开') != -1 else 'close')
+			elif 'tv' == asr.dev_id:
+				asr.command = ('power_on' if asr_cmd.find('开') != -1 else 'power_off')
 			elif 'air_conditioner' == asr.dev_id:
 				asr.command = ('power_on' if asr_cmd.find('开') != -1 else 'power_off')
 					

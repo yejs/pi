@@ -110,7 +110,7 @@ class Connection(object):
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
                     self.do_write("{\"event\":\"ack\"}")
-                    #print("recv from %s: %s" % (self._address[0], data[:])) 
+                    print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
                     WebSocket.broadcast_messages(data[:]);
                     #print("recv from %s: %s" % (self._address[0], data[:]))  
