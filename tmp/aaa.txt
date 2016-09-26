@@ -1,0 +1,7 @@
+@00,kai,001,$
+@01,guan,002,$
+@02,ting zhi,003,$
+@03,yin liang zen jia,004,$
+@40,kai deng,040,$
+@41,guan deng,041,$
+@49,la la,254,$
