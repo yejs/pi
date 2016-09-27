@@ -5,11 +5,11 @@
 @04,yin liang jian xiao,005,$
 @05,shang yi pin dao,006,$
 @06,xia yi pin dao,007,$
-@07,ling,008,$
-@08,er shi,009,$
-@09,si shi,010,$
-@10,liu shi,011,$
-@11,ba shi,012,$
+@07,shi,008,$
+@08,san shi,009,$
+@09,wu shi,010,$
+@10,qi shi,011,$
+@11,jiu shi,012,$
 @12,wen du zeng jia,013,$
 @13,wen du jian xiao,014,$
 @14,bai se,015,$
