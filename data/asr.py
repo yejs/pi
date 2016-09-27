@@ -20,9 +20,12 @@ class asr:
 	timer = None
 	
 	def do_recv(data): 
-		if False == data.isdigit() or (data.isdigit() and None == asr.asr_set.get(int(data))):
+		data = int(data, 16)
+		#if False == data.isdigit() or (data.isdigit() and None == asr.asr_set.get(int(data))):
+		if None == asr.asr_set.get(int(data)):
 			print('asr_set not found %s' %data)
 			return
+		print('asr_set %s' %data)
 		idata = int(data)
 		post_data = {}
 		id = None
