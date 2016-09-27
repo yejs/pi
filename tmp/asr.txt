@@ -1,0 +1,50 @@
+@00,kai,001,$
+@01,guan,002,$
+@02,ting zhi,003,$
+@03,yin liang zeng jia,004,$
+@04,yin liang jian xiao,005,$
+@05,shang yi pin dao,006,$
+@06,xia yi pin dao,007,$
+@07,ling,008,$
+@08,er shi,009,$
+@09,si shi,010,$
+@10,liu shi,011,$
+@11,ba shi,012,$
+@12,wen du zeng jia,013,$
+@13,wen du jian xiao,014,$
+@14,bai se,015,$
+@15,hong se,016,$
+@16,lv se,017,$
+@17,lan se,018,$
+@18,huang se,019,$
+@19,wo shi,020,$
+@20,zhu wo,021,$
+@21,ci wo,022,$
+@22,ke ting,023,$
+@23,can ting,024,$
+@24,chu fang,025,$
+@25,shu fang,026,$
+@26,hui jia,027,$
+@27,li jia,028,$
+@28,shui jiao,029,$
+@29,qi ye,030,$
+@30,hui ke,031,$
+@31,yong can,032,$
+@32,chi fan,033,$
+@33,deng,034,$
+@34,chuang lian,035,$
+@35,kong tiao,036,$
+@36,dian shi,037,$
+@37,cha zuo,038,$
+@38,,039,$
+@39,kai deng,040,$
+@40,guan deng,041,$
+@41,kai chuang lian,042,$
+@42,guan chuang lian,043,$
+@43,kai dian shi,044,$
+@44,guan dian shi,045,$
+@45,kai kong tiao,046,$
+@46,guan kong tiao,047,$
+@47,kai cha zuo,048,$
+@48,guan cha zuo,049,$
+@49,la la,254,$
