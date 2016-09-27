@@ -11,7 +11,7 @@ class asr:
 
 	mode_set = {'回家':'normal', '离家':'leave', '睡眠':'night', '睡觉':'night', '起夜':'getup', '会客':'guests', '用餐':'diner', '吃饭':'diner'}
 
-	asr_set = {1:'开', 2:'关', 3:'停止', 4:'音量增加', 5:'音量减小', 6:'上一频道', 7:'下一频道', 8:'0', 9:'20', 10:'40', 11:'60', 12:'80', 13:'温度增加', 14:'温度减小', 15:'白色', 16:'红色', 17:'绿色', 18:'蓝色', 18:'紫色', 19:'黄色', 20:'卧室', 21:'主卧', 22:'次卧', 23:'客厅', 24:'餐厅', 25:'厨房', 26:'书房', 27:'回家', 28:'离家', 29:'睡觉', 30:'起夜', 31:'会客', 32:'用餐', 33:'吃饭', 34:'灯', 35:'窗帘', 36:'空调', 37:'电视', 38:'插座', 39:'', 40:'开灯', 41:'关灯', 42:'开窗帘', 43:'关窗帘', 44:'开电视', 45:'关电视', 46:'开空调', 47:'关空调', 48:'开插座', 49:'关插座', 50:'开客厅灯'}
+	asr_set = {1:'开', 2:'关', 3:'停止', 4:'音量增加', 5:'音量减小', 6:'上一频道', 7:'下一频道', 8:'10', 9:'30', 10:'50', 11:'70', 12:'90', 13:'温度增加', 14:'温度减小', 15:'白色', 16:'红色', 17:'绿色', 18:'蓝色', 19:'黄色', 20:'卧室', 21:'主卧', 22:'次卧', 23:'客厅', 24:'餐厅', 25:'厨房', 26:'书房', 27:'回家', 28:'离家', 29:'睡觉', 30:'起夜', 31:'会客', 32:'用餐', 33:'吃饭', 34:'灯', 35:'窗帘', 36:'空调', 37:'电视', 38:'插座', 39:'', 40:'开灯', 41:'关灯', 42:'开窗帘', 43:'关窗帘', 44:'开电视', 45:'关电视', 46:'开空调', 47:'关空调', 48:'开插座', 49:'关插座', 50:'开客厅灯'}
 
 	do_post = None
 	name = None
@@ -63,25 +63,24 @@ class asr:
 					post_data['command'] = ('up' if '上一频道' == asr_cmd else 'down')
 				else:
 					return
-			elif '0' == asr_cmd or '20' == asr_cmd or '40' == asr_cmd or '60' == asr_cmd or '80' == asr_cmd:
+			elif '10' == asr_cmd or '30' == asr_cmd or '50' == asr_cmd or '70' == asr_cmd or '90' == asr_cmd:
 				if 'tv' == asr.dev_id:
 					asr.command = None
-					if '0' == asr_cmd:
+					if '10' == asr_cmd:
 						post_data['command'] = ['0']
-					elif '20' == asr_cmd:
+					elif '30' == asr_cmd:
 						post_data['command'] = ['2']
-					elif '40' == asr_cmd:
+					elif '50' == asr_cmd:
 						post_data['command'] = ['4']
-					elif '60' == asr_cmd:
+					elif '70' == asr_cmd:
 						post_data['command'] = ['6']
-					elif '80' == asr_cmd:
+					elif '90' == asr_cmd:
 						post_data['command'] = ['8']
-						
-					if '0' != asr_cmd:
-						if asr.timer:
-							asr.timer.cancel()
-						asr.timer = threading.Timer(1, asr.do_send_ir_0)#发送'0'处理
-						asr.timer.start()
+
+					if asr.timer:
+						asr.timer.cancel()
+					asr.timer = threading.Timer(1, asr.do_send_ir_0)#发送'0'处理
+					asr.timer.start()
 				else:
 					return
 			elif '温度增加' == asr_cmd or '温度减小' == asr_cmd:
