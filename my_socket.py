@@ -100,9 +100,10 @@ class Connection(object):
         if Connection.close_timer and Connection.close_ip == self._address[0]:
             Connection.close_timer.cancel()	
             Connection.close_timer = None
-			
+
         if isinstance(data, (bytes)):
-            data = data[:].decode() 
+            data = data[:].decode('utf-8') 
+ 
         if data[:].find('{') == 0 and (data[:].find('}') == len(data[:])-1 or data[:].find('}') == len(data[:])-2):
             obj = json.loads(data[:]) 
             if obj:
@@ -110,7 +111,7 @@ class Connection(object):
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
                     self.do_write("{\"event\":\"ack\"}")
-                    print("recv from %s: %s" % (self._address[0], data[:])) 
+                    #print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
                     WebSocket.broadcast_messages(data[:]);
                     #print("recv from %s: %s" % (self._address[0], data[:]))  
@@ -119,7 +120,7 @@ class Connection(object):
                     if self.heart_beat_ack_timer:
                         self.heart_beat_ack_timer.cancel()
                         self.heart_beat_ack_timer = None
-                elif obj.get('event') == 'asr' and obj.get('data'):    #语音识别
+                elif obj.get('event') == 'asr' and obj.get('data') and len(obj.get('data'))<3:    #语音识别
                     asr.do_recv(obj['data'])
         else:
             print("recv from %s: %s" % (self._address[0], data[:]))  
