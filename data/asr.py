@@ -25,7 +25,7 @@ class asr:
 		if None == asr.asr_set.get(idata):
 			print('asr_set not found %s' %data)
 			return
-		print('asr_set %s' %data)
+		print('asr_set %d' %idata)
 
 		post_data = {}
 		id = None
