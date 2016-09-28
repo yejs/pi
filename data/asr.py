@@ -20,13 +20,13 @@ class asr:
 	timer = None
 	
 	def do_recv(data): 
-		data = int(data, 16)
+		idata = int(data, 16)#16进制转为10进制
 		#if False == data.isdigit() or (data.isdigit() and None == asr.asr_set.get(int(data))):
-		if None == asr.asr_set.get(int(data)):
+		if None == asr.asr_set.get(idata):
 			print('asr_set not found %s' %data)
 			return
 		print('asr_set %s' %data)
-		idata = int(data)
+
 		post_data = {}
 		id = None
 
@@ -45,7 +45,7 @@ class asr:
 			
 			
 		elif idata < 20:
-			if '开' == asr_cmd or '关' == asr_cmd:
+			if '开' == asr_cmd or '关' == asr_cmd:#灯、窗帘、空调、电视共用开、关指令
 				if 'lamp' == asr.dev_id or 'plugin' == asr.dev_id:
 					asr.command = ('on' if '开' == asr_cmd else 'off')
 				elif 'curtain' == asr.dev_id:
@@ -54,45 +54,37 @@ class asr:
 					asr.command = ('power_on' if '开' == asr_cmd else 'power_off')
 				elif 'air_conditioner' == asr.dev_id:
 					asr.command = ('power_on' if '开' == asr_cmd else 'power_off')
-			elif '音量增加' == asr_cmd or '音量减小' == asr_cmd:
-				if 'tv' == asr.dev_id:
-					asr.command = None
+			elif '音量增加' == asr_cmd or '音量减小' == asr_cmd or '上一频道' == asr_cmd or '下一频道' == asr_cmd or '10' == asr_cmd or '30' == asr_cmd or '50' == asr_cmd or '70' == asr_cmd or '90' == asr_cmd:#电视专用指令
+				if 'tv' != asr.dev_id:
+					return
+				asr.command = None
+				if '音量增加' == asr_cmd or '音量减小' == asr_cmd:
 					post_data['command'] = ('vol_up' if '音量增加' == asr_cmd else 'vol_down')
-				else:
-					return
-			elif '上一频道' == asr_cmd or '下一频道' == asr_cmd:
-				if 'tv' == asr.dev_id:
-					asr.command = None
+				elif '上一频道' == asr_cmd or '下一频道' == asr_cmd:
 					post_data['command'] = ('up' if '上一频道' == asr_cmd else 'down')
-				else:
-					return
-			elif '10' == asr_cmd or '30' == asr_cmd or '50' == asr_cmd or '70' == asr_cmd or '90' == asr_cmd:
-				if 'tv' == asr.dev_id:
-					asr.command = None
+				elif '10' == asr_cmd or '30' == asr_cmd or '50' == asr_cmd or '70' == asr_cmd or '90' == asr_cmd:
 					if '10' == asr_cmd:
-						post_data['command'] = ['0']
+						post_data['command'] = ['1']
 					elif '30' == asr_cmd:
-						post_data['command'] = ['2']
+						post_data['command'] = ['3']
 					elif '50' == asr_cmd:
-						post_data['command'] = ['4']
+						post_data['command'] = ['5']
 					elif '70' == asr_cmd:
-						post_data['command'] = ['6']
+						post_data['command'] = ['7']
 					elif '90' == asr_cmd:
-						post_data['command'] = ['8']
+						post_data['command'] = ['9']
 
 					if asr.timer:
 						asr.timer.cancel()
 					asr.timer = threading.Timer(1, asr.do_send_ir_0)#发送'0'处理
 					asr.timer.start()
-				else:
-					return
-			elif '温度增加' == asr_cmd or '温度减小' == asr_cmd:
+			elif '温度增加' == asr_cmd or '温度减小' == asr_cmd:#空调专用指令
 				if 'air_conditioner' == asr.dev_id:
 					asr.command = None
 					post_data['command'] = ('temp_inc' if '温度增加' == asr_cmd else 'temp_dec')
 				else:
 					return
-			elif '白色' == asr_cmd or '红色' == asr_cmd or '绿色' == asr_cmd or '蓝色' == asr_cmd or '紫色' == asr_cmd or '黄色' == asr_cmd:
+			elif '白色' == asr_cmd or '红色' == asr_cmd or '绿色' == asr_cmd or '蓝色' == asr_cmd or '紫色' == asr_cmd or '黄色' == asr_cmd:#灯专用指令
 				if 'lamp' == asr.dev_id:
 					asr.command = None
 					if '白色' == asr_cmd:
@@ -160,9 +152,7 @@ class asr:
 	def do_send_ir_0(): 
 		post_data = {}
 		post_data['mode'] = [GlobalVar.get_mode()]
-		post_data['dev_id'] = [asr.dev_id]
-		print('do_send_ir_0, %s' %(post_data['mode']))
-
+		post_data['dev_id'] = [asr.dev_id]#tv
 		post_data['id'] = [GlobalVar.get_tv_id()]
 		post_data['command'] = ['0']
 		asr.do_post(None, post_data)
