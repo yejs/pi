@@ -6,7 +6,7 @@
 @05,shang yi pin dao,006,$
 @06,xia yi pin dao,007,$
 @07,shi,008,$
-@08,san shi,009,$
+@08,san shi,255,$
 @09,wu shi,010,$
 @10,qi shi,011,$
 @11,jiu shi,012,$
@@ -21,7 +21,7 @@
 @20,zhu wo,021,$
 @21,ci wo,022,$
 @22,ke ting,023,$
-@23,can ting,024,$
+@23,can ting,255,$
 @24,chu fang,025,$
 @25,shu fang,026,$
 @26,hui jia,027,$
@@ -47,4 +47,4 @@
 @46,guan kong tiao,047,$
 @47,kai cha zuo,048,$
 @48,guan cha zuo,049,$
-@49,xiao na,254,$
+@49,na na,254,$

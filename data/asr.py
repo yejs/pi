@@ -31,7 +31,7 @@ class asr:
 
 		asr_cmd = asr.asr_set.get(idata)
 		
-		print('asr, id: %d, cmd:%s' %idata, asr_cmd)
+		print('asr, id: %d, cmd:%s' %(idata, asr_cmd))
 		
 		if asr.mode_set.get(asr_cmd):			#模式指令27~33
 			post_data['mode'] = [asr.mode_set.get(asr_cmd)]
