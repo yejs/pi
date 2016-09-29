@@ -29,14 +29,14 @@
 @28,shui jiao,029,$
 @29,qi ye,030,$
 @30,hui ke,031,$
-@31,yong can,032,$
-@32,chi fan,033,$
-@33,deng,034,$
-@34,chuang lian,035,$
-@35,kong tiao,036,$
-@36,dian shi,037,$
-@37,cha zuo,038,$
-@38,,039,$
+@31,chi fan,032,$
+@32,deng,033,$
+@33,chuang lian,034,$
+@34,kong tiao,035,$
+@35,dian shi,036,$
+@36,cha zuo,037,$
+@37,kei,001,$
+@38,gun,002,$
 @39,kai deng,040,$
 @40,guan deng,041,$
 @41,kai chuang lian,042,$
@@ -47,4 +47,4 @@
 @46,guan kong tiao,047,$
 @47,kai cha zuo,048,$
 @48,guan cha zuo,049,$
-@49,la la,254,$
+@49,xiao na,254,$
