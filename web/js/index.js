@@ -203,7 +203,10 @@ window.addEventListener('message',function(e){
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else{
-			mode = json.mode;
+			if(mode != json.mode && window.frames['fscene']){
+				mode = json.mode;
+				window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
+			}
 			if( json.event === "lamp" && window.frames['lamp']){
 				_LAMP_[json.mode] = json.data;
 				window.frames['flamp'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');

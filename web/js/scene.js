@@ -31,7 +31,7 @@ window.addEventListener('message',function(e){
 				setFocus(id);
 			}
 		}
-	//	console.log(e.origin);
+	//	console.log('mode:' + e.origin);
 	}
 },false);
 
