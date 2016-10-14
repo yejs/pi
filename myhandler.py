@@ -20,12 +20,33 @@ import time
 from my_gpio import RPi_GPIO
 from my_socket import SocketServer, Connection
 from my_websocket import WebSocket
+from mymedea import mymedea
+
 from data.data import *
 from data.g_data import GlobalVar
 from data.asr import asr
 
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
+    def do_fft_callback(freq, value): 
+ 
+        i = 0
+        now_value = {}
+        for f in freq:#简化处理，只处理1000~4000hz间的数据
+            if f >= 1000 and f <= 4000 and f%100 == 0:
+                now_value['f'+str(f)] = str(value[i])#now_value.append(value[i])   
+            i += 1
+        for id in _DEVICE_['medea'].keys():
+            WebHandler.output('medea', id, 'command', now_value)
+        #print('do_fft_callback:%s' %json.dumps(now_value))
+		
+    def do_chg_index(): 
+        WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
+		
+    def do_chg_index_callback(): 
+        timer = threading.Timer(0.5, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
+        timer.start()
+	
     def set_asr_callback():#初始化设置语音识别回调函数
         asr.do_post = WebHandler.do_post
         #print('set Connection.asr_callback')
@@ -88,6 +109,8 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.air_conditioner(post_data) 
             elif dev_id == 'tv':
                 WebHandler.tv(post_data) 
+            elif dev_id == 'medea':
+                WebHandler.medea(post_data) 
             elif dev_id == 'plugin':
                 WebHandler.plugin(post_data) 
             elif dev_id == None:
@@ -95,6 +118,7 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.curtain(post_data)
                 WebHandler.air_conditioner(post_data) 
                 WebHandler.tv(post_data) 
+                WebHandler.medea(post_data) 
                 WebHandler.plugin(post_data) 
                 #print('mode:%s' %post_data)
 				
@@ -354,6 +378,33 @@ class WebHandler(tornado.web.RequestHandler):
 
         WebSocket.broadcast_tv_status()
 		
+	#电视业务逻辑模块处理,协议：	mode=normal&dev_id=tv&id=1&command=power_on	
+    def medea(post_data):
+        if post_data.get('command'):#解析command指令为具体的电视指令
+            if 'mute' == post_data['command'][0]:
+                volume = mymedea.get_volume()
+                if 0 == volume:
+                    volume = 1
+                else:
+                    volume = 0
+                mymedea.set_volume(volume)
+            elif 'play' == post_data['command'][0]:
+                if mymedea.playing:
+                    mymedea.pause()
+                else:
+                    mymedea.load(mymedea.get_filepath(mymedea.current_index)) 
+                    mymedea.play()
+            elif 'pre' == post_data['command'][0] or 'next' == post_data['command'][0]:
+                if 'pre' == post_data['command'][0]:
+                    mymedea.play_pre()
+                elif 'next' == post_data['command'][0]:
+                    mymedea.play_next()
+            else:
+                if post_data['command'][0].isdigit():
+                    mymedea.play_music(int(post_data['command'][0]))
+                    
+
+        #WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
 		
     def plugin(post_data):
         last_mode = GlobalVar.get_last_mode()

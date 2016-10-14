@@ -111,6 +111,20 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
         WebSocket.broadcast_messages(str1) 
 		
+    def broadcast_medea_status(data, index):
+        mode = GlobalVar.get_mode()
+        str1 = '{\"event\": \"medea\", \"data\":'
+        str1 += data
+        str1 += ', \"index\":\"'
+        str1 += index
+        str1 += '\", \"mode\":\"'
+        str1 += mode
+        str1 += '\", \"id\":\"'
+        str1 += GlobalVar.get_tv_id()
+        str1 += '\"}'
+
+        WebSocket.broadcast_messages(str1) 
+		
     def broadcast_plugin_status():
         mode = GlobalVar.get_mode()
         str1 = '{\"event\": \"plugin\", \"data\":'

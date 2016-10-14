@@ -20,6 +20,7 @@ from myhandler import WebHandler
 from my_websocket import WebSocket
 from my_socket import SocketServer, Connection
 from my_gpio import RPi_GPIO
+from mymedea import mymedea
 
 import os, threading, sys
 #import RPi.GPIO as GPIO
@@ -31,6 +32,7 @@ import signal
 import logging
 import time
 import upgrade.upgrade
+
 #
 
 from tornado.options import define, options
@@ -42,6 +44,7 @@ is_closing = False
 def signal_handler(signum, frame):
     global is_closing
     logging.info('exiting...')
+    mymedea.close()
     is_closing = True
 
 def try_exit(): 
@@ -50,6 +53,7 @@ def try_exit():
         # clean up here
         tornado.ioloop.IOLoop.instance().stop()
         logging.info('exit success')
+
 
 '''
 handler  是一个列表，每个列表项是tuple，每个tuple有三个选项，第一个为条件匹配项，符合此条件的则调用第二个handler选项，第三个可选项作为参数传给handler
@@ -63,6 +67,7 @@ application = tornado.web.Application([
  
 if __name__ == "__main__":
     try:
+        mymedea.start(WebHandler.do_fft_callback, WebHandler.do_chg_index_callback)
         RPi_GPIO.init(dir())
         #os.chdir(os.path.dirname(__file__))
         tornado.options.parse_command_line()

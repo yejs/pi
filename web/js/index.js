@@ -10,7 +10,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['&nbsp&nbsp灯光&nbsp&nbsp', '&nbsp&nbsp窗帘&nbsp&nbsp', '&nbsp&nbsp空调&nbsp&nbsp', '&nbsp&nbsp电视&nbsp&nbsp', '&nbsp&nbsp插座&nbsp&nbsp', '&nbsp&nbsp场景模式&nbsp&nbsp', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
+	var _title = ['&nbsp&nbsp灯光&nbsp&nbsp', '&nbsp&nbsp窗帘&nbsp&nbsp', '&nbsp&nbsp空调&nbsp&nbsp', '&nbsp&nbsp电视&nbsp&nbsp', '&nbsp&nbsp媒体&nbsp&nbsp', '&nbsp&nbsp插座&nbsp&nbsp', '&nbsp&nbsp场景模式&nbsp&nbsp', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -30,7 +30,7 @@ window.onload = function(){
 	ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 }
 
-var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin", "scene", "video"];
+var titles = ["lamp", "curtain", "air_conditioner", "tv", "medea", "plugin", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
 	/*	if(!document.getElementById(titles[i])){
@@ -167,6 +167,8 @@ window.addEventListener('message',function(e){
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if( json.dev_id === "tv"  && window.frames['flamp'])
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.dev_id === "medea"  && window.frames['flamp'])
+				window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if( json.dev_id === "plugin"  && window.frames['flamp'])
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
@@ -180,6 +182,8 @@ window.addEventListener('message',function(e){
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if((speech.indexOf('电视') >=0 || speech.indexOf('频道') >=0 || speech.indexOf('台') >=0) && window.frames['ftv'])
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if((speech.indexOf('歌') >=0 || speech.indexOf('音乐') >=0 || speech.indexOf('首') >=0) && window.frames['fmedea'])
+				window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if(speech.indexOf('插座') >=0 && window.frames['fplugin'])
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
@@ -222,6 +226,9 @@ window.addEventListener('message',function(e){
 			else if( json.event === "tv"  && window.frames['ftv']){
 				_TV_[json.mode] = json.data;
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			}
+			else if( json.event === "medea"  && window.frames['fmedea']){
+				window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}
 			else if( json.event === "plugin" && window.frames['fplugin']){
 				_PLUGIN_[json.mode] = json.data;

@@ -251,6 +251,8 @@ class Connection(object):
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
         elif dev_id.find('plugin') != -1:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
+        elif dev_id.find('medea') != -1:
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
         elif dev_id.find('air_conditioner') != -1:#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
             LIRC_KEY = None
             if value == 'power_on' or value == 'power_off':

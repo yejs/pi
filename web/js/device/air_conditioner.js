@@ -54,7 +54,7 @@ function air_conditioner()
 		var s = ((this.imageRect.x + this.imageRect.width - offset_x - btn_w) - (this.imageRect.x + offset_x))/3;
 		y += 130;
 		for(var i=_AIR_BTN_.mode;i<this.arrayBtn.length;i++){
-			this.arrayBtn[i].doResize(this.imageRect.x + offset_x + (i-3)*s, y, this.imageRect.x + offset_x + (i-3)*s + btn_w, y + btn_h);
+			this.arrayBtn[i].doResize(this.imageRect.x + offset_x + (i-_AIR_BTN_.mode)*s, y, this.imageRect.x + offset_x + (i-_AIR_BTN_.mode)*s + btn_w, y + btn_h);
 		}
 		
 		this.contextImage.fillStyle = "rgb(141, 178, 159)";
