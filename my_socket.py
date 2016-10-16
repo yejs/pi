@@ -50,6 +50,7 @@ class Connection(object):
         self.write_success = True	  			#发送成功标志位
         self.write_ack_timer = None	  			#发送超时定时器
         self.last_write_msg = None
+        self.medea = {'flag':False, 'send_id':0}
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         if Connection.lirc_air == None:
@@ -113,7 +114,13 @@ class Connection(object):
                     self.do_write("{\"event\":\"ack\"}")
                     #print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
-                    WebSocket.broadcast_messages(data[:]);
+                    if self.medea['flag']:#dev_id.find('medea') != -1:
+                        self.heart_beat_ack = True
+                        if self.heart_beat_ack_timer:
+                            self.heart_beat_ack_timer.cancel()
+                            self.heart_beat_ack_timer = None
+                    else:
+                        WebSocket.broadcast_messages(data[:]);
                     #print("recv from %s: %s" % (self._address[0], data[:]))  
                 elif obj.get('event') == 'heart_beat':    
                     self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:]))  
@@ -200,6 +207,20 @@ class Connection(object):
             if dev_id.find('tv') != -1:
                 Connection.last_param = param
 			
+		#媒体信号特殊处理
+        if dev_id.find('medea') != -1:
+            if not self.heart_beat_ack:
+                #print('medea last send_id:%d' %self.medea['send_id'])
+                return
+            self.medea['flag'] = True
+            self.medea['send_id'] = (self.medea['send_id']+1)%100
+            Connection.output_param = []
+            self.heart_beat_ack = False
+            if self.heart_beat_ack_timer:
+                self.heart_beat_ack_timer.cancel()
+            self.heart_beat_ack_timer = threading.Timer(3, self.heart_beat_overtime)#5秒心跳应答超时处理
+            self.heart_beat_ack_timer.start()
+			
         Connection.output_param.append(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
 		
         if Connection.timer:
@@ -253,6 +274,9 @@ class Connection(object):
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
         elif dev_id.find('medea') != -1:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
+            conn = Connection.is_online(ip)
+            if conn and conn.medea['flag']: 
+                msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, conn.medea['send_id'], pin, key, value)
         elif dev_id.find('air_conditioner') != -1:#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
             LIRC_KEY = None
             if value == 'power_on' or value == 'power_off':

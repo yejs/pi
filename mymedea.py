@@ -24,18 +24,31 @@ import time
 import signal
 import logging
 import json
-
+import queue
 import urllib.request
 import re
 
 import pygame
 import eyed3#pip install eyeD3
 
+import pyaudio
 from pyaudio import PyAudio, paInt16 
 import numpy as np
 import wave
 
+from scipy import fftpack
+from scipy import signal as sg
+
+CHUNK = 1024
+FORMAT = paInt16
+CHANNELS = 1
+RATE = 44100
+counter=1
+ad_rdy_ev=threading.Event()
+
 def signal_handler2(signum, frame):
+	print('signal_handler2')
+	mymedea.playing = False
 	mymedea.close()
 	
 class mymedea():
@@ -53,14 +66,16 @@ class mymedea():
 	do_fft_callback = None
 	do_chg_index_callback = None
 	pa = None
+	q = queue.Queue()
 	stream = None
-	
+	last = {'r':0, 'g':0, 'b':0, 'count':0}
+
 	def __init__(self, path):
 		mymedea.root_path = path
 		mymedea.get_music_files()
-
+	
 		pygame.mixer.init()
-		pygame.init()
+		#pygame.init()
 		
 		pygame.mixer.music.set_volume(0.9)
 		mymedea.TRACK_END = pygame.USEREVENT + 1
@@ -127,8 +142,7 @@ class mymedea():
 			
 	def playDaemon():
 		while mymedea.get_busy() and mymedea.can_play: #still playing
-			mymedea.do_fft()
-				
+	
 			if mymedea.last_str:
 				n = 0;
 				while n < len(mymedea.last_str) + 10:
@@ -137,7 +151,8 @@ class mymedea():
 			pos = int(pygame.mixer.music.get_pos()/1000)
 			m = int(pos/60) 
 			s = int(pos%60)
-			mymedea.last_str = '...still playing ' + mymedea.get_file(mymedea.current_index) + ', pos:  ' + str(m) + ':' + str(s) +'  ...'
+
+			mymedea.last_str = '...still playing ' + mymedea.get_file(mymedea.current_index) + ', time:  ' + str(m) + ':' + str(s) +'  ...'
 			sys.stdout.write (mymedea.last_str)
 			sys.stdout.flush()
 			pygame.time.wait(1000)
@@ -168,7 +183,7 @@ class mymedea():
 			mymedea.timer.cancel()
 			mymedea.timer = None
 			
-		mymedea.timer = threading.Timer(1, mymedea.playDaemon)
+		mymedea.timer = threading.Timer(0.5, mymedea.playDaemon)
 		mymedea.timer.start()
 			
 		'''
@@ -249,104 +264,150 @@ class mymedea():
 	#http://blog.sina.com.cn/s/blog_40793e970102w3m2.html
 	#http://old.sebug.net/paper/books/scipydoc/wave_pyaudio.html
 	def do_fft(): 
-		NUM_SAMPLES = 2000      # pyAudio内部缓存的块的大小
-		SAMPLING_RATE = 8000    # 取样频率
-		framerate=44100
-		
+
 		if mymedea.stream:
 			# 读入NUM_SAMPLES个取样
-			string_audio_data = mymedea.stream.read(NUM_SAMPLES) 
+			string_audio_data = mymedea.stream.read(CHUNK) 
+			
 			# 将读入的数据转换为数组
 			audio_data = np.fromstring(string_audio_data, dtype=np.short)
+
 			
 			audio_data.shape = -1, 2
 			audio_data = audio_data.T
-			time = np.arange(0, NUM_SAMPLES) * (1.0 / framerate)
-			#pylab.plot(time, audio_data[0])#显示波形数据
-			
+
 			# 采样点数，修改采样点数和起始位置进行不同位置和长度的音频波形分析
-			
-			start=0 #开始采样位置
-			df = framerate/(framerate-1) # 分辨率
-			freq = [df*n for n in range(0,framerate)] #N个元素
-			wave_data2=audio_data[0][start:start+framerate]
-			c=np.fft.fft(wave_data2)*2/framerate
-			#常规显示采样频率一半的频谱
-			d=int(len(c)/2)
-			#仅显示频率在4000以下的频谱
-			while freq[d]>4000:
-				d-=10
-			#pylab.plot(freq[:d-1],abs(c[:d-1]),'r')#显示频谱分析数据
-			
-		ff = [1000,1002, 1500, 1600, 1678, 2000, 2500]
-		value = [1000,1002, 1500, 1600, 'rere', 2000, 'eee']
-		if mymedea.do_fft_callback:
-			mymedea.do_fft_callback(ff, value)
 		
+			start=0 #开始采样位置
+			df = 1 # 分辨率
+			freq = [df*n for n in range(0,RATE)] #N个元素
+			wave_data2=audio_data[0][start:start+RATE]
+			value=np.fft.fft(wave_data2)*2/RATE
+			
+			mymedea.fft2color(freq, value)
+			
+		
+	def fft2color(freq, value):
+		#下面将fft频谱数据转为color数据
+		n = 10
+		s = n*100 #hz
+		i = 0
+		r = 0
+		g = 0
+		b = 0
+
+		df = len(freq)/len(value)
+		for v in value:#简化处理，只处理1000~4000hz间的数据
+			ff = freq[int(i*df)]
+			if ff >= s and ff <= 6000:
+				tmp = int(np.power(np.power(v.real, 2) + np.power(v.imag, 2),0.5));
+
+				if n <= 18:
+					r += tmp
+				elif n > 18 and n <= 40:
+					g += tmp
+				elif n > 40 and n <= 60:
+					b += tmp
+				n+=1
+			i += 1
+			
+		r = r if r>500000 else 0
+		g = g if g>500000 else 0
+		b = b if b>500000 else 0
+		
+		m = max(r, g, b, 5000000)
+		
+		#print('fft_temp_data.size:%d %d r:%d g:%d b:%d' %(len(freq), len(value), r, g, b))
+		
+		r = r*255/m
+		g = g*255/m
+		b = b*255/m
+		'''
+		diff = 15
+		#ESP8266的性能太差，这里只能采取过虑相近的数据，减少ESP8266的网络压力，否则ESP会长时间不响应收数据导致丢包
+		if not(abs(r - mymedea.last['r'])>diff or abs(g - mymedea.last['g'])>diff or abs(b - mymedea.last['b'])>diff) and mymedea.last['count']<2:
+			mymedea.last['count'] += 1;
+			#print('ddddddddddddddddddddddddd')
+			pass#return
+		mymedea.last['r'] = r
+		mymedea.last['g'] = g
+		mymedea.last['b'] = b
+		mymedea.last['count'] = 0
+		'''
+		color = hex(int(r/16))[2:] + hex(int(r%16))[2:] + hex(int(g/16))[2:] + hex(int(g%16))[2:] + hex(int(b/16))[2:] + hex(int(b%16))[2:]
+		
+		if mymedea.do_fft_callback:
+			mymedea.do_fft_callback(color)
+	
+	#https://github.com/licheegh/dig_sig_py_study/blob/master/Analyse_Microphone/audio_fft.py
+	def read_audio_thead(q,stream,ad_rdy_ev):
+		global rt_data
+		global fft_data
+
+		while stream.is_active():
+			ad_rdy_ev.wait(timeout=1000)
+			if not q.empty():
+				#process audio data here
+				data=q.get()
+				while not q.empty():
+					q.get()
+				rt_data = np.frombuffer(data,np.dtype('<i2'))
+				rt_data = rt_data * sg.hamming(CHUNK)
+				fft_temp_data=fftpack.fft(rt_data,rt_data.size,overwrite_x=True)
+				fft_data=np.abs(fft_temp_data)[0:fft_temp_data.size/2+1]
+				freq = [n for n in range(0,RATE)] #N个元素
+				mymedea.fft2color(freq, fft_data)
+
+			ad_rdy_ev.clear()
+	
+	def audio_callback(in_data, frame_count, time_info, status):
+		global ad_rdy_ev
+
+		mymedea.q.put(in_data)
+		ad_rdy_ev.set()
+		if counter <= 0:
+			return (None, pyaudio.paComplete)
+		else:
+			return (None, pyaudio.paContinue)
+	
 	def start(fft_callback = None, chg_index_callback = None):
 		mymedea(os.getcwd() + "\\music")
-		'''
-		# 打开WAV文档
-		f = wave.open(os.getcwd() + "\\music\\sound.wav", "rb")
 
-		# 读取格式信息
-		# (nchannels, sampwidth, framerate, nframes, comptype, compname)
-		params = f.getparams()
-		nchannels, sampwidth, framerate, nframes = params[:4]
-
-		# 读取波形数据
-		str_data = f.readframes(nframes)
-		f.close()
-		
-		wave_data = np.fromstring(str_data, dtype=np.short)
-		wave_data.shape = -1, 2
-		wave_data = wave_data.T
-		time = np.arange(0, nframes)# * (1.0 / framerate)
-		'''
-		
-		
-		'''
-		item = "{ 'songItem': { (.*) } }"
-		item2 = "'sid': '(.*)', 'sname': '(.*)', 'author': '(.*)'"
-		myfile = open("song.txt",'w')
-		response = urllib.request.urlopen('http://music.baidu.com/top/dayhot')
-		html = response.read()[:].decode('utf-8')
-		print(html.encode('utf-8'))
-
-		html = re.findall(item,html)
-		i = 1
-		for rec in html:
-			print(rec)
-			r = re.findall(item2,rec)
-			print(i,r[0][0],r[0][1],r[0][2])
-			i = i+1 
-		'''
 		for f in mymedea.music_files:
 			print('filename:%s' %(f['file']))
-			
+	
 		mymedea.do_fft_callback = fft_callback;
 		mymedea.do_chg_index_callback = chg_index_callback;
 		
-		NUM_SAMPLES = 2000      # pyAudio内部缓存的块的大小
-		SAMPLING_RATE = 8000    # 取样频率
 		# 开启声音输入
 		mymedea.pa = PyAudio() 
-		
+
+
 		for i in range(mymedea.pa.get_device_count()):
 			dev = mymedea.pa.get_device_info_by_index(i)
-			#print((i,dev['name'].encode(),dev['maxInputChannels']))
-			if dev['maxInputChannels']:
-				mymedea.stream = mymedea.pa.open(format=paInt16, channels=dev['maxInputChannels'], rate=SAMPLING_RATE, input=True, frames_per_buffer=NUM_SAMPLES, input_device_index=dev['index']) 
-			
+			#print((i,dev))
+			if dev['maxInputChannels'] and 2 == i:
+				#mymedea.stream = mymedea.pa.open(format=paInt16, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, input_device_index=dev['index']) 
+				mymedea.stream = mymedea.pa.open(format=paInt16,channels=CHANNELS,rate=RATE,input=True,frames_per_buffer=CHUNK,stream_callback=mymedea.audio_callback)
+				mymedea.stream.start_stream()
+				
+
+				t=threading.Thread(target=mymedea.read_audio_thead,args=(mymedea.q,mymedea.stream,ad_rdy_ev))
+				t.daemon=True
+				t.start()
+				print("maxInputChannels")
+
 		mymedea.load(mymedea.get_filepath(0)) 
 		mymedea.play()
-		
+	
 		if mymedea.do_chg_index_callback:
 			mymedea.do_chg_index_callback()
 				
 	def close(): 
 		mymedea.stop()
 		if mymedea.pa and mymedea.stream:
+			mymedea.stream.stop_stream()
+			mymedea.stream.close()
 			mymedea.pa.terminate()
 		
 if __name__ == "__main__":

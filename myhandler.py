@@ -26,19 +26,14 @@ from data.data import *
 from data.g_data import GlobalVar
 from data.asr import asr
 
+import numpy as np
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
-    def do_fft_callback(freq, value): 
- 
-        i = 0
-        now_value = {}
-        for f in freq:#简化处理，只处理1000~4000hz间的数据
-            if f >= 1000 and f <= 4000 and f%100 == 0:
-                now_value['f'+str(f)] = str(value[i])#now_value.append(value[i])   
-            i += 1
+    
+    def do_fft_callback(color): 
         for id in _DEVICE_['medea'].keys():
-            WebHandler.output('medea', id, 'command', now_value)
-        #print('do_fft_callback:%s' %json.dumps(now_value))
+            WebHandler.output('medea', id, 'command', color)
+        #print('do_fft_callback:%s ,%d' %(color, n))
 		
     def do_chg_index(): 
         WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
