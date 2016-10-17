@@ -372,30 +372,29 @@ class mymedea():
 	
 	def start(fft_callback = None, chg_index_callback = None):
 		mymedea(os.getcwd() + "\\music")
-
+		'''文件列表
 		for f in mymedea.music_files:
 			print('filename:%s' %(f['file']))
-	
+		'''
 		mymedea.do_fft_callback = fft_callback;
 		mymedea.do_chg_index_callback = chg_index_callback;
 		
 		# 开启声音输入
 		mymedea.pa = PyAudio() 
 
-
 		for i in range(mymedea.pa.get_device_count()):
 			dev = mymedea.pa.get_device_info_by_index(i)
-			#print((i,dev))
-			if dev['maxInputChannels'] and 2 == i:
+			print(dev['name'].encode('ISO-8859-1').decode('gb2312'))
+			if dev['maxInputChannels'] and dev['name'].encode('ISO-8859-1').decode('gb2312').find('麦克风') != -1:#2 == i:#找到指定的声音输入设备（麦克风）
 				#mymedea.stream = mymedea.pa.open(format=paInt16, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, input_device_index=dev['index']) 
 				mymedea.stream = mymedea.pa.open(format=paInt16,channels=CHANNELS,rate=RATE,input=True,frames_per_buffer=CHUNK,stream_callback=mymedea.audio_callback)
 				mymedea.stream.start_stream()
 				
-
 				t=threading.Thread(target=mymedea.read_audio_thead,args=(mymedea.q,mymedea.stream,ad_rdy_ev))
 				t.daemon=True
 				t.start()
 				print("maxInputChannels")
+				break
 
 		mymedea.load(mymedea.get_filepath(0)) 
 		mymedea.play()

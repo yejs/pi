@@ -20,7 +20,7 @@
 		window.onload = function(){
 			document.getElementById("wrap").style.display="block";
 			
-			var _title = ['&nbsp&nbsp灯光设置&nbsp&nbsp', '&nbsp&nbsp窗帘设置&nbsp&nbsp', '&nbsp&nbsp空调设置&nbsp&nbsp', '&nbsp&nbsp电视设置&nbsp&nbsp', '&nbsp&nbsp插座设置&nbsp&nbsp', '&nbsp&nbsp输入设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
+			var _title = ['&nbsp&nbsp灯光设置&nbsp&nbsp', '&nbsp&nbsp窗帘设置&nbsp&nbsp', '&nbsp&nbsp空调设置&nbsp&nbsp', '&nbsp&nbsp电视设置&nbsp&nbsp', '&nbsp&nbsp音乐灯设置&nbsp&nbsp', '&nbsp&nbsp插座设置&nbsp&nbsp', '&nbsp&nbsp输入设置&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 			var news=document.getElementById("news_ul");
 			for(var i=0;i<_title.length;i++){
 				var li = create_element(news, 'li', null, null, null);
@@ -44,7 +44,7 @@
 			_footer.onresize();
 		}
 		
-		var titles = ["lamp", "curtain", "air_conditioner", "tv", "plugin", "input"];
+		var titles = ["lamp", "curtain", "air_conditioner", "tv", "medea", "plugin", "input"];
 		showPage = function(title){
 			for(var i in titles){
 				if(titles[i] === title)
@@ -95,6 +95,7 @@
 			window.frames['fcurtain'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			window.frames['finput'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
@@ -129,6 +130,11 @@
 			mode = json.mode;
 			
 			window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+		}
+		else if( json.event === "medea" ){
+			mode = json.mode;
+			
+			window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
 		else if( json.event === "plugin" ){
 
@@ -194,6 +200,9 @@
 	</div>
 	<div id="tv" style="display:none">
 		<iframe name="ftv" src='dev_set.html?dev_id=tv' class="myframe"></iframe>
+	</div>
+	<div id="medea" style="display:none">
+		<iframe name="fmedea" src='dev_set.html?dev_id=medea' class="myframe"></iframe>
 	</div>
 	<div id="plugin" style="display:none">
 		<iframe name="fplugin" src='dev_set.html?dev_id=plugin' class="myframe"></iframe>

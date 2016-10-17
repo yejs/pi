@@ -55,8 +55,7 @@ class WebHandler(tornado.web.RequestHandler):
         WebHandler.do_post(self, post_data)
 
     def do_post(this, post_data):
-        #if None == this:
-        print('do_post, post_data: %s' %post_data)
+        #print('do_post, post_data: %s' %post_data)
 			
         if post_data.get('mode'):
             if GlobalVar.get_mode() != post_data['mode'][0]:

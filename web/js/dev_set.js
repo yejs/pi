@@ -20,7 +20,7 @@ window.onload = function(){
 		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner')
 			document.getElementById('d_brand').style.display = 'block';
 
-		if(_dev_set.dev_id == 'lamp' || _dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input')
+		if(_dev_set.dev_id == 'lamp' || _dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input' || _dev_set.dev_id == 'medea')
 			document.getElementById('d_GPIO').style.display = 'none';
 	}
 }
