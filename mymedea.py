@@ -302,20 +302,20 @@ class mymedea():
 			if ff >= s and ff <= 6000:
 				tmp = int(np.power(np.power(v.real, 2) + np.power(v.imag, 2),0.5));
 
-				if n <= 18:
+				if n <= 17:
 					r += tmp
-				elif n > 18 and n <= 40:
+				elif n > 17 and n <= 30:
 					g += tmp
-				elif n > 40 and n <= 60:
+				elif n > 30 and n <= 60:
 					b += tmp
 				n+=1
 			i += 1
-			
+		'''	
 		r = r if r>500000 else 0
 		g = g if g>500000 else 0
 		b = b if b>500000 else 0
-		
-		m = max(r, g, b, 5000000)
+		'''
+		m = max(r, g, b, 10000000)
 		
 		#print('fft_temp_data.size:%d %d r:%d g:%d b:%d' %(len(freq), len(value), r, g, b))
 		
@@ -384,10 +384,10 @@ class mymedea():
 
 		for i in range(mymedea.pa.get_device_count()):
 			dev = mymedea.pa.get_device_info_by_index(i)
-			print(dev['name'].encode('ISO-8859-1').decode('gb2312'))
-			if dev['maxInputChannels'] and dev['name'].encode('ISO-8859-1').decode('gb2312').find('麦克风') != -1:#2 == i:#找到指定的声音输入设备（麦克风）
-				#mymedea.stream = mymedea.pa.open(format=paInt16, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, input_device_index=dev['index']) 
-				mymedea.stream = mymedea.pa.open(format=paInt16,channels=CHANNELS,rate=RATE,input=True,frames_per_buffer=CHUNK,stream_callback=mymedea.audio_callback)
+			name = dev['name'].encode('ISO-8859-1').decode('gb2312')
+			print(name)
+			if dev['maxInputChannels'] and name.find('麦克风') != -1 and name.find('Realtek High Definition') != -1:#找到指定的声音输入设备（麦克风）
+				mymedea.stream = mymedea.pa.open(format=paInt16,channels=CHANNELS,rate=RATE,input=True,frames_per_buffer=CHUNK,stream_callback=mymedea.audio_callback,input_device_index=dev['index'])
 				mymedea.stream.start_stream()
 				
 				t=threading.Thread(target=mymedea.read_audio_thead,args=(mymedea.q,mymedea.stream,ad_rdy_ev))
