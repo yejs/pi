@@ -44,7 +44,6 @@ FORMAT = paInt16
 CHANNELS = 1
 RATE = 44100
 counter=1
-ad_rdy_ev=threading.Event()
 
 def signal_handler2(signum, frame):
 	print('signal_handler2')
@@ -65,10 +64,11 @@ class mymedea():
 	
 	do_fft_callback = None
 	do_chg_index_callback = None
-	pa = None
-	q = queue.Queue()
-	stream = None
-	last = {'r':0, 'g':0, 'b':0, 'count':0}
+	pa = None			#audio对象
+	stream = None		#流对象
+	q = queue.Queue()	#音频数据队列
+	
+	ad_rdy_ev=threading.Event()#信号
 
 	def __init__(self, path):
 		mymedea.root_path = path
@@ -310,30 +310,13 @@ class mymedea():
 					b += tmp
 				n+=1
 			i += 1
-		'''	
-		r = r if r>500000 else 0
-		g = g if g>500000 else 0
-		b = b if b>500000 else 0
-		'''
+
 		m = max(r, g, b, 10000000)
-		
-		#print('fft_temp_data.size:%d %d r:%d g:%d b:%d' %(len(freq), len(value), r, g, b))
-		
+
 		r = r*255/m
 		g = g*255/m
 		b = b*255/m
-		'''
-		diff = 15
-		#ESP8266的性能太差，这里只能采取过虑相近的数据，减少ESP8266的网络压力，否则ESP会长时间不响应收数据导致丢包
-		if not(abs(r - mymedea.last['r'])>diff or abs(g - mymedea.last['g'])>diff or abs(b - mymedea.last['b'])>diff) and mymedea.last['count']<2:
-			mymedea.last['count'] += 1;
-			#print('ddddddddddddddddddddddddd')
-			pass#return
-		mymedea.last['r'] = r
-		mymedea.last['g'] = g
-		mymedea.last['b'] = b
-		mymedea.last['count'] = 0
-		'''
+
 		color = hex(int(r/16))[2:] + hex(int(r%16))[2:] + hex(int(g/16))[2:] + hex(int(g%16))[2:] + hex(int(b/16))[2:] + hex(int(b%16))[2:]
 		
 		if mymedea.do_fft_callback:
@@ -341,8 +324,8 @@ class mymedea():
 	
 	#https://github.com/licheegh/dig_sig_py_study/blob/master/Analyse_Microphone/audio_fft.py
 	def read_audio_thead(q,stream,ad_rdy_ev):
-		global rt_data
-		global fft_data
+		#global rt_data
+		#global fft_data
 
 		while stream.is_active():
 			ad_rdy_ev.wait(timeout=1000)
@@ -351,20 +334,21 @@ class mymedea():
 				data=q.get()
 				while not q.empty():
 					q.get()
+
 				rt_data = np.frombuffer(data,np.dtype('<i2'))
 				rt_data = rt_data * sg.hamming(CHUNK)
 				fft_temp_data=fftpack.fft(rt_data,rt_data.size,overwrite_x=True)
 				fft_data=np.abs(fft_temp_data)[0:fft_temp_data.size/2+1]
 				freq = [n for n in range(0,RATE)] #N个元素
 				mymedea.fft2color(freq, fft_data)
-
 			ad_rdy_ev.clear()
 	
 	def audio_callback(in_data, frame_count, time_info, status):
-		global ad_rdy_ev
+		global counter
 
 		mymedea.q.put(in_data)
-		ad_rdy_ev.set()
+		mymedea.ad_rdy_ev.set()
+
 		if counter <= 0:
 			return (None, pyaudio.paComplete)
 		else:
@@ -385,15 +369,16 @@ class mymedea():
 		for i in range(mymedea.pa.get_device_count()):
 			dev = mymedea.pa.get_device_info_by_index(i)
 			name = dev['name'].encode('ISO-8859-1').decode('gb2312')
-			print(name)
-			if dev['maxInputChannels'] and name.find('麦克风') != -1 and name.find('Realtek High Definition') != -1:#找到指定的声音输入设备（麦克风）
+			#print(name)
+			if dev['maxInputChannels'] and name.find('麦克风') != -1 and name.find('High Definition') != -1:#找到指定的声音输入设备（麦克风）
+				mymedea.ad_rdy_ev.clear()
 				mymedea.stream = mymedea.pa.open(format=paInt16,channels=CHANNELS,rate=RATE,input=True,frames_per_buffer=CHUNK,stream_callback=mymedea.audio_callback,input_device_index=dev['index'])
 				mymedea.stream.start_stream()
 				
-				t=threading.Thread(target=mymedea.read_audio_thead,args=(mymedea.q,mymedea.stream,ad_rdy_ev))
+				t=threading.Thread(target=mymedea.read_audio_thead,args=(mymedea.q, mymedea.stream, mymedea.ad_rdy_ev))
 				t.daemon=True
 				t.start()
-				print("maxInputChannels")
+				print("声音输入设备  '%s' 初始化成功..." %name)
 				break
 
 		mymedea.load(mymedea.get_filepath(0)) 
