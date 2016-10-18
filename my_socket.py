@@ -209,8 +209,8 @@ class Connection(object):
 			
 		#媒体信号特殊处理
         if dev_id.find('medea') != -1:
-            if not self.heart_beat_ack:
-                #print('medea last send_id:%d' %self.medea['send_id'])
+            if not self.heart_beat_ack and value != '000000':
+                print('medea last send_id:%d' %self.medea['send_id'])
                 return
             self.medea['flag'] = True
             self.medea['send_id'] = (self.medea['send_id']+1)%100

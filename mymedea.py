@@ -67,7 +67,8 @@ class mymedea():
 	pa = None			#audio对象
 	stream = None		#流对象
 	q = queue.Queue()	#音频数据队列
-	
+	output_zero = False
+	last = {'r':0, 'g':0, 'b':0, 'count':0}
 	ad_rdy_ev=threading.Event()#信号
 
 	def __init__(self, path):
@@ -289,38 +290,56 @@ class mymedea():
 		
 	def fft2color(freq, value):
 		#下面将fft频谱数据转为color数据
-		n = 10
-		s = n*100 #hz
+
 		i = 0
 		r = 0
 		g = 0
 		b = 0
 
 		df = len(freq)/len(value)
+		L = len(value)
 		for v in value:#简化处理，只处理1000~4000hz间的数据
 			ff = freq[int(i*df)]
-			if ff >= s and ff <= 6000:
-				tmp = int(np.power(np.power(v.real, 2) + np.power(v.imag, 2),0.5));
+			if ff <= 6000:
+				tmp = int(np.power(np.power(v.real, 2) + np.power(v.imag, 2),0.5)/L);
 
-				if n <= 17:
+				if ff <= 800:
 					r += tmp
-				elif n > 17 and n <= 30:
+				elif ff > 800 and ff <= 2000:
 					g += tmp
-				elif n > 30 and n <= 60:
+				else:
 					b += tmp
-				n+=1
-			i += 1
+				i += 1
+			else:
+				break
 
-		m = max(r, g, b, 10000000)
+		m = max(r, g, b, 50000)
 
 		r = r*255/m
 		g = g*255/m
 		b = b*255/m
+		
+		a = 30
+		if not (abs(mymedea.last['r'] - r) > a or abs(mymedea.last['g'] - g) > a or abs(mymedea.last['b'] - b) > a or (abs(mymedea.last['r'] - r) + abs(mymedea.last['g'] - g) + abs(mymedea.last['b'] - b)) > a*2 or mymedea.last['count'] > 10) and (r + g + b) > 3:
+			mymedea.last['count'] += 1
+			print('.................%d.........' %mymedea.last['count'])
+			return
+			
+		mymedea.last['r'] = r
+		mymedea.last['g'] = g
+		mymedea.last['b'] = b
+		mymedea.last['count'] = 0
 
 		color = hex(int(r/16))[2:] + hex(int(r%16))[2:] + hex(int(g/16))[2:] + hex(int(g%16))[2:] + hex(int(b/16))[2:] + hex(int(b%16))[2:]
 		
-		if mymedea.do_fft_callback:
+		if mymedea.do_fft_callback:# and (r + g + b) > 3:
 			mymedea.do_fft_callback(color)
+			mymedea.output_zero = False
+		else:									#静音后的处理，只输出一次静音信号，其余的不输出，这样就可以人工调节LED灯光了
+			if not mymedea.output_zero:
+				mymedea.do_fft_callback('000000')
+				mymedea.output_zero = True
+
 	
 	#https://github.com/licheegh/dig_sig_py_study/blob/master/Analyse_Microphone/audio_fft.py
 	def read_audio_thead(q,stream,ad_rdy_ev):
