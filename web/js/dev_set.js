@@ -22,6 +22,9 @@ window.onload = function(){
 
 		if(_dev_set.dev_id == 'lamp' || _dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input' || _dev_set.dev_id == 'medea')
 			document.getElementById('d_GPIO').style.display = 'none';
+		
+		if(_dev_set.dev_id == 'lamp')
+			document.getElementById('d_music').style.display = 'block';
 	}
 }
 
@@ -206,6 +209,11 @@ function dev_set()
 		else
 			document.getElementById('hide').checked = false;
 		
+		if(_DEVICE_[dev_id][id].hasOwnProperty('music'))
+			document.getElementById('music').checked = _DEVICE_[dev_id][id]['music'] == 'true' ? true : false;
+		else
+			document.getElementById('music').checked = false;
+		
 		if('all' === id){
 			document.getElementById('all').style.backgroundColor = '#e00';
 			document.getElementById('IP').setAttribute("disabled","disabled");
@@ -257,6 +265,9 @@ function dev_set()
 		
 		if(_DEVICE_[dev_id][id].hasOwnProperty('hide'))
 			_DEVICE_[dev_id][id]['hide'] = document.getElementById('hide').checked ? 'true' : 'false';
+		
+		if(_DEVICE_[dev_id][id].hasOwnProperty('music'))
+			_DEVICE_[dev_id][id]['music'] = document.getElementById('music').checked ? 'true' : 'false';
 		
 		if(dev_id == 'humiture'){
 			_DEVICE_[dev_id][id]['t_min'] = parseFloat(document.getElementById('t_min').value);

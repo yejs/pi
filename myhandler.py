@@ -29,11 +29,11 @@ from data.asr import asr
 import numpy as np
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
-    
+    volume = 0
     def do_fft_callback(color): 
-        for id in _DEVICE_['medea'].keys():
+        for id in _DEVICE_['lamp'].keys():
             WebHandler.output('medea', id, 'command', color)
-        #print('do_fft_callback:%s ,%d' %(color, n))
+        #print('do_fft_callback:%s ,%d' %(color, 0))
 		
     def do_chg_index(): 
         WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
@@ -138,12 +138,24 @@ class WebHandler(tornado.web.RequestHandler):
     #硬件层输出（GPIO 或 socket到硬件终端）
     def output(dev_id, id, key, value):
         mode = GlobalVar.get_mode()
-		
+
+        dev = 'lamp' if dev_id == 'medea' else dev_id
+        if not _DEVICE_[dev][id].get('ip'):
+            return
+        sock = Connection.is_online(_DEVICE_[dev][id]['ip'])
+        if sock == None or (sock != None and sock.stop_flag):
+            return
+	   
         if dev_id == 'lamp':#灯
             item = _LAMP_[mode][id]
             if key == 'color':		                        #调光调色指令
                 key = 'command'
                 value = item['status']
+        elif dev_id == 'medea':
+            if _DEVICE_['lamp'].get(id):
+                if _DEVICE_['lamp'][id]['hide'] == 'false' and _DEVICE_['lamp'][id]['music'] == 'true':
+                    sock.output(dev_id, _DEVICE_['lamp'][id]['ip'], _DEVICE_['lamp'][id]['pin'] if _DEVICE_['lamp'][id].get('pin') else None, key, value, None)
+            return
         else:
             item = None
 
@@ -152,15 +164,13 @@ class WebHandler(tornado.web.RequestHandler):
             key = 'command'
             value = item['status']
             print('mode')
-	
-        Connection.check_output()
+
         if _DEVICE_[dev_id].get(id):
-	
             if _DEVICE_[dev_id][id].get('pin') and key:
                 RPi_GPIO.output(int(_DEVICE_[dev_id][id]['pin']), key, value)
 
-            if Connection.sock != None and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['hide'] == 'false' and Connection.is_online(_DEVICE_[dev_id][id]['ip']):
-                Connection.sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'] if _DEVICE_[dev_id][id].get('pin') else None, key, value, item)
+            if _DEVICE_[dev_id][id]['hide'] == 'false':
+                sock.output(dev_id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['pin'] if _DEVICE_[dev_id][id].get('pin') else None, key, value, item)
 				
 	#灯业务逻辑模块处理,协议：	mode=normal&dev_id=lamp&id=1&command=on（开关指令） 或 mode=normal&dev_id=lamp&id=1&color=aabbcc（调光调色指令）
     def lamp(post_data):
@@ -378,9 +388,26 @@ class WebHandler(tornado.web.RequestHandler):
             if 'mute' == post_data['command'][0]:
                 volume = mymedea.get_volume()
                 if 0 == volume:
-                    volume = 1
+                    volume = volume if WebHandler.volume == 0 else WebHandler.volume
                 else:
+                    WebHandler.volume = volume
                     volume = 0
+                mymedea.set_volume(volume)
+            elif 'vol_add' == post_data['command'][0]:
+                volume = mymedea.get_volume()
+                if 1 > volume:
+                    volume += 0.1
+                    volume = min(volume, 1.0)
+                else:
+                    volume = 1.0
+                mymedea.set_volume(volume)
+            elif 'vol_dec' == post_data['command'][0]:
+                volume = mymedea.get_volume()
+                if 0 < volume:
+                    volume -= 0.1
+                    volume = max(volume, 0.0)
+                else:
+                    volume = 0.0
                 mymedea.set_volume(volume)
             elif 'play' == post_data['command'][0]:
                 if mymedea.playing:

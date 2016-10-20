@@ -14,11 +14,12 @@ import json
 import base64
 import urllib
 import logging
-
+import queue
 import threading
 import time
 from my_gpio import RPi_GPIO
 from my_websocket import WebSocket
+from mymedea import mymedea
 #from myhandler import WebHandler
 from lirc import LIRC
 from data.data import *
@@ -28,21 +29,23 @@ import types
 
 class Connection(object):    
     do_disarming_timer = None
-    heart_beat_timer = None
+    stop_flag = False
     close_timer = None	  				#关闭超时定时器
     close_ip = None
     clients = set()    
-    output_param = list()#{"ip": "", "pin": "", "item": None}
     last_heart_beat_msg = None
-    time_tick = 0
-    timer = None
+
     lirc_air = None
     lirc_tv = None
-    sock = None #声明一个socket全局变量，否则调用Connection.output时会有断言错误 assert isinstance
     last_param = None
     def __init__(self, stream, address):   
-        Connection.sock = self
         Connection.clients.add(self)   
+		
+        self.q = queue.Queue()#list()#{"ip": "", "pin": "", "item": None}
+        self.time_tick = 0
+        self.timer = None
+        self.heart_beat_timer = None
+		
         self._stream = stream    
         self._address = address    
         self.heart_beat_ack = True    			#心跳应答标志位
@@ -58,12 +61,12 @@ class Connection(object):
             Connection.lirc_tv = LIRC("conf/tv.conf")
         print("New connection: %s, " % address[0])
 		
-        Connection.timer = threading.Timer(0.1, Connection.do_disarming)#延时0.1秒输出
-        Connection.timer.start()
+        Connection.do_disarming_timer = threading.Timer(0.1, Connection.do_disarming)#延时0.1秒输出
+        Connection.do_disarming_timer.start()
         #Connection.do_disarming()#根据场景模式撤防、布防处理
 		
-        if None == Connection.heart_beat_timer:
-            Connection.heart_beat()             
+        self.heart_beat_timer = threading.Timer(10, self.heart_beat)#10秒心跳输出
+        self.heart_beat_timer.start()      
   
     def read_message(self):    
         self._stream.read_bytes(1024, self.doRecv, partial=True)
@@ -116,6 +119,7 @@ class Connection(object):
                 elif obj.get('event') == 'ack':    
                     if self.medea['flag']:#dev_id.find('medea') != -1:
                         self.heart_beat_ack = True
+                        mymedea.recv_id = (mymedea.recv_id + 1)%100
                         if self.heart_beat_ack_timer:
                             self.heart_beat_ack_timer.cancel()
                             self.heart_beat_ack_timer = None
@@ -139,6 +143,7 @@ class Connection(object):
 
 		
     def do_write_overtime(self):
+        self.write_ack_timer = None
         self.write_success = True
         if self.last_write_msg:
             self.do_write(self.last_write_msg)
@@ -154,18 +159,44 @@ class Connection(object):
             self.last_write_msg = None
         else:
             self.last_write_msg = msg
-			
+
         if self.write_ack_timer:
             self.write_ack_timer.cancel()			
         self.write_ack_timer = threading.Timer(0.5, self.do_write_overtime)#发送超时处理
         self.write_ack_timer.start()
+
+    def stop(): 
+        Connection.stop_flag = True
+        if Connection.close_timer:
+            Connection.close_timer.cancel()
+			
+        for conn in Connection.clients:
+            if conn.timer != None:
+                conn.timer.cancel()
+            if conn.heart_beat_timer != None:
+                conn.heart_beat_timer.cancel()
+            if conn.heart_beat_ack_timer != None:
+                conn.heart_beat_ack_timer.cancel()
+            if conn.write_ack_timer != None:
+                conn.write_ack_timer.cancel()
+
 		
     def on_close(self):    
         if self not in Connection.clients:
             return
+			
         Connection.clients.remove(self)    
-        Connection.close_ip = self._address[0]
+        if self.timer != None:
+            self.timer.cancel()
+        if self.heart_beat_timer != None:
+            self.heart_beat_timer.cancel()
+        if self.heart_beat_ack_timer != None:
+            self.heart_beat_ack_timer.cancel()
+        if self.write_ack_timer != None:
+            self.write_ack_timer.cancel()
+			
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
+
         if Connection.close_timer:
             Connection.close_timer.cancel()	
             Connection.close_timer = None
@@ -194,13 +225,29 @@ class Connection(object):
         WebSocket.broadcast_curtain_status()
         WebSocket.broadcast_plugin_status()
 	
-    def check_output():
-        l = len(Connection.output_param)
-        if l > 20:
-            Connection.output_param = Connection.output_param[l-4:-1]
+	#媒体信号特殊处理
+    def output_medea(self, dev_id, ip, pin, key, value, item):
+        if not self.heart_beat_ack and value != '000000':
+            #print('medea last send_id:%d' %self.medea['send_id'])
+            return
+
+        self.medea['flag'] = True
+        self.medea['send_id'] = (self.medea['send_id']+1)%100
+        mymedea.send_id = self.medea['send_id']
+        msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, self.medea['send_id'], pin, key, value)
+        try:
+            self.do_write(msg)
+        except:
+            logging.error('Error sending message', exc_info=True)	
+
+        self.heart_beat_ack = False
+        if self.heart_beat_ack_timer:
+            self.heart_beat_ack_timer.cancel()
+        self.heart_beat_ack_timer = threading.Timer(3, self.heart_beat_overtime)#5秒心跳应答超时处理
+        self.heart_beat_ack_timer.start()
 			
     def output(self, dev_id, ip, pin, key, value, item):
-        if dev_id.find('tv') != -1 and time.time() - Connection.time_tick < 0.5 and Connection.last_param and Connection.lirc_tv.remote.get('repeat') and Connection.last_param["value"] == value and Connection.last_param["ip"] == ip:#电视连续按键处理
+        if dev_id.find('tv') != -1 and time.time() - self.time_tick < 0.5 and Connection.last_param and Connection.lirc_tv.remote.get('repeat') and Connection.last_param["value"] == value and Connection.last_param["ip"] == ip:#电视连续按键处理
             param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": "repeat", "item": item}
         else:
             param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": value, "item": item}
@@ -209,57 +256,39 @@ class Connection(object):
 			
 		#媒体信号特殊处理
         if dev_id.find('medea') != -1:
-            if not self.heart_beat_ack and value != '000000':
-                print('medea last send_id:%d' %self.medea['send_id'])
-                return
-            self.medea['flag'] = True
-            self.medea['send_id'] = (self.medea['send_id']+1)%100
-            Connection.output_param = []
-            self.heart_beat_ack = False
-            if self.heart_beat_ack_timer:
-                self.heart_beat_ack_timer.cancel()
-            self.heart_beat_ack_timer = threading.Timer(3, self.heart_beat_overtime)#5秒心跳应答超时处理
-            self.heart_beat_ack_timer.start()
+            self.output_medea(dev_id, ip, pin, key, value, item)
+            return
 			
-        Connection.output_param.append(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
+        self.q.put(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
 		
-        if Connection.timer:
-            Connection.timer.cancel()
-            Connection.timer = None
+        if self.timer:
+            self.timer.cancel()
+            self.timer = None
 			
         #输出优化处理，当单位时间内输出很多信息到ESP时，ESP会挂掉，所以这里用定时器做过滤处理，每秒顶多输出10个信息（0.1秒定时）
-        if time.time() - Connection.time_tick > 2 or (time.time() - Connection.time_tick > 0.5 and len(Connection.output_param) == 1):
+        if time.time() - self.time_tick > 2 or (time.time() - self.time_tick > 0.5 and self.q.qsize() == 1):
             if dev_id.find('tv') != -1 and value.isdigit() and int(value) >=0 and int(value)<=9:#如果是电视的首个数字键则延时0.5秒，否则第二个数字键来不及按被误当作两个独立的按键输出
-                Connection.timer = threading.Timer(0.5, Connection.output_ex)
-                Connection.timer.start()
+                self.timer = threading.Timer(0.5, self.output_ex)
+                self.timer.start()
             else:
-                Connection.output_ex()
+                self.output_ex()
 
         else :
-            Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
-            Connection.timer.start()
+            self.timer = threading.Timer(0.1, self.output_ex)#延时0.1秒输出
+            self.timer.start()
+	
+    def output_ex(self):
+        self.time_tick = time.time()
+        if self.timer:
+            self.timer.cancel()
+            self.timer = None
 
-    def front(sets):
-        if len(sets) == 0:
-            return None;
-		
-        for param in sets:
-            sets.remove(param)
-            return param
-			
-    def output_ex():
-        Connection.time_tick = time.time()
-        if Connection.timer:
-            Connection.timer.cancel()
-            Connection.timer = None
-			
-        #param = Connection.output_param.pop()
-        param = Connection.front(Connection.output_param)
+        param = self.q.get()
         if param == None:
             return;
 
-        Connection.timer = threading.Timer(0.1, Connection.output_ex)#延时0.1秒输出
-        Connection.timer.start()
+        self.timer = threading.Timer(0.1, self.output_ex)#延时0.1秒输出
+        self.timer.start()
         dev_id = param['dev_id']
         ip = param['ip']
         pin = param['pin']
@@ -273,10 +302,7 @@ class Connection(object):
         elif dev_id.find('plugin') != -1:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
         elif dev_id.find('medea') != -1:
-            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
-            conn = Connection.is_online(ip)
-            if conn and conn.medea['flag']: 
-                msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, conn.medea['send_id'], pin, key, value)
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, self.medea['send_id'], pin, key, value)
         elif dev_id.find('air_conditioner') != -1:#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
             LIRC_KEY = None
             if value == 'power_on' or value == 'power_off':
@@ -352,12 +378,10 @@ class Connection(object):
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"data\":\"%s\", \"is_raw\":\"%d\"}" %(dev_id, value, is_raw)
         #print(msg)
 
-        conn = Connection.is_online(ip)
-        if conn:
-            try:
-                conn.do_write(msg)
-            except:
-                logging.error('Error sending message', exc_info=True)	
+        try:
+            self.do_write(msg)
+        except:
+            logging.error('Error sending message', exc_info=True)	
 					
     def is_online(ip): 
         for conn in Connection.clients:
@@ -382,33 +406,33 @@ class Connection(object):
 				
 	#收到心跳包应答超时处理
     def heart_beat_overtime(self):
+        self.heart_beat_ack_timer = None
         if not self.heart_beat_ack:
             self.heart_beat_ack = True
             #print('heart_beat has no ack: %s!' %Connection.last_heart_beat_msg)
 		
     #发送心跳包到ESP,因为ESP断电后socket服务检测不到socket断开的动作，这里通过发送心跳检测客户端socket是否已经断开	
-    def heart_beat():
-        if Connection.heart_beat_timer != None:
-            Connection.heart_beat_timer.cancel()
-        Connection.heart_beat_timer = threading.Timer(10, Connection.heart_beat)#10秒心跳输出
-        Connection.heart_beat_timer.start()
+    def heart_beat(self):
+        if not self.stop_flag:
+            self.heart_beat_timer = threading.Timer(10, self.heart_beat)#10秒心跳输出
+            self.heart_beat_timer.start()
 
-        if time.time() - Connection.time_tick > 10:
+        if time.time() - self.time_tick > 10:
             msg = "{\"event\":\"heart_beat\", \"time\":\"%d\"}" %time.time()
             Connection.last_heart_beat_msg = msg
-            for conn in Connection.clients:
-                try:
-                    if conn.heart_beat_ack:
-                        conn.do_write(msg)
-                        conn.heart_beat_ack = False
-                        if conn.heart_beat_ack_timer:
-                            conn.heart_beat_ack_timer.cancel()
-                        conn.heart_beat_ack_timer = threading.Timer(3, conn.heart_beat_overtime)#5秒心跳应答超时处理
-                        conn.heart_beat_ack_timer.start()
-                    #print(msg)
-                except:
-                    logging.error('Error sending message', exc_info=True)	
-				
+
+            try:
+                if self.heart_beat_ack:
+                    self.do_write(msg)
+                    self.heart_beat_ack = False
+                    if self.heart_beat_ack_timer:
+                        self.heart_beat_ack_timer.cancel()
+                    self.heart_beat_ack_timer = threading.Timer(3, self.heart_beat_overtime)#5秒心跳应答超时处理
+                    self.heart_beat_ack_timer.start()
+                #print(msg)
+            except:
+                logging.error('Error sending message', exc_info=True)	
+
 class SocketServer(TCPServer):    
     def handle_stream(self, stream, address):   
         Connection(stream, address)   

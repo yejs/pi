@@ -40,10 +40,13 @@ define("http_port", default=8000, help="run on the given port", type=int)
 define("socket_port", default=5000, help="run on the given port", type=int)
 
 is_closing = False
+server = None
 
 def signal_handler(signum, frame):
     global is_closing
     logging.info('exiting...')
+    server.stop()
+    Connection.stop()
     mymedea.close()
     is_closing = True
 
@@ -82,10 +85,7 @@ if __name__ == "__main__":
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:
         tornado.ioloop.IOLoop.instance().stop()
-        if Connection.heart_beat_timer != None:
-            Connection.heart_beat_timer.cancel()
     finally:
         RPi_GPIO.cleanup()
         tornado.ioloop.IOLoop.instance().stop()
-        if Connection.heart_beat_timer != None:
-            Connection.heart_beat_timer.cancel()
+        

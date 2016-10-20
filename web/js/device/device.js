@@ -457,8 +457,9 @@ function device()
 			return;
 		} 
 		else{
+
 			var id = json.id;
-			if(!_DEVICE_[json.event].hasOwnProperty(json.id))
+			if(json.event != 'medea' && !_DEVICE_[json.event].hasOwnProperty(json.id))
 				id = '1';
 
 			mode = json.mode;

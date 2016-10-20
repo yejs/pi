@@ -61,7 +61,7 @@ class mymedea():
 	can_play = False	#当前文件是否能够播放标志
 	timer = None
 	last_str = None
-	
+	close_flag = False
 	do_fft_callback = None
 	do_chg_index_callback = None
 	pa = None			#audio对象
@@ -70,7 +70,8 @@ class mymedea():
 	output_zero = False
 	last = {'r':0, 'g':0, 'b':0, 'count':0}
 	ad_rdy_ev=threading.Event()#信号
-
+	recv_id = 0
+	send_id = 0
 	def __init__(self, path):
 		mymedea.root_path = path
 		mymedea.get_music_files()
@@ -90,20 +91,22 @@ class mymedea():
 		artist = ''
 		album  = ''
 		anno  = ''
+		version = ''
+		sample_freq = 0
+		time_secs = 0
 		if filename.lower().endswith('.mp3'):
-			pass
-			'''
-			fp = open(file, 'rb', 0)
-			fp.seek(128,-2)
-			tag  = fp.read(3) # TAG iniziale
-			title  = fp.read(30)
-			artist = fp.read(30)
-			album  = fp.read(30)
-			anno  = fp.read(4)
-			comment = fp.read(28)
-			fp.close()
-			'''
-		return {'file':filename, 'tag':tag, 'title':title, 'artist':artist, 'album':album}
+			audiofile = None
+			try:
+				audiofile = eyed3.load(file)
+			except:
+				pass#print("eyed3 load file {} error!".format(file))
+			finally:
+				if audiofile:
+					time_secs = audiofile.info.time_secs
+					if audiofile.info.mp3_header:
+						version = audiofile.info.mp3_header.version
+						sample_freq = audiofile.info.mp3_header.sample_freq
+		return {'file':filename, 'tag':tag, 'title':title, 'artist':artist, 'album':album, 'time_secs':time_secs, 'version':version, 'sample_freq':sample_freq}
 		
 	#获取本地音乐文件列表
 	def get_music_files():
@@ -129,9 +132,6 @@ class mymedea():
 			if file:
 				mymedea.track = pygame.mixer.music.load(file.encode('utf-8'))
 				mymedea.can_play = True
-				
-				#pygame.mixer.music.set_endevent(mymedea.TRACK_END)
-				#print('load, file:%s, current_index:%d' %(file, mymedea.current_index))
 		except pygame.error:
 			mymedea.can_play = False
 			print("load File {} error! {}".format(file, pygame.get_error()))
@@ -140,20 +140,28 @@ class mymedea():
 				mymedea.do_chg_index_callback()
 			
 		return file
-			
+
+		
 	def playDaemon():
 		while mymedea.get_busy() and mymedea.can_play: #still playing
 	
 			if mymedea.last_str:
 				n = 0;
-				while n < len(mymedea.last_str) + 10:
+				while n < len(mymedea.last_str) + 50:
 					sys.stdout.write ('\b')
 					n += 1
 			pos = int(pygame.mixer.music.get_pos()/1000)
 			m = int(pos/60) 
 			s = int(pos%60)
+			
+			file = mymedea.get_file(mymedea.current_index)
+			time_secs = '--'
+			for f in mymedea.music_files:
+				if f['file'] == file:
+					time_secs = str(int(f['time_secs']/60)) + ':' + str(int(f['time_secs']%60))
 
-			mymedea.last_str = '...still playing ' + mymedea.get_file(mymedea.current_index) + ', time:  ' + str(m) + ':' + str(s) +'  ...'
+
+			mymedea.last_str = 'still playing ' + file + ', time_secs:  ' + time_secs + '， time:  ' + str(m) + ':' + str(s) + ', send_id:' + str(mymedea.send_id) + ', recv_id:' + str(mymedea.recv_id)
 			sys.stdout.write (mymedea.last_str)
 			sys.stdout.flush()
 			pygame.time.wait(1000)
@@ -173,8 +181,6 @@ class mymedea():
 			if mymedea.can_play:
 				pygame.mixer.music.play(loops, start)
 				mymedea.playing = True
-				#print ('play %s...' %(mymedea.get_file(mymedea.current_index)))
-				#mymedea.track.play()
 		except pygame.error:
 			print("play error! {}".format(pygame.get_error()))
 		finally:
@@ -186,12 +192,6 @@ class mymedea():
 			
 		mymedea.timer = threading.Timer(0.5, mymedea.playDaemon)
 		mymedea.timer.start()
-			
-		'''
-		next_file = mymedea.get_filepath((mymedea.current_index + 1) % len(mymedea.music_files))
-		if next_file:
-			pygame.mixer.music.queue(next_file)#使用指定下一个要播放的音乐文件，当前的音乐播放完成后自动开始播放指定的下一个。一次只能指定一个等待播放的音乐文件
-		'''
 		
 	#播放下一首音乐 
 	def play_next():
@@ -264,33 +264,9 @@ class mymedea():
 			
 	#http://blog.sina.com.cn/s/blog_40793e970102w3m2.html
 	#http://old.sebug.net/paper/books/scipydoc/wave_pyaudio.html
-	def do_fft(): 
-
-		if mymedea.stream:
-			# 读入NUM_SAMPLES个取样
-			string_audio_data = mymedea.stream.read(CHUNK) 
-			
-			# 将读入的数据转换为数组
-			audio_data = np.fromstring(string_audio_data, dtype=np.short)
-
-			
-			audio_data.shape = -1, 2
-			audio_data = audio_data.T
-
-			# 采样点数，修改采样点数和起始位置进行不同位置和长度的音频波形分析
-		
-			start=0 #开始采样位置
-			df = 1 # 分辨率
-			freq = [df*n for n in range(0,RATE)] #N个元素
-			wave_data2=audio_data[0][start:start+RATE]
-			value=np.fft.fft(wave_data2)*2/RATE
-			
-			mymedea.fft2color(freq, value)
-			
 		
 	def fft2color(freq, value):
 		#下面将fft频谱数据转为color数据
-
 		i = 0
 		r = 0
 		g = 0
@@ -319,6 +295,7 @@ class mymedea():
 		g = g*255/m
 		b = b*255/m
 		
+		#每秒10几个数据，ESP来不及接收，这里过滤相近的数据，只发送变化比较大的数据，以提高LED灯的响应速度，a是过滤阀值，过大了LED只反应幅度比较大的数据，幅度小的LED灯亮度不变，太小了达不到过滤的效果
 		a = 30
 		if not (abs(mymedea.last['r'] - r) > a or abs(mymedea.last['g'] - g) > a or abs(mymedea.last['b'] - b) > a or (abs(mymedea.last['r'] - r) + abs(mymedea.last['g'] - g) + abs(mymedea.last['b'] - b)) > a*2 or mymedea.last['count'] > 10) and (r + g + b) > 3:
 			mymedea.last['count'] += 1
@@ -332,13 +309,13 @@ class mymedea():
 
 		color = hex(int(r/16))[2:] + hex(int(r%16))[2:] + hex(int(g/16))[2:] + hex(int(g%16))[2:] + hex(int(b/16))[2:] + hex(int(b%16))[2:]
 		
-		if mymedea.do_fft_callback:# and (r + g + b) > 3:
+		if mymedea.do_fft_callback and (r + g + b) > 3:
 			mymedea.do_fft_callback(color)
 			mymedea.output_zero = False
 		else:									#静音后的处理，只输出一次静音信号，其余的不输出，这样就可以人工调节LED灯光了
 			if not mymedea.output_zero:
-				mymedea.do_fft_callback('000000')
-				mymedea.output_zero = True
+				mymedea.do_fft_callback('000001')
+				#mymedea.output_zero = True
 
 	
 	#https://github.com/licheegh/dig_sig_py_study/blob/master/Analyse_Microphone/audio_fft.py
@@ -346,7 +323,7 @@ class mymedea():
 		#global rt_data
 		#global fft_data
 
-		while stream.is_active():
+		while stream.is_active() and not mymedea.close_flag:
 			ad_rdy_ev.wait(timeout=1000)
 			if not q.empty():
 				#process audio data here
@@ -412,6 +389,7 @@ class mymedea():
 			mymedea.stream.stop_stream()
 			mymedea.stream.close()
 			mymedea.pa.terminate()
+			mymedea.close_flag = True
 		
 if __name__ == "__main__":
 	try:

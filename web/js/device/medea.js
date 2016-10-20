@@ -1,5 +1,5 @@
 //plugin类
-_MEDEA_BTN_ = {'mute':0, 'play':1, 'pre':2, 'next':3};
+_MEDEA_BTN_ = {'mute':0,  'vol_add':1, 'vol_dec':2, 'play':3, 'pre':4, 'next':5};
 
 function medea()
 {
@@ -27,11 +27,17 @@ function medea()
 		document.getElementById('all').style.display = 'none';
 		document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- 音乐';
 
-		for(var i=0;i<4;i++)
+		for(var i=0;i<6;i++)
 		{
 			switch(i){
 				case _MEDEA_BTN_.mute:
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'静音');
+				break;
+				case _MEDEA_BTN_.vol_add:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'音量+');
+				break;
+				case _MEDEA_BTN_.vol_dec:
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'音量-');
 				break;
 				case _MEDEA_BTN_.play:
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'播放');
@@ -52,12 +58,14 @@ function medea()
 		this.imageRect = {x:25, y:5, width:this.rect.width-50 , height:(this.rect.width-50)};
 		var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 40;
 		var y = this.imageRect.y + this.imageRect.height + offset_y;
-		this.arrayBtn[_MEDEA_BTN_.mute].doResize(this.rect.width/2 - btn_w/2, y, this.rect.width/2 + btn_w/2, y + btn_h);
+	//	this.arrayBtn[_MEDEA_BTN_.mute].doResize(this.rect.width/2 - btn_w/2, y, this.rect.width/2 + btn_w/2, y + btn_h);
 
 		var s = ((this.imageRect.x + this.imageRect.width - offset_x - btn_w) - (this.imageRect.x + offset_x))/2;
-		y += 130;
-		for(var i=_MEDEA_BTN_.play;i<=_MEDEA_BTN_.next;i++){
-			this.arrayBtn[i].doResize(this.imageRect.x + offset_x + (i-_MEDEA_BTN_.play)*s, y, this.imageRect.x + offset_x + (i-_MEDEA_BTN_.play)*s + btn_w, y + btn_h);
+	//	y += 130;
+		for(var i=_MEDEA_BTN_.mute;i<=_MEDEA_BTN_.next;i++){
+			if(i == _MEDEA_BTN_.play)
+				y += 130;
+			this.arrayBtn[i].doResize(this.imageRect.x + offset_x + ((i-_MEDEA_BTN_.mute)%3)*s, y, this.imageRect.x + offset_x + ((i-_MEDEA_BTN_.mute)%3)*s + btn_w, y + btn_h);
 		}
 		
 		this.contextImage.fillStyle = "rgb(141, 178, 159)";
@@ -101,11 +109,18 @@ function medea()
 			this.docommand(this.id, 'mute');
 			this.doBtnFocus(_MEDEA_BTN_.power);
 		}
+		else if(this.arrayBtn[_MEDEA_BTN_.vol_add].IsInRect(loc, 0)){//vol_add
+			this.docommand(this.id, 'vol_add');
+			this.doBtnFocus(_MEDEA_BTN_.vol_add);
+		}
+		else if(this.arrayBtn[_MEDEA_BTN_.vol_dec].IsInRect(loc, 0)){//vol_dec
+			this.docommand(this.id, 'vol_dec');
+			this.doBtnFocus(_MEDEA_BTN_.vol_dec);
+		}
 		else if(this.arrayBtn[_MEDEA_BTN_.play].IsInRect(loc, 0)){//play
 			this.docommand(this.id, 'play');
 			this.doBtnFocus(_MEDEA_BTN_.play);
 		}
-		
 		else if(this.arrayBtn[_MEDEA_BTN_.pre].IsInRect(loc, 0)){//pre
 			this.docommand(this.id, 'pre');
 			this.doBtnFocus(_MEDEA_BTN_.pre);
