@@ -39,7 +39,7 @@ class WebHandler(tornado.web.RequestHandler):
         WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
 		
     def do_chg_index_callback(): 
-        timer = threading.Timer(0.5, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
+        timer = threading.Timer(2, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
         timer.start()
 	
     def set_asr_callback():#初始化设置语音识别回调函数

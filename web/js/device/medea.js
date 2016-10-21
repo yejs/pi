@@ -11,7 +11,7 @@ function medea()
 	this.do_medea_files = function(data, index){
 		this._medea_data = data;
 		this._current_index = index;
-
+		
 		this.arrayFiles = [];
 		for(var i=0;i<Math.min(120, this._medea_data.length);i++){
 			this.arrayFiles[i] = new tagRECT(this.imageRect.x+35,this.imageRect.y + 40 + (i-1)*55,this.rect.width == 0 ? 800:this.rect.width ,this.imageRect.y + 40 + (i)*55,'');
@@ -89,6 +89,7 @@ function medea()
 				if(this.arrayFiles[i-start].IsInRect(loc, 0)){
 					this.arrayFiles[i-start].istouch = true;
 					this.docommand(this.id, i.toString());
+					this._current_index = i;
 				}
 			}
 		}
@@ -142,7 +143,13 @@ function medea()
 				var index = parseInt(f);
 				if(index>=start && index < end){
 					ctx.fillStyle = ctx.strokeStyle = (index == this._current_index ? "rgb(247, 82, 67)" : "rgb(47, 82, 67)");
-					ctx.fillText((index).toString() + '.  ' + this._medea_data[index].file, this.arrayFiles[index-start].left, this.arrayFiles[index-start].bottom);
+					var tmp = (index).toString() + '.  ' + this._medea_data[index].file;
+					if(ctx.measureText(tmp).width > (this.imageRect.width - 100)){
+						while(ctx.measureText(tmp).width > (this.imageRect.width - 100))
+							tmp = tmp.substr(0, tmp.length - 2);
+						tmp = tmp + '...'
+					}
+					ctx.fillText(tmp, this.arrayFiles[index-start].left, this.arrayFiles[index-start].bottom);
 				}
 			}
 		}
@@ -153,15 +160,9 @@ function medea()
 			else
 				ctx.fillStyle = "rgb(170, 170, 170)";
 			
-
 			this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
 		}
-		//画电源按钮
-		ctx.strokeStyle = "rgb(250, 20, 20)";
-		ctx.lineWidth = 5;
-		powerBtn = this.arrayBtn[_MEDEA_BTN_.power];
-	//	ctx.arcEx(powerBtn.left + powerBtn.width/2, powerBtn.top + powerBtn.height/2, 20, 1.4*Math.PI, 1.6*Math.PI, 1, 0, 1, false);
-	//	ctx.drawLine(powerBtn.left + powerBtn.width/2,powerBtn.top + 15,powerBtn.left + powerBtn.width/2,powerBtn.top + 30);
+
 	}
 	
 	this.doParam = function(id, commandEx){

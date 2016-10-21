@@ -70,12 +70,13 @@ class mymedea():
 	output_zero = False
 	last = {'r':0, 'g':0, 'b':0, 'count':0}
 	ad_rdy_ev=threading.Event()#信号
+	mutex = threading.Lock()#创建锁
 	recv_id = 0
 	send_id = 0
 	def __init__(self, path):
 		mymedea.root_path = path
 		mymedea.get_music_files()
-	
+		
 		pygame.mixer.init()
 		#pygame.init()
 		
@@ -111,6 +112,7 @@ class mymedea():
 	#获取本地音乐文件列表
 	def get_music_files():
     # 从文件夹来读取所有的音乐文件
+		mymedea.mutex.acquire()#取得锁
 		raw_filenames = os.listdir(mymedea.root_path)
 		mymedea.music_files = []
 		for filename in raw_filenames:
@@ -118,6 +120,8 @@ class mymedea():
 			if filename.lower().endswith('.ogg') or filename.lower().endswith('.mp3') or filename.lower().endswith('.wav'):
 				#mymedea.music_files.append(os.path.join(mymedea.root_path, filename))
 				mymedea.music_files.append(mymedea.getID3(filename))
+				
+		mymedea.mutex.release()#释放锁
 		return mymedea.music_files#sorted(mymedea.music_files)
 		
 	#播放音乐文件，外部接口

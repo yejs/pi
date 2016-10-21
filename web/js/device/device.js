@@ -515,6 +515,7 @@ function device()
 			}
 			else if( json.event === "medea" ){
 				this.do_medea_files(json.data, json.index);
+				
 			}
 			else if( json.event === "plugin" ){
 				_PLUGIN_[json.mode] = json.data;
