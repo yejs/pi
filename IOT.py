@@ -20,8 +20,8 @@ from myhandler import WebHandler
 from my_websocket import WebSocket
 from my_socket import SocketServer, Connection
 from my_gpio import RPi_GPIO
-from mymedea import mymedea
-
+from mymedia import mymedia
+from ping import ping 
 import os, threading, sys
 #import RPi.GPIO as GPIO
 
@@ -47,7 +47,7 @@ def signal_handler(signum, frame):
     logging.info('exiting...')
     server.stop()
     Connection.stop()
-    mymedea.close()
+    mymedia.close()
     is_closing = True
 
 def try_exit(): 
@@ -70,7 +70,8 @@ application = tornado.web.Application([
  
 if __name__ == "__main__":
     try:
-        mymedea.start(WebHandler.do_fft_callback, WebHandler.do_chg_index_callback)
+        mymedia.start(WebHandler.do_fft_callback, WebHandler.do_chg_index_callback)
+		
         RPi_GPIO.init(dir())
         #os.chdir(os.path.dirname(__file__))
         tornado.options.parse_command_line()
@@ -80,7 +81,11 @@ if __name__ == "__main__":
         server = SocketServer()    
         server.listen(options.socket_port)
         print ("webserver 127.0.0.1:%s start..." % options.http_port)
+		
         WebHandler.set_asr_callback()
+		
+        ping(WebHandler.do_post)
+		
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:

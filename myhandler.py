@@ -20,7 +20,7 @@ import time
 from my_gpio import RPi_GPIO
 from my_socket import SocketServer, Connection
 from my_websocket import WebSocket
-from mymedea import mymedea
+from mymedia import mymedia
 
 from data.data import *
 from data.g_data import GlobalVar
@@ -29,17 +29,25 @@ from data.asr import asr
 import numpy as np
 #客户端ajax请求处理
 class WebHandler(tornado.web.RequestHandler):
+    time_tick = time.time()
     volume = 0
     def do_fft_callback(color): 
+
         for id in _DEVICE_['lamp'].keys():
-            WebHandler.output('medea', id, 'command', color)
-        #print('do_fft_callback:%s ,%d' %(color, 0))
+            if not _DEVICE_['lamp'][id].get('ip'):
+                continue
+
+            sock = Connection.is_online(_DEVICE_['lamp'][id]['ip'])
+
+            if sock and (not sock.stop_flag) and _DEVICE_['lamp'].get(id) and _DEVICE_['lamp'][id]['hide'] == 'false' and _DEVICE_['lamp'][id]['music'] == 'true':
+                sock.output_media(_DEVICE_['lamp'][id]['ip'], _DEVICE_['lamp'][id]['pin'] if _DEVICE_['lamp'][id].get('pin') else None, 'command', color)
+        
 		
     def do_chg_index(): 
-        WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
+        WebSocket.broadcast_media_status(json.dumps(mymedia.music_files), str(mymedia.current_index), 'true' if mymedia.get_volume() == 0 else 'false', 'true' if not mymedia.paused else 'false')
 		
     def do_chg_index_callback(): 
-        timer = threading.Timer(2, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
+        timer = threading.Timer(2 if time.time() < (WebHandler.time_tick + 2) else 0.5, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
         timer.start()
 	
     def set_asr_callback():#初始化设置语音识别回调函数
@@ -72,6 +80,9 @@ class WebHandler(tornado.web.RequestHandler):
         else:
             GlobalVar.set_mode("normal")
 			
+        if post_data.get('auto_mode'):
+            GlobalVar.set_auto_mode(post_data['auto_mode'][0])
+			
         if post_data.get('dev_id'):
             dev_id = post_data['dev_id'][0]
             GlobalVar.set_dev_id(dev_id)
@@ -103,8 +114,8 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.air_conditioner(post_data) 
             elif dev_id == 'tv':
                 WebHandler.tv(post_data) 
-            elif dev_id == 'medea':
-                WebHandler.medea(post_data) 
+            elif dev_id == 'media':
+                WebHandler.media(post_data) 
             elif dev_id == 'plugin':
                 WebHandler.plugin(post_data) 
             elif dev_id == None:
@@ -112,7 +123,7 @@ class WebHandler(tornado.web.RequestHandler):
                 WebHandler.curtain(post_data)
                 WebHandler.air_conditioner(post_data) 
                 WebHandler.tv(post_data) 
-                WebHandler.medea(post_data) 
+                WebHandler.media(post_data) 
                 WebHandler.plugin(post_data) 
                 #print('mode:%s' %post_data)
 				
@@ -139,10 +150,9 @@ class WebHandler(tornado.web.RequestHandler):
     def output(dev_id, id, key, value):
         mode = GlobalVar.get_mode()
 
-        dev = 'lamp' if dev_id == 'medea' else dev_id
-        if not _DEVICE_[dev][id].get('ip'):
+        if not _DEVICE_[dev_id][id].get('ip'):
             return
-        sock = Connection.is_online(_DEVICE_[dev][id]['ip'])
+        sock = Connection.is_online(_DEVICE_[dev_id][id]['ip'])
         if sock == None or (sock != None and sock.stop_flag):
             return
 	   
@@ -151,11 +161,6 @@ class WebHandler(tornado.web.RequestHandler):
             if key == 'color':		                        #调光调色指令
                 key = 'command'
                 value = item['status']
-        elif dev_id == 'medea':
-            if _DEVICE_['lamp'].get(id):
-                if _DEVICE_['lamp'][id]['hide'] == 'false' and _DEVICE_['lamp'][id]['music'] == 'true':
-                    sock.output(dev_id, _DEVICE_['lamp'][id]['ip'], _DEVICE_['lamp'][id]['pin'] if _DEVICE_['lamp'][id].get('pin') else None, key, value, None)
-            return
         else:
             item = None
 
@@ -383,49 +388,49 @@ class WebHandler(tornado.web.RequestHandler):
         WebSocket.broadcast_tv_status()
 		
 	#电视业务逻辑模块处理,协议：	mode=normal&dev_id=tv&id=1&command=power_on	
-    def medea(post_data):
+    def media(post_data):
         if post_data.get('command'):#解析command指令为具体的电视指令
             if 'mute' == post_data['command'][0]:
-                volume = mymedea.get_volume()
+                volume = mymedia.get_volume()
                 if 0 == volume:
                     volume = volume if WebHandler.volume == 0 else WebHandler.volume
                 else:
                     WebHandler.volume = volume
                     volume = 0
-                mymedea.set_volume(volume)
+                mymedia.set_volume(volume)
             elif 'vol_add' == post_data['command'][0]:
-                volume = mymedea.get_volume()
+                volume = mymedia.get_volume()
                 if 1 > volume:
                     volume += 0.1
                     volume = min(volume, 1.0)
                 else:
                     volume = 1.0
-                mymedea.set_volume(volume)
+                mymedia.set_volume(volume)
             elif 'vol_dec' == post_data['command'][0]:
-                volume = mymedea.get_volume()
+                volume = mymedia.get_volume()
                 if 0 < volume:
                     volume -= 0.1
                     volume = max(volume, 0.0)
                 else:
                     volume = 0.0
-                mymedea.set_volume(volume)
+                mymedia.set_volume(volume)
             elif 'play' == post_data['command'][0]:
-                if mymedea.playing:
-                    mymedea.pause()
+                if mymedia.playing:
+                    mymedia.pause()
                 else:
-                    mymedea.load(mymedea.get_filepath(mymedea.current_index)) 
-                    mymedea.play()
+                    mymedia.load(mymedia.get_filepath(mymedia.current_index)) 
+                    mymedia.play()
             elif 'pre' == post_data['command'][0] or 'next' == post_data['command'][0]:
                 if 'pre' == post_data['command'][0]:
-                    mymedea.play_pre()
+                    mymedia.play_pre()
                 elif 'next' == post_data['command'][0]:
-                    mymedea.play_next()
+                    mymedia.play_next()
             else:
                 if post_data['command'][0].isdigit():
-                    mymedea.play_music(int(post_data['command'][0]))
+                    mymedia.play_music(int(post_data['command'][0]))
                     
 
-        #WebSocket.broadcast_medea_status(json.dumps(mymedea.music_files), str(mymedea.current_index))
+        #WebSocket.broadcast_media_status(json.dumps(mymedia.music_files), str(mymedia.current_index))
 		
     def plugin(post_data):
         last_mode = GlobalVar.get_last_mode()

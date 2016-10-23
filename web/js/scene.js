@@ -23,6 +23,7 @@ refresh = function(){
 }
 
 _SCENE_ = {'1':'normal', '2':'leave', '3':'night', '4':'getup', '5':'guests', '6':'diner'}
+_id_ = '1'
 
 window.addEventListener('message',function(e){
 	if('mode'===e.data.msg){
@@ -31,11 +32,18 @@ window.addEventListener('message',function(e){
 				setFocus(id);
 			}
 		}
+		if(e.data.hasOwnProperty('auto_mode')){
+			if('true' == e.data.auto_mode)
+				document.getElementById('auto_mode').checked = true;
+			else
+				document.getElementById('auto_mode').checked = false;
+		}
 	//	console.log('mode:' + e.origin);
 	}
 },false);
 
 setFocus = function(id){
+	_id_ = id;
 	for(var i=1;i<7;i++){
 		var btn = document.getElementById(i.toString());
 		btn.style.backgroundColor = '#aaa';
@@ -48,8 +56,10 @@ setFocus = function(id){
 domodel = function(id){
 
 	setFocus(id);
+	
+	var auto_mode = document.getElementById('auto_mode').checked ? 'true' : 'false';
 		
-	params = "mode=" + _SCENE_[id];
+	params = "mode=" + _SCENE_[id] + "&auto_mode=" + auto_mode;
 
 	//页面ajax请求
 	loadXMLDoc("/control",function()

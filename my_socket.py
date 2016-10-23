@@ -19,7 +19,7 @@ import threading
 import time
 from my_gpio import RPi_GPIO
 from my_websocket import WebSocket
-from mymedea import mymedea
+from mymedia import mymedia
 #from myhandler import WebHandler
 from lirc import LIRC
 from data.data import *
@@ -53,7 +53,7 @@ class Connection(object):
         self.write_success = True	  			#发送成功标志位
         self.write_ack_timer = None	  			#发送超时定时器
         self.last_write_msg = None
-        self.medea = {'flag':False, 'send_id':0}
+        self.media = {'flag':False, 'send_id':0}
         self._stream.set_close_callback(self.on_close)    
         self.read_message()    
         if Connection.lirc_air == None:
@@ -117,9 +117,9 @@ class Connection(object):
                     self.do_write("{\"event\":\"ack\"}")
                     #print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
-                    if self.medea['flag']:#dev_id.find('medea') != -1:
+                    if self.media['flag']:#dev_id.find('media') != -1:
                         self.heart_beat_ack = True
-                        mymedea.recv_id = (mymedea.recv_id + 1)%100
+                        mymedia.time_tick = time.time()
                         if self.heart_beat_ack_timer:
                             self.heart_beat_ack_timer.cancel()
                             self.heart_beat_ack_timer = None
@@ -226,15 +226,14 @@ class Connection(object):
         WebSocket.broadcast_plugin_status()
 	
 	#媒体信号特殊处理
-    def output_medea(self, dev_id, ip, pin, key, value, item):
+    def output_media(self, ip, pin, key, value):
         if not self.heart_beat_ack and value != '000000':
-            #print('medea last send_id:%d' %self.medea['send_id'])
+            #print('media last send_id:%d' %self.media['send_id'])
             return
 
-        self.medea['flag'] = True
-        self.medea['send_id'] = (self.medea['send_id']+1)%100
-        mymedea.send_id = self.medea['send_id']
-        msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, self.medea['send_id'], pin, key, value)
+        self.media['flag'] = True
+        self.media['send_id'] = (self.media['send_id']+1)%100
+        msg = "{\"event\":\"msg\", \"dev_id\":\"media\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(self.media['send_id'], pin, key, value)
         try:
             self.do_write(msg)
         except:
@@ -253,11 +252,6 @@ class Connection(object):
             param = {"dev_id": dev_id, "ip": ip, "pin": pin, "key": key, "value": value, "item": item}
             if dev_id.find('tv') != -1:
                 Connection.last_param = param
-			
-		#媒体信号特殊处理
-        if dev_id.find('medea') != -1:
-            self.output_medea(dev_id, ip, pin, key, value, item)
-            return
 			
         self.q.put(param)  #如果前端等待终端应答后再发送命令，原则上命令队列里永远只有一个，否则会有若干个
 		
@@ -301,8 +295,8 @@ class Connection(object):
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
         elif dev_id.find('plugin') != -1:
             msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, pin, key, value)
-        elif dev_id.find('medea') != -1:
-            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, self.medea['send_id'], pin, key, value)
+        elif dev_id.find('media') != -1:
+            msg = "{\"event\":\"msg\", \"dev_id\":\"%s\", \"send_id\":\"%d\", \"pin\":\"%s\", \"%s\":\"%s\"}" %(dev_id, self.media['send_id'], pin, key, value)
         elif dev_id.find('air_conditioner') != -1:#command 可能的值：power_on、power_off、temp_inc、temp_dec、mode_heat~mode_health、speed_x、up_down_swept、left_right_swept
             LIRC_KEY = None
             if value == 'power_on' or value == 'power_off':

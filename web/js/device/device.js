@@ -6,7 +6,7 @@ document.write('<script type="text/javascript" src="js/device/lamp.js"></script>
 document.write('<script type="text/javascript" src="js/device/curtain.js"></script>');
 document.write('<script type="text/javascript" src="js/device/air_conditioner.js"></script>');
 document.write('<script type="text/javascript" src="js/device/tv.js"></script>');
-document.write('<script type="text/javascript" src="js/device/medea.js"></script>');
+document.write('<script type="text/javascript" src="js/device/media.js"></script>');
 document.write('<script type="text/javascript" src="js/device/plugin.js"></script>');
 
 _device = null;//设备对象
@@ -40,8 +40,8 @@ window.onload = function(){
 		else if(dev_id == 'tv'){
 			_device = new tv();
 		}
-		else if(dev_id == 'medea'){
-			_device = new medea();
+		else if(dev_id == 'media'){
+			_device = new media();
 		}
 		else if(dev_id == 'plugin'){
 			_device = new plugin();
@@ -69,7 +69,7 @@ refresh = function(){
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
 		else if('plugin' == dev_id)
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + (_PLUGIN_[mode][_device.id]['status'] === 'off' ? '\" 关闭' : '\" 打开');	
-		else if('medea' == dev_id)
+		else if('media' == dev_id)
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- 音乐';
 		else
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调节';
@@ -459,7 +459,7 @@ function device()
 		else{
 
 			var id = json.id;
-			if(json.event != 'medea' && !_DEVICE_[json.event].hasOwnProperty(json.id))
+			if(json.event != 'media' && !_DEVICE_[json.event].hasOwnProperty(json.id))
 				id = '1';
 
 			mode = json.mode;
@@ -513,8 +513,8 @@ function device()
 			else if( json.event === "tv" ){
 				_TV_[json.mode] = json.data;
 			}
-			else if( json.event === "medea" ){
-				this.do_medea_files(json.data, json.index);
+			else if( json.event === "media" ){
+				this.do_media_files(json.data, id, json.mute, json.play);
 				
 			}
 			else if( json.event === "plugin" ){

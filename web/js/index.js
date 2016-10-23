@@ -30,7 +30,7 @@ window.onload = function(){
 	ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 }
 
-var titles = ["lamp", "curtain", "air_conditioner", "tv", "medea", "plugin", "scene", "video"];
+var titles = ["lamp", "curtain", "air_conditioner", "tv", "media", "plugin", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
 	/*	if(!document.getElementById(titles[i])){
@@ -122,7 +122,8 @@ doShowNumber = function()
 	}
 }
 	
-var mode='normal';
+var mode='';
+var auto_mode='';
 window.addEventListener('message',function(e){
 	if('http://' + window.location.host !== e.origin)
 		return;
@@ -167,8 +168,8 @@ window.addEventListener('message',function(e){
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if( json.dev_id === "tv"  && window.frames['flamp'])
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if( json.dev_id === "medea"  && window.frames['flamp'])
-				window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.dev_id === "media"  && window.frames['flamp'])
+				window.frames['fmedia'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if( json.dev_id === "plugin"  && window.frames['flamp'])
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
@@ -182,8 +183,8 @@ window.addEventListener('message',function(e){
 				window.frames['fair_conditioner'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if((speech.indexOf('电视') >=0 || speech.indexOf('频道') >=0 || speech.indexOf('台') >=0) && window.frames['ftv'])
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
-			else if((speech.indexOf('歌') >=0 || speech.indexOf('音乐') >=0 || speech.indexOf('首') >=0) && window.frames['fmedea'])
-				window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if((speech.indexOf('歌') >=0 || speech.indexOf('音乐') >=0 || speech.indexOf('首') >=0) && window.frames['fmedia'])
+				window.frames['fmedia'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			else if(speech.indexOf('插座') >=0 && window.frames['fplugin'])
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		}
@@ -207,9 +208,13 @@ window.addEventListener('message',function(e){
 				window.frames['fplugin'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 		} 
 		else{
-			if(mode != json.mode && window.frames['fscene']){
+			var tmp = auto_mode;
+			if(json.hasOwnProperty('auto_mode'))//自动模式控制
+				tmp = json.auto_mode;
+			if((mode != json.mode || auto_mode != tmp) && window.frames['fscene']){
 				mode = json.mode;
-				window.frames['fscene'].postMessage({'msg':'mode' , 'data':mode},'*');
+				auto_mode = tmp;
+				window.frames['fscene'].postMessage({'msg':'mode', 'data':mode, 'auto_mode':tmp},'*');
 			}
 			if( json.event === "lamp" && window.frames['lamp']){
 				_LAMP_[json.mode] = json.data;
@@ -227,8 +232,8 @@ window.addEventListener('message',function(e){
 				_TV_[json.mode] = json.data;
 				window.frames['ftv'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}
-			else if( json.event === "medea"  && window.frames['fmedea']){
-				window.frames['fmedea'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
+			else if( json.event === "media"  && window.frames['fmedia']){
+				window.frames['fmedia'].postMessage({'msg':'onmessage' , 'data':evt.data},'*');
 			}
 			else if( json.event === "plugin" && window.frames['fplugin']){
 				_PLUGIN_[json.mode] = json.data;

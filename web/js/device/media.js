@@ -1,19 +1,23 @@
 //plugin类
 _MEDEA_BTN_ = {'mute':0,  'vol_add':1, 'vol_dec':2, 'play':3, 'pre':4, 'next':5};
 
-function medea()
+function media()
 {
 	device.apply(this,arguments);
-	this._medea_data = null;
+	this._media_data = null;
 	this._current_index = null;
 	this.arrayFiles = new Array();
-	
-	this.do_medea_files = function(data, index){
-		this._medea_data = data;
+	this.mute = false;
+	this.play = false;
+
+	this.do_media_files = function(data, index, mute, play){
+		this._media_data = data;
 		this._current_index = index;
+		this.mute = mute;
+		this.play = play;
 		
 		this.arrayFiles = [];
-		for(var i=0;i<Math.min(120, this._medea_data.length);i++){
+		for(var i=0;i<Math.min(120, this._media_data.length);i++){
 			this.arrayFiles[i] = new tagRECT(this.imageRect.x+35,this.imageRect.y + 40 + (i-1)*55,this.rect.width == 0 ? 800:this.rect.width ,this.imageRect.y + 40 + (i)*55,'');
 		}
 	}
@@ -31,7 +35,7 @@ function medea()
 		{
 			switch(i){
 				case _MEDEA_BTN_.mute:
-				this.arrayBtn[i] = new tagRECT(0,0,0,0,'静音');
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'静音','静音');
 				break;
 				case _MEDEA_BTN_.vol_add:
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'音量+');
@@ -40,7 +44,7 @@ function medea()
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'音量-');
 				break;
 				case _MEDEA_BTN_.play:
-				this.arrayBtn[i] = new tagRECT(0,0,0,0,'播放');
+				this.arrayBtn[i] = new tagRECT(0,0,0,0,'播放','暂停');
 				break;
 				case _MEDEA_BTN_.pre:
 				this.arrayBtn[i] = new tagRECT(0,0,0,0,'上一首');
@@ -50,7 +54,7 @@ function medea()
 				break;
 			}
 		}
-		this.docommand(this.id, 'next');
+		this.docommand(this.id, '0');
 	}
 	this.initDraw = function(){
 		this.contextImage.clearRect(0, 0, this.rect.width, this.rect.height);
@@ -58,10 +62,8 @@ function medea()
 		this.imageRect = {x:25, y:5, width:this.rect.width-50 , height:(this.rect.width-50)};
 		var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 40;
 		var y = this.imageRect.y + this.imageRect.height + offset_y;
-	//	this.arrayBtn[_MEDEA_BTN_.mute].doResize(this.rect.width/2 - btn_w/2, y, this.rect.width/2 + btn_w/2, y + btn_h);
-
 		var s = ((this.imageRect.x + this.imageRect.width - offset_x - btn_w) - (this.imageRect.x + offset_x))/2;
-	//	y += 130;
+
 		for(var i=_MEDEA_BTN_.mute;i<=_MEDEA_BTN_.next;i++){
 			if(i == _MEDEA_BTN_.play)
 				y += 130;
@@ -83,7 +85,7 @@ function medea()
 			}
 
 			start = Math.max(parseInt(this._current_index)-8, 0);
-			end = Math.min(start+16, this._medea_data.length);
+			end = Math.min(start+16, this._media_data.length);
 
 			for(var i=start;i<end;i++){
 				if(this.arrayFiles[i-start].IsInRect(loc, 0)){
@@ -133,20 +135,23 @@ function medea()
 	}
 	
 	this.drawIt = function(ctx){
+		if(this.rect.width == 0)
+			return;
 		ctx.drawImage(this.canvasImage, 0, 0);
-		if(this._medea_data){
+		if(this._media_data){
 			ctx.font = _font38;
 
 			start = Math.max(parseInt(this._current_index)-8, 0);
-			end = Math.min(start+16, this._medea_data.length);
-			for(var f in this._medea_data){
+			end = Math.min(start+16, this._media_data.length);
+			for(var f in this._media_data){
 				var index = parseInt(f);
 				if(index>=start && index < end){
 					ctx.fillStyle = ctx.strokeStyle = (index == this._current_index ? "rgb(247, 82, 67)" : "rgb(47, 82, 67)");
-					var tmp = (index).toString() + '.  ' + this._medea_data[index].file;
-					if(ctx.measureText(tmp).width > (this.imageRect.width - 100)){
-						while(ctx.measureText(tmp).width > (this.imageRect.width - 100))
+					var tmp = (index+1).toString() + '.  ' + this._media_data[index].file;
+					if(ctx.measureText(tmp).width > (this.rect.width - 150)){
+						while(ctx.measureText(tmp).width > (this.rect.width - 150)){
 							tmp = tmp.substr(0, tmp.length - 2);
+						}
 						tmp = tmp + '...'
 					}
 					ctx.fillText(tmp, this.arrayFiles[index-start].left, this.arrayFiles[index-start].bottom);
@@ -160,8 +165,15 @@ function medea()
 			else
 				ctx.fillStyle = "rgb(170, 170, 170)";
 			
+			if((i == _MEDEA_BTN_.mute && 'true' == this.mute) || (i == _MEDEA_BTN_.play && 'true' == this.play))
+				this.arrayBtn[i].onclick = true;
+			
 			this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
+			
+			this.arrayBtn[i].onclick = false;
 		}
+		
+
 
 	}
 	
