@@ -2,6 +2,7 @@
 class GlobalVar:
 	mode = 'normal'
 	last_mode = 'normal'
+	auto_mode = 'true'
 	dev_id = 'lamp'
 	lamp_id = '1'
 	curtain_id = '1'
@@ -17,6 +18,10 @@ class GlobalVar:
 		GlobalVar.last_mode = value
 	def get_last_mode():
 		return GlobalVar.last_mode
+	def set_auto_mode(value):
+		GlobalVar.auto_mode = value
+	def get_auto_mode():
+		return GlobalVar.auto_mode
 		
 	def set_dev_id(value):
 		GlobalVar.dev_id = value
