@@ -9,7 +9,11 @@ function media()
 	this.arrayFiles = new Array();
 	this.mute = false;
 	this.play = false;
-
+	this.mute_img1 = null;
+	this.mute_img2 = null;
+	this.play_img1 = null;
+	this.play_img2 = null;
+		
 	this.do_media_files = function(data, index, mute, play){
 		this._media_data = data;
 		this._current_index = index;
@@ -72,6 +76,27 @@ function media()
 		
 		this.contextImage.fillStyle = "rgb(141, 178, 159)";
 		this.contextImage.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
+		
+		this.mute_img1=new Image();
+		this.mute_img1.src = 'images//mute1.png';
+		this.mute_img1.onload = function(){
+			_device.doDraw();
+		}
+		this.mute_img2=new Image();
+		this.mute_img2.src = 'images//mute2.png';
+		this.mute_img2.onload = function(){
+			_device.doDraw();
+		}
+		this.play_img1=new Image();
+		this.play_img1.src = 'images//play1.png';
+		this.play_img1.onload = function(){
+			_device.doDraw();
+		}
+		this.play_img2=new Image();
+		this.play_img2.src = 'images//play2.png';
+		this.play_img2.onload = function(){
+			_device.doDraw();
+		}
 	}
 	//人机交互处理
 	this.doIt = function(loc, down, up){
@@ -168,7 +193,24 @@ function media()
 			if((i == _MEDEA_BTN_.mute && 'true' == this.mute) || (i == _MEDEA_BTN_.play && 'true' == this.play))
 				this.arrayBtn[i].onclick = true;
 			
-			this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
+			if(i == _MEDEA_BTN_.mute){
+				if('true' == this.mute && this.mute_img2){
+					ctx.drawImage(this.mute_img2, 0, 0, this.mute_img2.width, this.mute_img2.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.mute_img2.width/2, _device.arrayBtn[i].top, this.mute_img2.width, this.mute_img2.height);
+				}
+				else if('false' == this.mute && this.mute_img1){
+					ctx.drawImage(this.mute_img1, 0, 0, this.mute_img1.width, this.mute_img1.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.mute_img1.width/2, _device.arrayBtn[i].top, this.mute_img1.width, this.mute_img1.height);
+				}
+			}
+			else if(i == _MEDEA_BTN_.play){
+				if('true' == this.play && this.play_img1){
+					ctx.drawImage(this.play_img1, 0, 0, this.play_img1.width, this.play_img1.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.play_img1.width/2, _device.arrayBtn[i].top, this.play_img1.width, this.play_img1.height);
+				}
+				else if('false' == this.play && this.play_img2){
+					ctx.drawImage(this.play_img2, 0, 0, this.play_img2.width, this.play_img2.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.play_img2.width/2, _device.arrayBtn[i].top, this.play_img2.width, this.play_img2.height);
+				}
+			}
+			else
+				this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
 			
 			this.arrayBtn[i].onclick = false;
 		}
