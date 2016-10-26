@@ -76,10 +76,10 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         str = '{\"event\": \"tv\", \"data\": %s, \"mode\":\"%s\", \"auto_mode\":\"%s\", \"id\":\"%s\"}' %(json.dumps(_TV_[mode]), mode, GlobalVar.get_auto_mode(), GlobalVar.get_tv_id())
         WebSocket.broadcast_messages(str) 
 		
-    def broadcast_media_status(data, index, mute, play):
+    def broadcast_media_status(data, index, vol, play):
         mode = GlobalVar.get_mode()
-        str = '{\"event\": \"media\", \"data\": %s, \"mode\":\"%s\", \"auto_mode\":\"%s\", \"id\":\"%s\", \"mute\":\"%s\", \"play\":\"%s\"}' %(data, mode, GlobalVar.get_auto_mode(), index, mute, play)
-        WebSocket.broadcast_messages(str) 
+        str1 = '{\"event\": \"media\", \"data\": %s, \"mode\":\"%s\", \"auto_mode\":\"%s\", \"id\":\"%s\", \"vol\":\"%s\", \"play\":\"%s\"}' %(data, mode, GlobalVar.get_auto_mode(), index, str(vol), play)
+        WebSocket.broadcast_messages(str1) 
 		
     def broadcast_plugin_status():
         mode = GlobalVar.get_mode()

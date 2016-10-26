@@ -514,8 +514,7 @@ function device()
 				_TV_[json.mode] = json.data;
 			}
 			else if( json.event === "media" ){
-				this.do_media_files(json.data, id, json.mute, json.play);
-				
+				this.do_media_files(json.data, id, json.vol, json.play);
 			}
 			else if( json.event === "plugin" ){
 				_PLUGIN_[json.mode] = json.data;

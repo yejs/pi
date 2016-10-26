@@ -7,18 +7,23 @@ function media()
 	this._media_data = null;
 	this._current_index = null;
 	this.arrayFiles = new Array();
+	this.vol = 0;
 	this.mute = false;
 	this.play = false;
 	this.mute_img1 = null;
 	this.mute_img2 = null;
 	this.play_img1 = null;
 	this.play_img2 = null;
+	this.vol_img1 = null;
+	this.vol_img2 = null;
 		
-	this.do_media_files = function(data, index, mute, play){
+	this.do_media_files = function(data, index, vol, play){
+		
 		this._media_data = data;
 		this._current_index = index;
-		this.mute = mute;
-		this.play = play;
+		this.vol = vol;
+		this.mute = (this.vol == 0 ? true : false);
+		this.play = (play == 'false' ? false : true);
 		
 		this.arrayFiles = [];
 		for(var i=0;i<Math.min(120, this._media_data.length);i++){
@@ -97,37 +102,54 @@ function media()
 		this.play_img2.onload = function(){
 			_device.doDraw();
 		}
+		this.vol_img1=new Image();
+		this.vol_img1.src = 'images//vol1.png';
+		this.vol_img1.onload = function(){
+			_device.doDraw();
+		}
+		this.vol_img2=new Image();
+		this.vol_img2.src = 'images//vol2.png';
+		this.vol_img2.onload = function(){
+			_device.doDraw();
+		}
 	}
 	//人机交互处理
 	this.doIt = function(loc, down, up){
+		start = Math.max(parseInt(this._current_index)-8, 0);
+		end = Math.min(start+16, this._media_data.length);
+			
 		if(down){
-			var touchBtn = -1;
 			for(var i=0;i<this.arrayBtn.length;i++){
 				if(this.arrayBtn[i].IsInRect(loc, 0)){
 					this.arrayBtn[i].istouch = true;
-					this.doMedeaKey(loc);
 				}
 			}
-
-			start = Math.max(parseInt(this._current_index)-8, 0);
-			end = Math.min(start+16, this._media_data.length);
 
 			for(var i=start;i<end;i++){
 				if(this.arrayFiles[i-start].IsInRect(loc, 0)){
 					this.arrayFiles[i-start].istouch = true;
-					this.docommand(this.id, i.toString());
-					this._current_index = i;
 				}
 			}
+			this.istouch = true;
 		}
 		else if(up){
 			for(var i=0;i<this.arrayBtn.length;i++){
+				if(this.arrayBtn[i].IsInRect(loc, 0)){
+					this.doMedeaKey(loc);
+				}
 				this.arrayBtn[i].istouch = false;
 			}
-			for(var i=0;i<this.arrayFiles.length;i++){
+
+			for(var i=start;i<end;i++){
+				if(this.arrayFiles[i-start].IsInRect(loc, 0)){
+					this.docommand(this.id, i.toString());
+					this._current_index = i;
+				}
 				this.arrayFiles[i].istouch = false;
 			}
+			this.istouch = false;
 		}
+
 		this.doDraw();
 	}
 
@@ -190,32 +212,40 @@ function media()
 			else
 				ctx.fillStyle = "rgb(170, 170, 170)";
 			
-			if((i == _MEDEA_BTN_.mute && 'true' == this.mute) || (i == _MEDEA_BTN_.play && 'true' == this.play))
-				this.arrayBtn[i].onclick = true;
-			
 			if(i == _MEDEA_BTN_.mute){
-				if('true' == this.mute && this.mute_img2){
+				if(this.mute && this.mute_img2){
 					ctx.drawImage(this.mute_img2, 0, 0, this.mute_img2.width, this.mute_img2.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.mute_img2.width/2, _device.arrayBtn[i].top, this.mute_img2.width, this.mute_img2.height);
 				}
-				else if('false' == this.mute && this.mute_img1){
+				else if(!this.mute && this.mute_img1){
 					ctx.drawImage(this.mute_img1, 0, 0, this.mute_img1.width, this.mute_img1.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.mute_img1.width/2, _device.arrayBtn[i].top, this.mute_img1.width, this.mute_img1.height);
 				}
 			}
 			else if(i == _MEDEA_BTN_.play){
-				if('true' == this.play && this.play_img1){
+				if(this.play && this.play_img1){
 					ctx.drawImage(this.play_img1, 0, 0, this.play_img1.width, this.play_img1.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.play_img1.width/2, _device.arrayBtn[i].top, this.play_img1.width, this.play_img1.height);
 				}
-				else if('false' == this.play && this.play_img2){
+				else if(!this.play && this.play_img2){
 					ctx.drawImage(this.play_img2, 0, 0, this.play_img2.width, this.play_img2.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.play_img2.width/2, _device.arrayBtn[i].top, this.play_img2.width, this.play_img2.height);
 				}
 			}
+			else if(i == _MEDEA_BTN_.vol_dec && this.vol_img1){
+				ctx.drawImage(this.vol_img1, 0, 0, this.vol_img1.width, this.vol_img1.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.vol_img1.width/2, _device.arrayBtn[i].top, this.vol_img1.width, this.vol_img1.height);
+				
+				this.vol
+			}
+			else if(i == _MEDEA_BTN_.vol_add && this.vol_img2){
+				ctx.drawImage(this.vol_img2, 0, 0, this.vol_img2.width, this.vol_img2.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.vol_img2.width/2, _device.arrayBtn[i].top, this.vol_img2.width, this.vol_img2.height);
+			}
 			else
 				this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);
-			
-			this.arrayBtn[i].onclick = false;
 		}
 		
-
+		ctx.fillStyle = ctx.strokeStyle = this.istouch ? "rgb(255, 30, 30)" : "rgb(30, 30, 30)";
+		ctx.font = _font38;
+		ctx.textBaseline="middle";
+		s = '音量:' + (parseInt(this.vol*100)).toString() + '%';
+		left = (_device.arrayBtn[_MEDEA_BTN_.vol_add].right + _device.arrayBtn[_MEDEA_BTN_.vol_dec].left)/2 - ctx.measureText(s).width/2;
+		ctx.fillText(s, left, _device.arrayBtn[_MEDEA_BTN_.vol_add].top + _device.arrayBtn[_MEDEA_BTN_.vol_add].height/2);
 
 	}
 	

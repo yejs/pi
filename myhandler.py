@@ -44,7 +44,7 @@ class WebHandler(tornado.web.RequestHandler):
         
 		
     def do_chg_index(): 
-        WebSocket.broadcast_media_status(json.dumps(mymedia.music_files), str(mymedia.current_index), 'true' if mymedia.get_volume() == 0 else 'false', 'true' if not mymedia.paused else 'false')
+        WebSocket.broadcast_media_status(json.dumps(mymedia.music_files), str(mymedia.current_index), mymedia.get_volume(), 'true' if not mymedia.paused else 'false')
 		
     def do_chg_index_callback(): 
         timer = threading.Timer(2 if time.time() < (WebHandler.time_tick + 2) else 0.5, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
