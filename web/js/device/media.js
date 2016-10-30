@@ -157,7 +157,7 @@ function media()
 
 		if(this.arrayBtn[_MEDEA_BTN_.mute].IsInRect(loc, 0)){//mute
 			this.docommand(this.id, 'mute');
-			this.doBtnFocus(_MEDEA_BTN_.power);
+			this.doBtnFocus(_MEDEA_BTN_.mute);
 		}
 		else if(this.arrayBtn[_MEDEA_BTN_.vol_add].IsInRect(loc, 0)){//vol_add
 			this.docommand(this.id, 'vol_add');

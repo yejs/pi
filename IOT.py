@@ -48,6 +48,7 @@ def signal_handler(signum, frame):
     server.stop()
     Connection.stop()
     mymedia.close()
+    ping.close()
     is_closing = True
 
 def try_exit(): 

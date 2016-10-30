@@ -19,12 +19,23 @@ window.onload = function(){
 			document.getElementById('d_length').style.display = 'block';
 		else if(_dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner')
 			document.getElementById('d_brand').style.display = 'block';
+		else if(_dev_set.dev_id == 'lamp'){
+			document.getElementById('d_music').style.display = 'block';
 
-		if(_dev_set.dev_id == 'lamp' || _dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input' || _dev_set.dev_id == 'medea')
+			var d_GPIO = document.getElementById('d_GPIO');
+			var oldnode = document.getElementById("GPIO")
+			var newnode = create_element(d_GPIO, 'input', null, 'GPIO', null);
+			newnode.setAttribute("type", 'text');
+			newnode.setAttribute("placeholder", '请输入灯珠数');
+			d_GPIO.replaceChild(newnode,oldnode);
+
+			document.getElementById('s_GPIO').innerText = '灯珠数';
+		}
+
+		if(_dev_set.dev_id == 'curtain' || _dev_set.dev_id == 'tv' || _dev_set.dev_id == 'air_conditioner' || _dev_set.dev_id == 'input')
 			document.getElementById('d_GPIO').style.display = 'none';
 		
-		if(_dev_set.dev_id == 'lamp')
-			document.getElementById('d_music').style.display = 'block';
+		
 	}
 }
 
@@ -163,10 +174,15 @@ function dev_set()
 		if(_DEVICE_[dev_id][id].hasOwnProperty('pin')){
 			value = _DEVICE_[dev_id][id]['pin'];
 			var obj = document.getElementById('GPIO'); 
-			for(var i=0;i<2;i++){
-				if(obj.options[i].value.indexOf(value)>=0){
-					obj.selectedIndex = i;
-					break;
+			if(dev_id == 'lamp'){
+				document.getElementById('GPIO').value = value;
+			}
+			else{
+				for(var i=0;i<2;i++){
+					if(obj.options[i].value.indexOf(value)>=0){
+						obj.selectedIndex = i;
+						break;
+					}
 				}
 			}
 		}
@@ -252,9 +268,12 @@ function dev_set()
 			_DEVICE_[dev_id][id]['ip'] = document.getElementById('IP').value; 
 		
 		if(document.getElementById('GPIO').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('pin')){
-			value = parseInt(document.getElementById('GPIO').options[document.getElementById('GPIO').selectedIndex].value);
+			if(dev_id == 'lamp')
+				value = document.getElementById('GPIO').value; 
+			else
+				value = parseInt(document.getElementById('GPIO').options[document.getElementById('GPIO').selectedIndex].value);
 			_DEVICE_[dev_id][id]['pin'] = String(value); 
-		//	console.log(value);
+			console.log(value);
 		}
 		
 		if(document.getElementById('brand').value.length>0 && _DEVICE_[dev_id][id].hasOwnProperty('brand'))

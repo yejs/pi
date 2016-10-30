@@ -44,7 +44,8 @@ class WebHandler(tornado.web.RequestHandler):
         
 		
     def do_chg_index(): 
-        WebSocket.broadcast_media_status(json.dumps(mymedia.music_files), str(mymedia.current_index), mymedia.get_volume(), 'true' if not mymedia.paused else 'false')
+        vol = round(mymedia.get_volume()*20)/20.0
+        WebSocket.broadcast_media_status(json.dumps(mymedia.music_files), str(mymedia.current_index), vol, 'true' if not mymedia.paused else 'false')
 		
     def do_chg_index_callback(): 
         timer = threading.Timer(2 if time.time() < (WebHandler.time_tick + 2) else 0.5, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
@@ -391,9 +392,9 @@ class WebHandler(tornado.web.RequestHandler):
     def media(post_data):
         if post_data.get('command'):#解析command指令为具体的电视指令
             if 'mute' == post_data['command'][0]:
-                volume = mymedia.get_volume()
+                volume = round(mymedia.get_volume()*20)/20.0
                 if 0 == volume:
-                    volume = volume if WebHandler.volume == 0 else WebHandler.volume
+                    volume = 1.0 if WebHandler.volume == 0 else WebHandler.volume
                 else:
                     WebHandler.volume = volume
                     volume = 0
@@ -401,7 +402,8 @@ class WebHandler(tornado.web.RequestHandler):
             elif 'vol_add' == post_data['command'][0]:
                 volume = mymedia.get_volume()
                 if 1 > volume:
-                    volume += 0.1
+                    volume = round(volume*20 + 1)/20.0
+                    
                     volume = min(volume, 1.0)
                 else:
                     volume = 1.0
@@ -409,7 +411,8 @@ class WebHandler(tornado.web.RequestHandler):
             elif 'vol_dec' == post_data['command'][0]:
                 volume = mymedia.get_volume()
                 if 0 < volume:
-                    volume -= 0.1
+                    volume = round(volume*20 - 1)/20.0
+                    
                     volume = max(volume, 0.0)
                 else:
                     volume = 0.0

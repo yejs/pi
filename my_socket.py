@@ -144,7 +144,7 @@ class Connection(object):
 		
     def do_write_overtime(self):
         self.write_ack_timer = None
-        self.write_success = True
+        #self.write_success = True
         if self.last_write_msg:
             self.do_write(self.last_write_msg)
 
@@ -160,10 +160,10 @@ class Connection(object):
         else:
             self.last_write_msg = msg
 
-        if self.write_ack_timer:
-            self.write_ack_timer.cancel()			
-        self.write_ack_timer = threading.Timer(0.5, self.do_write_overtime)#发送超时处理
-        self.write_ack_timer.start()
+            if self.write_ack_timer:
+                self.write_ack_timer.cancel()			
+            self.write_ack_timer = threading.Timer(0.5, self.do_write_overtime)#发送超时处理
+            self.write_ack_timer.start()
 
     def stop(): 
         Connection.stop_flag = True

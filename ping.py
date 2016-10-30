@@ -20,8 +20,11 @@ TODO:Linux下待测试！！！！！！！！！！！！！！！
 '''
 class ping(threading.Thread):
 	count_param = '-n'#ping指定数目的参数
+	timeout_param = '-w'#ping timeout
+	timeout_value = '500'
 	host_set = set() 
 	do_post = None
+	close_flag = False
 	def __init__(self, callback):
 		threading.Thread.__init__(self)
 		self.daemon=True
@@ -31,8 +34,12 @@ class ping(threading.Thread):
 		#window、linux ping 指定数目的参数不一样
 		if platform.system().find('Linux')>=0:
 			ping.count_param = '-c'
+			timeout_param = '-i'
+			timeout_value = '0.5'
 		elif platform.system().find('Windows')>=0:
 			ping.count_param = '-n'
+			timeout_param = '-w'
+			timeout_value = '500'
 			
 		ping.init_host()
 			
@@ -48,10 +55,13 @@ class ping(threading.Thread):
 		f.close
 		
 
+	def close():
+		ping.close_flag = True
+		
 	#ping 过程函数
 	#TODO:Linux下待测试
 	def do_ping(host):
-		p = subprocess.Popen(['ping', ping.count_param, '1', host],
+		p = subprocess.Popen(['ping', ping.count_param, '1', ping.timeout_param, ping.timeout_value, host],
 							stdin = subprocess.PIPE,
 							stdout = subprocess.PIPE,
 							stderr = subprocess.PIPE,
@@ -96,7 +106,7 @@ class ping(threading.Thread):
 	#线程函数，循环遍历ping家庭成员的手机的IP
 	def run(self):
 		n = 0
-		while True:
+		while not ping.close_flag:
 			if GlobalVar.get_auto_mode() == 'true' and len(ping.host_set):#只有在自动模式控制时才检测 
 				leave = True
 

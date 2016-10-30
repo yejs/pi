@@ -62,7 +62,6 @@ class mymedia():
 	can_play = False	#当前文件是否能够播放标志
 	timer = None
 	last_str = None
-	close_flag = False
 	do_fft_callback = None
 	do_chg_index_callback = None
 	pa = None			#audio对象
@@ -335,7 +334,7 @@ class mymedia():
 		#global rt_data
 		#global fft_data
 
-		while stream.is_active() and not mymedia.close_flag:
+		while (not stream._is_running) and stream.is_active():
 			ad_rdy_ev.wait(timeout=1000)
 			if not q.empty():
 				#process audio data here
@@ -351,6 +350,7 @@ class mymedia():
 					freq = [n for n in range(0,RATE)] #N个元素
 					mymedia.fft2color(freq, fft_data)
 			ad_rdy_ev.clear()
+		print('read_audio_thead close')
 	
 	def audio_callback(in_data, frame_count, time_info, status):
 		global counter
@@ -402,7 +402,8 @@ class mymedia():
 			mymedia.stream.stop_stream()
 			mymedia.stream.close()
 			mymedia.pa.terminate()
-			mymedia.close_flag = True
+			mymedia.ad_rdy_ev.set()
+			print('mymedia close')
 		
 if __name__ == "__main__":
 	try:
