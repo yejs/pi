@@ -72,7 +72,8 @@ class mymedia():
 	ad_rdy_ev=threading.Event()#信号
 	mutex = threading.Lock()#创建锁
 	time_tick = 0
-
+	play_flag = False
+	
 	def __init__(self, path):
 		mymedia.root_path = path
 		mymedia.get_music_files()
@@ -130,7 +131,8 @@ class mymedia():
 		mymedia.current_index = index
 		mymedia.load(mymedia.get_filepath(mymedia.current_index)) 
 		mymedia.play()
-			
+		play_flag = True
+		
 	#加载音乐文件
 	def load(file):
 		try:
@@ -148,8 +150,13 @@ class mymedia():
 
 		
 	def playDaemon():
-		while mymedia.get_busy() and mymedia.can_play: #still playing
-	
+		while (mymedia.get_busy() or mymedia.play_flag) and mymedia.can_play: #still playing
+			if mymedia.get_busy() and mymedia.play_flag:
+				mymedia.play_flag = False
+			elif not mymedia.get_busy():
+				pygame.time.wait(1000)
+				continue
+				
 			if mymedia.last_str:
 				n = 0;
 				while n < len(mymedia.last_str) + 50:
@@ -165,14 +172,22 @@ class mymedia():
 				if f['file'] == file:
 					time_secs = str(int(f['time_secs']/60)) + ':' + str(int(f['time_secs']%60))
 
-
-			mymedia.last_str = 'still playing ' + file + ', time_secs:  ' + time_secs + '， time:  ' + str(m) + ':' + str(s)
-			sys.stdout.write (mymedia.last_str)
-			sys.stdout.flush()
+			if type(file) != None and type(m) != None and type(s) != None:
+				mymedia.last_str = 'still playing ' + file + ', time_secs:  ' + time_secs + '， time:  ' + str(m) + ':' + str(s)
+				sys.stdout.write (mymedia.last_str)
+				sys.stdout.flush()
+			else:
+				if type(file) == None:
+					print('file is NoneType.......')
+				if type(m) == None:
+					print('m is NoneType........')
+				if type(s) == None:
+					print('s is NoneType...........')
 			pygame.time.wait(1000)
 			
 
 		if mymedia.playing:
+			print('playDaemon:play_next %d' %mymedia.get_busy())
 			mymedia.get_music_files()
 			mymedia.play_next()
 		
@@ -203,7 +218,7 @@ class mymedia():
 		mymedia.current_index = (mymedia.current_index + 1) % len(mymedia.music_files)
 		mymedia.load(mymedia.get_filepath(mymedia.current_index)) 
 		mymedia.play()
-			
+		
 	#播放上一首音乐
 	def play_pre():
 		# prev的处理方法：
@@ -215,7 +230,8 @@ class mymedia():
 			mymedia.current_index = (mymedia.current_index - 1) if  mymedia.current_index>0 else len(mymedia.music_files) - 1
 			mymedia.load(mymedia.get_filepath(mymedia.current_index)) 
 			mymedia.play()
-			
+		print('play_pre')
+		
 	def pause():
 		if mymedia.paused:
 			pygame.mixer.music.unpause()

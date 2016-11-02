@@ -27,7 +27,7 @@ function media()
 		
 		this.arrayFiles = [];
 		for(var i=0;i<Math.min(120, this._media_data.length);i++){
-			this.arrayFiles[i] = new tagRECT(this.imageRect.x+35,this.imageRect.y + 40 + (i-1)*55,this.rect.width == 0 ? 800:this.rect.width ,this.imageRect.y + 40 + (i)*55,'');
+			this.arrayFiles[i] = new tagRECT(this.imageRect.x+35,this.imageRect.y + 60 + (i-1)*55,this.rect.width == 0 ? 800:this.rect.width ,this.imageRect.y + 60 + (i)*55,'');
 		}
 	}
 	
@@ -69,7 +69,7 @@ function media()
 		this.contextImage.clearRect(0, 0, this.rect.width, this.rect.height);
 	
 		this.imageRect = {x:25, y:5, width:this.rect.width-50 , height:(this.rect.width-50)};
-		var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 40;
+		var btn_w = 160, btn_h = 80, offset_x = 20, offset_y = 20;
 		var y = this.imageRect.y + this.imageRect.height + offset_y;
 		var s = ((this.imageRect.x + this.imageRect.width - offset_x - btn_w) - (this.imageRect.x + offset_x))/2;
 
@@ -81,6 +81,10 @@ function media()
 		
 		this.contextImage.fillStyle = "rgb(141, 178, 159)";
 		this.contextImage.roundRect(this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height, 20, 1, 0);
+		
+		//画按钮背景
+		this.contextImage.fillStyle = "rgb(80, 76, 81)";
+		this.contextImage.roundRect(this.imageRect.x, this.imageRect.y + this.imageRect.height, this.imageRect.width, (btn_h + offset_y)*2 + 50, 20, 1, 0);
 		
 		this.mute_img1=new Image();
 		this.mute_img1.src = 'images//mute1.png';
@@ -122,15 +126,19 @@ function media()
 			for(var i=0;i<this.arrayBtn.length;i++){
 				if(this.arrayBtn[i].IsInRect(loc, 0)){
 					this.arrayBtn[i].istouch = true;
+					if(i <= _MEDEA_BTN_.vol_dec)
+						this.istouch = true;
 				}
 			}
 
 			for(var i=start;i<end;i++){
 				if(this.arrayFiles[i-start].IsInRect(loc, 0)){
 					this.arrayFiles[i-start].istouch = true;
+					this.docommand(this.id, i.toString());
+					this._current_index = i;
 				}
 			}
-			this.istouch = true;
+			
 		}
 		else if(up){
 			for(var i=0;i<this.arrayBtn.length;i++){
@@ -142,8 +150,8 @@ function media()
 
 			for(var i=start;i<end;i++){
 				if(this.arrayFiles[i-start].IsInRect(loc, 0)){
-					this.docommand(this.id, i.toString());
-					this._current_index = i;
+				//	this.docommand(this.id, i.toString());
+				//	this._current_index = i;
 				}
 				this.arrayFiles[i].istouch = false;
 			}
@@ -201,10 +209,12 @@ function media()
 						}
 						tmp = tmp + '...'
 					}
-					ctx.fillText(tmp, this.arrayFiles[index-start].left, this.arrayFiles[index-start].bottom);
+					ctx.fillText(tmp, this.arrayFiles[index-start].left, (this.arrayFiles[index-start].top + this.arrayFiles[index-start].bottom)/2);
 				}
 			}
 		}
+		
+		
 		//画按钮
 		for(var i=0;i<this.arrayBtn.length;i++){
 			if(this.arrayBtn[i].istouch)
