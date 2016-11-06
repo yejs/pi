@@ -239,6 +239,7 @@ class Connection(object):
         except:
             logging.error('Error sending message', exc_info=True)	
 
+        mymedia.time_tick = time.time()
         self.heart_beat_ack = False
         if self.heart_beat_ack_timer:
             self.heart_beat_ack_timer.cancel()

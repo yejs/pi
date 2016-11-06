@@ -39,7 +39,7 @@ class ping(threading.Thread):
 		elif platform.system().find('Windows')>=0:
 			ping.count_param = '-n'
 			timeout_param = '-w'
-			timeout_value = '500'
+			timeout_value = '3000'
 			
 		ping.init_host()
 			
@@ -61,13 +61,14 @@ class ping(threading.Thread):
 	#ping 过程函数
 	#TODO:Linux下待测试
 	def do_ping(host):
-		p = subprocess.Popen(['ping', ping.count_param, '1', ping.timeout_param, ping.timeout_value, host],
+		p = subprocess.Popen(['ping', ping.count_param, '1', host],
 							stdin = subprocess.PIPE,
 							stdout = subprocess.PIPE,
 							stderr = subprocess.PIPE,
 							shell = True)
 		out = p.stdout.read()#.decode('gb2312')#.decode('utf-8')
 
+	
 		ret = ping.check_time(out, "time<\d*", "时间<\d*")
 		if not ret:
 			ret = ping.check_time(out, "time=\d*", "时间=\d*")
@@ -98,7 +99,7 @@ class ping(threading.Thread):
 		if ('leave' == mode and not leave) or ('leave' != mode and leave):
 			post_data = {}
 			if 'leave' == mode and not leave:
-				post_data['mode'] = ['normal']
+				post_data['mode'] = [GlobalVar.get_last_mode()]
 			else:
 				post_data['mode'] = ['leave']
 			ping.do_post(None, post_data)
@@ -122,6 +123,7 @@ class ping(threading.Thread):
 			if n > 60:
 				ping.init_host()
 				n = 0
+
 			
 if __name__ == "__main__":
 	try:

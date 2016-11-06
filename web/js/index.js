@@ -10,7 +10,7 @@ _port = 8000;
 
 window.onload = function(){
 	document.getElementById("wrap").style.display="block";
-	var _title = ['&nbsp&nbsp灯光&nbsp&nbsp', '&nbsp&nbsp窗帘&nbsp&nbsp', '&nbsp&nbsp空调&nbsp&nbsp', '&nbsp&nbsp电视&nbsp&nbsp', '&nbsp&nbsp媒体&nbsp&nbsp', '&nbsp&nbsp插座&nbsp&nbsp', '&nbsp&nbsp场景模式&nbsp&nbsp', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
+	var _title = ['&nbsp&nbsp灯光&nbsp&nbsp', '&nbsp&nbsp插座&nbsp&nbsp', '&nbsp&nbsp窗帘&nbsp&nbsp', '&nbsp&nbsp空调&nbsp&nbsp', '&nbsp&nbsp电视&nbsp&nbsp', '&nbsp&nbsp媒体&nbsp&nbsp', '&nbsp&nbsp随心听&nbsp&nbsp', '&nbsp&nbsp场景模式&nbsp&nbsp', '视频监控&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'];
 	var news=document.getElementById("news_ul");
 	for(var i=0;i<_title.length;i++){
 		var li = create_element(news, 'li', null, null, null);
@@ -30,23 +30,9 @@ window.onload = function(){
 	ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 }
 
-var titles = ["lamp", "curtain", "air_conditioner", "tv", "media", "plugin", "scene", "video"];
+var titles = ["lamp", "plugin", "curtain", "air_conditioner", "tv", "media", "fm", "scene", "video"];
 showPage = function(title){
 	for(var i in titles){
-	/*	if(!document.getElementById(titles[i])){
-			var wrap=document.getElementById("wrap");	
-			var div = create_element(wrap, 'div', null, titles[i], null);
-			var myframe = create_element(div, 'iframe', 'myframe', null, null);
-			myframe.setAttribute("name", 'f' + titles[i]);
-			if('scene' == titles[i])
-				myframe.setAttribute("src", 'scene.html?param=work');
-			else if('video' == titles[i])
-				myframe.setAttribute("src", '');
-			else
-				myframe.setAttribute("src", 'device.html?dev_id=' + titles[i]);
-
-			window.frames['f' + titles[i]].postMessage({'msg':'onmessage' , 'data':str},'*');
-		}*/
 		if(titles[i] === title)
 			document.getElementById(titles[i]).style.display="block";
 		else
@@ -82,17 +68,18 @@ onNewsTitle = function(i){
 	
 	showPage(titles[i]);
 	
-	var news=document.getElementById("video");
-	if(news){
-		var elem_child = news.getElementsByTagName("iframe"); 
+	var video=document.getElementById("video");
+	if(video){
+		var elem_child = video.getElementsByTagName("iframe"); 
 		if(elem_child){
-				if('video' != titles[i]){
+			if('video' != titles[i]){
 				if(elem_child[0].src.indexOf("fake.html") < 0)//关闭视频页面
 					elem_child[0].src = "fake.html";
-					
-				window.frames['f' + titles[i]].window.refresh();
+				
+				if('fm' != titles[i])
+					window.frames['f' + titles[i]].window.refresh();
 			}
-			else if('video' == titles[i]){//video
+			else if('video' == titles[i]){
 				var src = window.location.host;
 				var npos = src.indexOf(":");
 
@@ -103,6 +90,18 @@ onNewsTitle = function(i){
 			}
 		}
 	}
+	
+	var fm=document.getElementById("fm");
+	if(fm){
+		var elem_child = fm.getElementsByTagName("iframe"); 
+		if(elem_child){
+			if('fm' == titles[i] && "http://fm.baidu.com/" != elem_child[0].src){
+				elem_child[0].src = "http://fm.baidu.com/";
+			}
+		}
+	}
+	
+	
 	
 	if('tv' != titles[i])
 		document.getElementById("div_footer_btn").style.display = 'none';

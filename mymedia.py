@@ -60,6 +60,7 @@ class mymedia():
 	paused = False		#暂停标志
 	playing = False		#播放标志
 	can_play = False	#当前文件是否能够播放标志
+	play_count = 0		#当前文件秒数，用于控制快速切换的逻辑
 	timer = None
 	last_str = None
 	do_fft_callback = None
@@ -72,7 +73,7 @@ class mymedia():
 	ad_rdy_ev=threading.Event()#信号
 	mutex = threading.Lock()#创建锁
 	time_tick = 0
-	play_flag = False
+	
 	
 	def __init__(self, path):
 		mymedia.root_path = path
@@ -131,7 +132,6 @@ class mymedia():
 		mymedia.current_index = index
 		mymedia.load(mymedia.get_filepath(mymedia.current_index)) 
 		mymedia.play()
-		play_flag = True
 		
 	#加载音乐文件
 	def load(file):
@@ -150,9 +150,9 @@ class mymedia():
 
 		
 	def playDaemon():
-		while (mymedia.get_busy() or mymedia.play_flag) and mymedia.can_play: #still playing
-			if mymedia.get_busy() and mymedia.play_flag:
-				mymedia.play_flag = False
+		while (mymedia.get_busy() or mymedia.play_count < 5) and mymedia.stream._is_running and mymedia.can_play: #still playing
+			if mymedia.get_busy() and mymedia.play_count < 5:
+				mymedia.play_count += 1
 			elif not mymedia.get_busy():
 				pygame.time.wait(1000)
 				continue
@@ -173,21 +173,13 @@ class mymedia():
 					time_secs = str(int(f['time_secs']/60)) + ':' + str(int(f['time_secs']%60))
 
 			if type(file) != None and type(m) != None and type(s) != None:
-				mymedia.last_str = 'still playing ' + file + ', time_secs:  ' + time_secs + '， time:  ' + str(m) + ':' + str(s)
+				mymedia.last_str = 'still playing ' + file + ', time_secs:  ' + time_secs + ', time:  ' + str(m) + ':' + str(s)
 				sys.stdout.write (mymedia.last_str)
 				sys.stdout.flush()
-			else:
-				if type(file) == None:
-					print('file is NoneType.......')
-				if type(m) == None:
-					print('m is NoneType........')
-				if type(s) == None:
-					print('s is NoneType...........')
 			pygame.time.wait(1000)
 			
 
-		if mymedia.playing:
-			print('playDaemon:play_next %d' %mymedia.get_busy())
+		if mymedia.stream._is_running and mymedia.playing:
 			mymedia.get_music_files()
 			mymedia.play_next()
 		
@@ -206,6 +198,8 @@ class mymedia():
 		finally:
 			pass
 
+		mymedia.play_count = 0
+			
 		if mymedia.timer:
 			mymedia.timer.cancel()
 			mymedia.timer = None
@@ -230,7 +224,6 @@ class mymedia():
 			mymedia.current_index = (mymedia.current_index - 1) if  mymedia.current_index>0 else len(mymedia.music_files) - 1
 			mymedia.load(mymedia.get_filepath(mymedia.current_index)) 
 			mymedia.play()
-		print('play_pre')
 		
 	def pause():
 		if mymedia.paused:
@@ -244,14 +237,16 @@ class mymedia():
 			mymedia.do_chg_index_callback()
 		
 	def stop():
+		if mymedia.timer:
+			mymedia.timer.cancel()
+			mymedia.timer = None
+			
 		if not mymedia.music_files:
 			return
 		pygame.mixer.music.stop()
 		mymedia.paused = False
 		mymedia.playing = False
-		if mymedia.timer:
-			mymedia.timer.cancel()
-			mymedia.timer = None
+		
 		
 	def fadeout(time):
 		pygame.mixer.music.fadeout(time)
@@ -350,7 +345,7 @@ class mymedia():
 		#global rt_data
 		#global fft_data
 
-		while (not stream._is_running) and stream.is_active():
+		while stream._is_running and stream.is_active():
 			ad_rdy_ev.wait(timeout=1000)
 			if not q.empty():
 				#process audio data here
@@ -358,15 +353,16 @@ class mymedia():
 				while not q.empty():
 					q.get()
 
-				if time.time() - mymedia.time_tick >= 0.2:
+				if time.time() - mymedia.time_tick > 0.1:
+					#mymedia.time_tick = time.time()
 					rt_data = np.frombuffer(data,np.dtype('<i2'))
 					rt_data = rt_data * sg.hamming(CHUNK)
 					fft_temp_data=fftpack.fft(rt_data,rt_data.size,overwrite_x=True)
-					fft_data=np.abs(fft_temp_data)[0:fft_temp_data.size/2+1]
+					fft_data=np.abs(fft_temp_data)[0:int(fft_temp_data.size/2+1)]
 					freq = [n for n in range(0,RATE)] #N个元素
 					mymedia.fft2color(freq, fft_data)
 			ad_rdy_ev.clear()
-		print('read_audio_thead close')
+		#print('read_audio_thead close')
 	
 	def audio_callback(in_data, frame_count, time_info, status):
 		global counter
@@ -403,7 +399,7 @@ class mymedia():
 				read_audio_t=threading.Thread(target=mymedia.read_audio_thead,args=(mymedia.q, mymedia.stream, mymedia.ad_rdy_ev))
 				read_audio_t.daemon=True
 				read_audio_t.start()
-				print("声音输入设备  '%s' 初始化成功..." %name)
+				print("Input audio '%s' 初始化成功..." %name)
 				break
 
 		mymedia.load(mymedia.get_filepath(0)) 
@@ -419,7 +415,7 @@ class mymedia():
 			mymedia.stream.close()
 			mymedia.pa.terminate()
 			mymedia.ad_rdy_ev.set()
-			print('mymedia close')
+			#print('mymedia close')
 		
 if __name__ == "__main__":
 	try:
