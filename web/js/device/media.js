@@ -106,6 +106,19 @@ function media()
 		this.play_img2.onload = function(){
 			_device.doDraw();
 		}
+		
+		this.next=new Image();
+		this.next.src = 'images//next.png';
+		this.next.onload = function(){
+			_device.doDraw();
+		}
+		
+		this.pre=new Image();
+		this.pre.src = 'images//pre.png';
+		this.pre.onload = function(){
+			_device.doDraw();
+		}
+		
 		this.vol_img1=new Image();
 		this.vol_img1.src = 'images//vol1.png';
 		this.vol_img1.onload = function(){
@@ -245,6 +258,12 @@ function media()
 			}
 			else if(i == _MEDEA_BTN_.vol_add && this.vol_img2){
 				ctx.drawImage(this.vol_img2, 0, 0, this.vol_img2.width, this.vol_img2.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.vol_img2.width/2, _device.arrayBtn[i].top, this.vol_img2.width, this.vol_img2.height);
+			}
+			else if(i == _MEDEA_BTN_.pre && this.pre){
+				ctx.drawImage(this.pre, 0, 0, this.pre.width, this.pre.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.pre.width/2, _device.arrayBtn[i].top, this.pre.width, this.pre.height);
+			}
+			else if(i == _MEDEA_BTN_.next && this.next){
+				ctx.drawImage(this.next, 0, 0, this.next.width, this.next.height, _device.arrayBtn[i].left + _device.arrayBtn[i].width/2 - this.next.width/2, _device.arrayBtn[i].top, this.next.width, this.next.height);
 			}
 			else
 				this.arrayBtn[i].drawBtn(ctx, _font38, "rgb(0, 0, 0)", 10);

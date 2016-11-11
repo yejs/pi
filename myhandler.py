@@ -25,6 +25,7 @@ from mymedia import mymedia
 from data.data import *
 from data.g_data import GlobalVar
 from data.asr import asr
+from data.gesture import gesture
 
 import numpy as np
 #客户端ajax请求处理
@@ -51,8 +52,9 @@ class WebHandler(tornado.web.RequestHandler):
         timer = threading.Timer(2 if time.time() < (WebHandler.time_tick + 2) else 0.5, WebHandler.do_chg_index)#延时推送列表信息到页面，否则如果页面刚打开，会收不到此信息
         timer.start()
 	
-    def set_asr_callback():#初始化设置语音识别回调函数
+    def set_callback():#初始化设置语音识别、手势识别回调函数
         asr.do_post = WebHandler.do_post
+        gesture.do_post = WebHandler.do_post
         #print('set Connection.asr_callback')
 			
     def post(self, *args, **kwargs):

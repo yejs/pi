@@ -133,6 +133,8 @@ class Connection(object):
                         self.heart_beat_ack_timer = None
                 elif obj.get('event') == 'asr' and obj.get('data') and len(obj.get('data'))<3:    #语音识别
                     asr.do_recv(obj['data'])
+                elif obj.get('event') == 'gesture' and obj.get('data'):    #手势识别
+                    asr.do_recv(obj['data'], self._address[0])
         else:
             print("recv from %s: %s" % (self._address[0], data[:]))  
 

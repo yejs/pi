@@ -83,7 +83,7 @@ if __name__ == "__main__":
         server.listen(options.socket_port)
         print ("webserver 127.0.0.1:%s start..." % options.http_port)
 		
-        WebHandler.set_asr_callback()
+        WebHandler.set_callback()
 		
         ping(WebHandler.do_post)
 		
