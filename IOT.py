@@ -42,9 +42,9 @@ define("socket_port", default=5000, help="run on the given port", type=int)
 is_closing = False
 server = None
 
-def signal_handler(signum, frame):
+def myHandler(signum, frame):
     global is_closing
-    logging.info('exiting...')
+    logging.info('exiting %s...' %signum)
     server.stop()
     Connection.stop()
     mymedia.close()
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         RPi_GPIO.init(dir())
         #os.chdir(os.path.dirname(__file__))
         tornado.options.parse_command_line()
-        signal.signal(signal.SIGINT, signal_handler)       
+        signal.signal(signal.SIGINT, myHandler)  		
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
         http_server.listen(options.http_port)
         server = SocketServer()    
@@ -90,7 +90,8 @@ if __name__ == "__main__":
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:
-        tornado.ioloop.IOLoop.instance().stop()
+        logging.info('KeyboardInterrupt...')
+        myHandler(2, None)
     finally:
         RPi_GPIO.cleanup()
         tornado.ioloop.IOLoop.instance().stop()
