@@ -56,7 +56,7 @@ function dev_set()
 	this.id = '1';
 
 
-	var input_titles = ["door", "window", "humiture", "flammable", "fire", "ir_in"];
+	var input_titles = ["door", "window", "humiture", "flammable", "fire", "ir_in", "alert"];
 	
 		//websocket 处理函数
 	this.onmessage = function(evt){

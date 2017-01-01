@@ -44,7 +44,7 @@ server = None
 
 def myHandler(signum, frame):
     global is_closing
-    logging.info('exiting %s...' %signum)
+    logging.info('exiting ...' )
     server.stop()
     Connection.stop()
     mymedia.close()
@@ -71,7 +71,7 @@ application = tornado.web.Application([
  
 if __name__ == "__main__":
     try:
-        mymedia.start(WebHandler.do_fft_callback, WebHandler.do_chg_index_callback)
+        #mymedia.start(WebHandler.do_fft_callback, WebHandler.do_chg_index_callback)
 		
         RPi_GPIO.init(dir())
         #os.chdir(os.path.dirname(__file__))
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 		
         WebHandler.set_callback()
 		
-        ping(WebHandler.do_post)
+        #ping(WebHandler.do_post)
 		
         tornado.ioloop.PeriodicCallback(try_exit, 100).start()
         tornado.ioloop.IOLoop.instance().start()

@@ -71,7 +71,7 @@ function footer(index)
 	{
 		this.rect = getWinRect();
 		this.rect.height = '80';
-		this.rect.width = Math.min(1080, this.rect.width) - 2;
+		this.rect.width = Math.min(1080, this.rect.width);
 		this.canvas.width = this.canvasReport.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.rect.height;
 		this.contextReport = this.canvasReport.getContext("2d");
@@ -89,6 +89,7 @@ function footer(index)
 	{
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
+		
 
 		this.contextReport.fillStyle = "rgb(43, 164, 235)";
 		this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);

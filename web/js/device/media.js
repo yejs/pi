@@ -132,6 +132,8 @@ function media()
 	}
 	//人机交互处理
 	this.doIt = function(loc, down, up){
+		if(!this._media_data)
+			return;
 		start = Math.max(parseInt(this._current_index)-8, 0);
 		end = Math.min(start+16, this._media_data.length);
 			

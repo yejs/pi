@@ -117,13 +117,13 @@ class ping(threading.Thread):
 						break
 
 				ping.do_mode(leave)
-			
+
 			time.sleep(1)
 			n += 1
 			if n > 60:
 				ping.init_host()
 				n = 0
-
+		print('ping close')
 			
 if __name__ == "__main__":
 	try:

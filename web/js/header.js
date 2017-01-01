@@ -90,27 +90,48 @@ function header(index)
 	{
 		this.rect = getWinRect();
 		this.rect.height = '180';
-		this.rect.width = Math.min(1080, this.rect.width) - 2;
+		this.rect.width = Math.min(1080, this.rect.width);
 		this.canvas.width = this.canvasReport.width = this.rect.width;  
 		this.canvas.height = this.canvasReport.height = this.rect.height;
 		this.contextReport = this.canvasReport.getContext("2d");
 		this.ctx = this.canvas.getContext("2d");
-		this.doDraw();	
+		this.doDraw();
 	}
 
 	this.doDraw = function()
 	{
 		if(!this.ctx)
 			return;
-		
+
 		this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 
 		this.contextReport.clearRect(0, 0, this.rect.width, this.rect.height);
 
 		var grd=this.contextReport.createLinearGradient(0, 0, 0, this.rect.height); //绘背景色
-		grd.addColorStop(0, "rgba(5, 39, 175, 255)"); 
-		grd.addColorStop(0.5, "rgba(5, 89, 175, 255)");
-		grd.addColorStop(1, "rgba(5, 139, 175, 255)");
+		
+		
+		
+		
+		
+		if(this.weather){
+			var _w = this.weather;
+			pos = _w.s2.indexOf('晴');
+			if(pos<0){
+				grd.addColorStop(0, "rgba(75, 79, 125, 255)"); 
+				grd.addColorStop(0.5, "rgba(75, 109, 125, 255)");
+				grd.addColorStop(1, "rgba(75, 119, 125, 255)");
+			}
+			else{
+				grd.addColorStop(0, "rgba(5, 39, 175, 255)"); 
+				grd.addColorStop(0.5, "rgba(5, 89, 175, 255)");
+				grd.addColorStop(1, "rgba(5, 139, 175, 255)");
+			}
+		}
+		else{
+			grd.addColorStop(0, "rgba(5, 39, 175, 255)"); 
+			grd.addColorStop(0.5, "rgba(5, 89, 175, 255)");
+			grd.addColorStop(1, "rgba(5, 139, 175, 255)");
+		}
 		
 		this.contextReport.fillStyle = grd;//"rgb(5, 39, 175)";
 		this.contextReport.fillRect(0, 0, this.rect.width, this.rect.height);
@@ -128,7 +149,22 @@ function header(index)
 		var id = null;
 		for(var i=1;i<12;i++){
 			if(_DEVICE_[dev_id].hasOwnProperty(i.toString())){
-				if(_DEVICE_[dev_id][i.toString()].status == key){
+				if(_DEVICE_[dev_id][i.toString()].status == key && _DEVICE_[dev_id][i.toString()].online){
+					id = i.toString();
+					break;
+				}
+			}
+			else
+				break;
+		}
+		return id;
+	}
+	
+	this.getOnline = function(dev_id){
+		var id = null;
+		for(var i=1;i<12;i++){
+			if(_DEVICE_[dev_id].hasOwnProperty(i.toString())){
+				if(_DEVICE_[dev_id][i.toString()].online){
 					id = i.toString();
 					break;
 				}
@@ -155,14 +191,21 @@ function header(index)
 				dev_id = 'window';
 		}
 		if(!dev_id){//没有找到打开的门、窗（所有门窗都处于关闭状态）
-			if(this.last_id.dev_id){
+	//	console.log(dev_id);
+		/*	if(this.last_id.dev_id){
 				dev_id = this.last_id.dev_id;
 				id = this.last_id.id;
 				var title = _DEVICE_[dev_id][id].name + '：';
 			}
-			else{
+			else*/
+			{
 				dev_id = 'door';
-				id = '1';
+				id = this.getOnline('door');
+				if(null == id)
+					id = this.getOnline('window');
+
+				id = null == id ? this.last_id.id : id;
+				id = null == id ? '1' : id;
 				var title = '所有门窗：';
 			}
 		}
@@ -175,13 +218,13 @@ function header(index)
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText(title, x - ctx.measureText(title).width, 36);
-		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_[dev_id][id].status == 'open') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillStyle = ctx.strokeStyle = (id && _DEVICE_[dev_id][id].status == 'open') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
 		ctx.fillText((_DEVICE_[dev_id][id].status == 'open' ? '开' : '关'), x, 36);
 		
 		//2.处理燃气检测设备
 		id = this.checkInput('flammable', 'alert');
 		if(!id){//所有燃气检测设备都处于安全状态
-			id = '1';
+			id = this.getOnline('flammable');
 			title = '所有燃气：';
 		}
 		else
@@ -189,13 +232,13 @@ function header(index)
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText(title, x - ctx.measureText(title).width, 91);
-		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.flammable[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText((_DEVICE_.flammable[id].status == 'alert' ? '警报' : '安全'), x, 91);
+		ctx.fillStyle = ctx.strokeStyle = (id && _DEVICE_.flammable[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(id ? (_DEVICE_.flammable[id].status == 'alert' ? '警报' : '安全') : '不在线', x, 91);
 
 		//3.处理火警检测设备
 		id = this.checkInput('fire', 'alert');
 		if(!id){//所有火警检测设备都处于安全状态
-			id = '1';
+			id = this.getOnline('fire');
 			title = '所有火警：';
 		}
 		else
@@ -203,36 +246,40 @@ function header(index)
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText(title, x - ctx.measureText(title).width, 146);
-		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.fire[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText((_DEVICE_.fire[id].status == 'alert' ? '警报' : '安全'), x, 146);
+		ctx.fillStyle = ctx.strokeStyle = (id && _DEVICE_.fire[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(id ? (_DEVICE_.fire[id].status == 'alert' ? '警报' : '安全') : '不在线', x, 146);
 		
 		
-		var status = _DEVICE_.humiture['1'].status;
-		pos = status.indexOf(':');
-		
-		if(pos>=0){
-			temperature = status.substr(0, pos);
-			humidity = status.substr(pos+1);
+		//3.处理温度、湿度检测设备
+		id = this.getOnline('humiture');
+		if(id){
+			var status = _DEVICE_.humiture[id].status;
+			pos = status.indexOf(':');
+			
+			if(pos>=0){
+				temperature = status.substr(0, pos);
+				humidity = status.substr(pos+1);
+			}
+			else
+				return;
 		}
-		else
-			return;
 		
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		var rect = {x:0, y:0, width:this.rect.width*2/3, height:this.rect.height};
 		x = Math.max(rect.width/4 - ctx.measureText('室内温度：35.6℃').width/2 - 10, 0) + ctx.measureText('室内温度：').width;
 		ctx.fillText('室内温度：', x - ctx.measureText('室内温度：').width, 36);
-		ctx.fillStyle = ctx.strokeStyle = (parseInt(temperature) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText(temperature + '℃', x, 36);
+		ctx.fillStyle = ctx.strokeStyle = (id && parseInt(temperature) >= 24) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(id ? temperature + '℃' : '不在线', x, 36);
 
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText('相对湿度：', x - ctx.measureText('相对湿度：').width, 91);
-		ctx.fillStyle = ctx.strokeStyle = (parseInt(humidity) >= 70) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText(humidity + '%', x, 91);
+		ctx.fillStyle = ctx.strokeStyle = (id && parseInt(humidity) >= 70) ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(id ? humidity + '%' : '不在线', x, 91);
 		
 		//4.处理红外检测设备
 		id = this.checkInput('ir_in', 'alert');
 		if(!id){//所有红外检测设备都处于安全状态
-			id = '1';
+			id = this.getOnline('ir_in');
 			title = '所有红外：';
 		}
 		else
@@ -240,8 +287,8 @@ function header(index)
 
 		ctx.fillStyle = ctx.strokeStyle = "rgb(255, 255, 150)";
 		ctx.fillText(title, x - ctx.measureText(title).width, 146);
-		ctx.fillStyle = ctx.strokeStyle = (_DEVICE_.ir_in[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
-		ctx.fillText((_DEVICE_.ir_in[id].status == 'alert' ? '有人' : '无人'), x, 146);
+		ctx.fillStyle = ctx.strokeStyle = (id && _DEVICE_.ir_in[id].status == 'alert') ? "rgb(255, 50, 50)" : "rgb(50, 255, 50)";
+		ctx.fillText(id ? (_DEVICE_.ir_in[id].status == 'alert' ? '有人' : '无人') : '不在线', x, 146);
 	}
 	
 	this.drawWeather = function(ctx, rect)
@@ -265,6 +312,7 @@ function header(index)
 			r = 9/ratio;
 			ctx.drawImage(img, 0, 0, img.width, img.height, (_header.rect.width - (img.width*r))*ratio/2, 5, img.width*r*ratio, img.height*r*ratio);
 			_header.ctx.drawImage(_header.canvasReport, 0, 0);
+			
 		};
 		
 		if(parseInt(_w.t1) > 24)

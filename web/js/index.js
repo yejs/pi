@@ -25,7 +25,10 @@ window.onload = function(){
 	doInitHeader('header', 0);
 	doInitFooter('footer', 0);
 	
-	window.onresize();
+//	if(_header)
+//		_header.onresize();
+//	if(_footer)
+//		_footer.onresize();
 	
 	ws = websocket.prototype.connect(document.domain, _port, onmessage, onopen, onclose, null);
 }
@@ -41,13 +44,7 @@ showPage = function(title){
 }
 
 window.onresize = function(){
-	if(_header)
-		_header.onresize();
-	if(_footer)
-		_footer.onresize();
-	
-//	window.resizeTo(screen.width, screen.height);
-//    window.moveTo(0, 0);
+	location.reload(false);
 }
 
 onNewsTitle = function(i){

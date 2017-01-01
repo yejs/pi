@@ -52,6 +52,7 @@ def signal_handler2(signum, frame):
 
 	  
 class mymedia():
+	inited = False
 	track = None
 	music_files = None	#文件列表
 	TRACK_END = None
@@ -76,6 +77,7 @@ class mymedia():
 	
 	
 	def __init__(self, path):
+		inited = True
 		mymedia.root_path = path
 		mymedia.get_music_files()
 		
@@ -150,7 +152,7 @@ class mymedia():
 
 		
 	def playDaemon():
-		while (mymedia.get_busy() or mymedia.play_count < 5) and mymedia.stream._is_running and mymedia.can_play: #still playing
+		while mymedia.inited and (mymedia.get_busy() or mymedia.play_count < 5) and mymedia.stream._is_running and mymedia.can_play: #still playing
 			if mymedia.get_busy() and mymedia.play_count < 5:
 				mymedia.play_count += 1
 			elif not mymedia.get_busy():
@@ -179,7 +181,7 @@ class mymedia():
 			pygame.time.wait(1000)
 			
 
-		if mymedia.stream._is_running and mymedia.playing:
+		if mymedia.inited and mymedia.stream._is_running and mymedia.playing:
 			mymedia.get_music_files()
 			mymedia.play_next()
 		
@@ -258,7 +260,10 @@ class mymedia():
 			mymedia.timer = None
 			
 	def get_busy():
-		return pygame.mixer.music.get_busy()
+		if mymedia.inited:
+			return pygame.mixer.music.get_busy()
+		else:
+			return False
 		
 	def set_volume(value):
 		pygame.mixer.music.set_volume(value)
@@ -270,7 +275,7 @@ class mymedia():
 		return pygame.mixer.music.get_volume()
 
 	def get_file(file_index = None):
-		if len(mymedia.music_files):
+		if mymedia.music_files and len(mymedia.music_files):
 			if file_index == None or file_index >= len(mymedia.music_files):
 				file_index = 0
 			return mymedia.music_files[file_index]['file']
