@@ -259,7 +259,7 @@ div  input, select, .select-text
 	padding: 0px 0px 0px 10px;
 	float:right;
 	white-space:normal;
-	border-width:1px;border-color:black;
+	border:none;border-color:gray;
 	font-family:"PingHei",'Hiragino Sans GB','Microsoft Yahei','Helvetica', 'Arial';font-weight:600;font-style:normal;font-size:42px;text-align:left;
 }
 
@@ -345,3 +345,7 @@ div.item  input.mybtn
 
 .myframe {width:100%;height:87vh;border:none;}
 		
+body {
+	margin: 0px;
+    padding: 0px;
+}
