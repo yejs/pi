@@ -64,7 +64,7 @@ refresh = function(){
 		document.getElementById('scene_title').innerText = mode;
 
 		if('lamp' == dev_id)
-			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调光调色';
+			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + (_LAMP_[mode][_device.id]['status'] === 'off' ? '\" 关闭' : (_DEVICE_['lamp'][_device.id]['pin'] != '0' ? '\" 调光调色' : '\" 打开'));	
 		else if('curtain' == dev_id)
 			document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(_device.id).innerText + '\"调节开合进度';
 		else if('plugin' == dev_id)
@@ -427,7 +427,7 @@ function device()
 			this.doSpeech(json.data);
 		}
 		else if( json.event === "device" || json.event === "the_device"){
-		//	console.log('device:' + JSON.stringify(json));
+			
 			if(json.event === "device")
 				_DEVICE_ = json.data;
 			else if(json.event === "the_device")
@@ -476,13 +476,17 @@ function device()
 
 				_LAMP_[json.mode] = json.data;
 
-				document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : '\" 调色调光');	
+				document.getElementById('scene_title').innerText = _MODE_SET_[mode] + '-- \"' + document.getElementById(json.id).innerText + (_LAMP_[mode][json.id]['status'] === 'off' ? '\" 关闭' : (_DEVICE_['lamp'][id]['pin'] != '0' ? '\" 调光调色' : '\" 打开'));	
 
 				for(var id in _LAMP_[mode]){
 					if(_DEVICE_["lamp"].hasOwnProperty(id.toString())){
 						if(_LAMP_[mode][id]['status'] === 'on'){
-							r = _LAMP_[mode][id]['color']['r']*255/100, g = _LAMP_[mode][id]['color']['g']*255/100, b = _LAMP_[mode][id]['color']['b']*255/100;
-							color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+							if(_DEVICE_['lamp'][id]['pin'] != '0'){
+								r = _LAMP_[mode][id]['color']['r']*255/100, g = _LAMP_[mode][id]['color']['g']*255/100, b = _LAMP_[mode][id]['color']['b']*255/100;
+								color = '#' + parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+							}
+							else
+								color = '#fcc';
 							document.getElementById(id).style.backgroundColor = color;	
 						}					
 						else

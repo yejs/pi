@@ -32,6 +32,7 @@ import numpy as np
 class WebHandler(tornado.web.RequestHandler):
     time_tick = time.time()
     volume = 0
+    GlobalVar.set_auto_mode(_auto_mode_)
     def do_fft_callback(color): 
 
         for id in _DEVICE_['lamp'].keys():
@@ -55,6 +56,7 @@ class WebHandler(tornado.web.RequestHandler):
     def set_callback():#初始化设置语音识别、手势识别回调函数
         asr.do_post = WebHandler.do_post
         gesture.do_post = WebHandler.do_post
+        Connection.perform_save = WebHandler.perform_save;
         #print('set Connection.asr_callback')
 			
     def post(self, *args, **kwargs):
@@ -139,13 +141,14 @@ class WebHandler(tornado.web.RequestHandler):
 	
     def perform_save(): 
         f = open('data/data.py','w')            
-        f.write('__all__ = ["_DEVICE_", "_LAMP_", "_CURTAIN_", "_AIR_CONDITIONER_", "_TV_", "_PLUGIN_"]\n')  
+        f.write('__all__ = ["_DEVICE_", "_LAMP_", "_CURTAIN_", "_AIR_CONDITIONER_", "_TV_", "_PLUGIN_", "_auto_mode_"]\n')  
         f.write('_DEVICE_ = ' + json.dumps(_DEVICE_) + '\n')  
         f.write('_LAMP_ = ' + json.dumps(_LAMP_) + '\n')  
         f.write('_CURTAIN_ = ' + json.dumps(_CURTAIN_) + '\n')  
         f.write('_AIR_CONDITIONER_ = ' + json.dumps(_AIR_CONDITIONER_) + '\n')  
         f.write('_TV_ = ' + json.dumps(_TV_) + '\n')  
         f.write('_PLUGIN_ = ' + json.dumps(_PLUGIN_) + '\n')  
+        f.write('_auto_mode_ = ' + json.dumps(GlobalVar.get_auto_mode()) + '\n')  
         f.close
 		
 	

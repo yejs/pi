@@ -38,6 +38,7 @@ class Connection(object):
     lirc_air = None
     lirc_tv = None
     last_param = None
+    perform_save = None
     def __init__(self, stream, address):   
         Connection.clients.add(self)   
 		
@@ -61,6 +62,8 @@ class Connection(object):
             Connection.lirc_tv = LIRC("conf/tv.conf")
         print("New connection: %s, " % address[0])
 		
+        Connection.do_OnOff()
+		
         Connection.do_disarming_timer = threading.Timer(0.1, Connection.do_disarming)#延时0.1秒输出
         Connection.do_disarming_timer.start()
         #Connection.do_disarming()#根据场景模式撤防、布防处理
@@ -74,7 +77,71 @@ class Connection(object):
     def set_dev_item(dev_id, ip, status):
         if _DEVICE_.get(dev_id) == None:
             return
+		
+        for id in _DEVICE_[dev_id]:
+            if _DEVICE_[dev_id][id].get('status') and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['ip'] == ip:
+                _DEVICE_[dev_id][id]['status'] = status
+				
+        Connection.do_alert(dev_id, ip, status)
+				
+    def check_status(dev_id): 
+        if dev_id == 'flammable' or dev_id == 'fire':
+            key_status = 'alert'
+        elif dev_id == 'ir_in':
+            key_status = 'alert'
+        elif dev_id == 'door' or dev_id == 'window':
+            key_status = 'open'
 			
+        for id in _DEVICE_[dev_id].keys():
+            if not _DEVICE_[dev_id][id].get('ip'):
+                continue
+
+            sock = Connection.is_online(_DEVICE_[dev_id][id]['ip'])
+
+            if sock and _DEVICE_[dev_id][id]['status'].find(key_status) != -1:
+                return True
+				
+        return False
+					
+    def do_alert(dev_id, ip, status):
+        if _DEVICE_.get(dev_id) == None:
+            return
+			
+		
+			
+        msg = "{\"event\":\"alert\", \"dev_id\":\"all\", \"status\":\"security\"}"
+        if (((dev_id == 'flammable' or dev_id == 'fire') and status == 'alert') or (dev_id == 'ir_in' and status == 'alert') or ((dev_id == 'door' or dev_id == 'window') and status == 'open')):
+            msg = "{\"event\":\"alert\", \"dev_id\":\"%s\", \"status\":\"%s\"}" %(dev_id, status)	
+        else:
+            if Connection.check_status('flammable'):
+                msg = "{\"event\":\"alert\", \"dev_id\":\"%s\", \"status\":\"%s\"}" %('flammable', 'alert')	
+            elif Connection.check_status('fire'):
+                msg = "{\"event\":\"alert\", \"dev_id\":\"%s\", \"status\":\"%s\"}" %('fire', 'alert')	
+            elif Connection.check_status('ir_in'):
+                msg = "{\"event\":\"alert\", \"dev_id\":\"%s\", \"status\":\"%s\"}" %('ir_in', 'alert')	
+            elif Connection.check_status('door'):
+                msg = "{\"event\":\"alert\", \"dev_id\":\"%s\", \"status\":\"%s\"}" %('door', 'open')	
+            elif Connection.check_status('window'):
+                msg = "{\"event\":\"alert\", \"dev_id\":\"%s\", \"status\":\"%s\"}" %('window', 'open')	
+			
+        #print("\ndo_alert: %s" %msg)
+		
+        for id in _DEVICE_['alert'].keys():
+            if not _DEVICE_['alert'][id].get('ip'):
+                continue
+
+            sock = Connection.is_online(_DEVICE_['alert'][id]['ip'])
+			
+            if sock:
+                sock.time_tick = time.time()
+                if sock.timer:
+                    sock.timer.cancel()
+                    sock.timer = None
+                try:
+                    sock.do_write(msg)
+                except:
+                    logging.error('Error sending message', exc_info=True)		
+        '''
         if dev_id == 'humiture':#温湿度超过设定最大最小值
             pos = status.find(':')
             if pos != -1:
@@ -84,16 +151,13 @@ class Connection(object):
                     for id in _DEVICE_[dev_id]:
                         if _DEVICE_[dev_id][id]['ip'] == ip and (float(temperature)>_DEVICE_[dev_id][id]['t_max'] or float(temperature)<_DEVICE_[dev_id][id]['t_min'] or float(humidity)>_DEVICE_[dev_id][id]['h_max'] or float(humidity)<_DEVICE_[dev_id][id]['h_min']):
                             pass
-        elif (dev_id == 'flammable' or dev_id == 'fire') and status == 'alert':#燃气、火警报警处理
+        elif dev_id == 'flammable' or dev_id == 'fire':#燃气、火警报警处理
             pass
-        elif dev_id == 'door' and status == 'open':#门、窗非法打开报警处理
+        elif (dev_id == 'door' or dev_id == 'window') and status == 'open':#门、窗非法打开报警处理
             pass
-			
-        for id in _DEVICE_[dev_id]:
-            if _DEVICE_[dev_id][id].get('status') and _DEVICE_[dev_id][id].get('ip') and _DEVICE_[dev_id][id]['ip'] == ip:
-                _DEVICE_[dev_id][id]['status'] = status
-				
-				
+        elif dev_id == 'ir_in' and status == 'alert':#红外报警处理
+            pass
+        '''	
 
 		
     def doRecv(self, data):    
@@ -111,10 +175,12 @@ class Connection(object):
         if data[:].find('{') == 0 and (data[:].find('}') == len(data[:])-1 or data[:].find('}') == len(data[:])-2):
             obj = json.loads(data[:]) 
             if obj:
+                if obj.get('event') != 'heart_beat':
+                    print("recv from %s: %s" % (self._address[0], data[:]))
+					
                 if obj.get('event') == 'report':    
                     Connection.set_dev_item(obj['dev_id'], self._address[0], obj['status'])
                     WebSocket.broadcast_the_device(obj['dev_id']);
-                    self.do_write("{\"event\":\"ack\"}")
                     #print("recv from %s: %s" % (self._address[0], data[:])) 
                 elif obj.get('event') == 'ack':    
                     if self.media['flag']:#dev_id.find('media') != -1:
@@ -127,14 +193,16 @@ class Connection(object):
                         WebSocket.broadcast_messages(data[:]);
                     #print("recv from %s: %s" % (self._address[0], data[:]))  
                 elif obj.get('event') == 'heart_beat':    
-                    self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:]))  
-                    if self.heart_beat_ack_timer:
-                        self.heart_beat_ack_timer.cancel()
-                        self.heart_beat_ack_timer = None
+                    pass
                 elif obj.get('event') == 'asr' and obj.get('data') and len(obj.get('data'))<3:    #语音识别
                     asr.do_recv(obj['data'])
                 elif obj.get('event') == 'gesture' and obj.get('data'):    #手势识别
                     asr.do_recv(obj['data'], self._address[0])
+					
+                self.heart_beat_ack = True  #print("recv from2 %s: %s" % (self._address[0], data[:]))  
+                if self.heart_beat_ack_timer:
+                    self.heart_beat_ack_timer.cancel()
+                    self.heart_beat_ack_timer = None
         else:
             print("recv from %s: %s" % (self._address[0], data[:]))  
 
@@ -182,6 +250,16 @@ class Connection(object):
             if conn.write_ack_timer != None:
                 conn.write_ack_timer.cancel()
 
+	
+    def do_OnOff(): 
+        Connection.check_online('flammable')
+        Connection.check_online('humiture')
+        Connection.check_online('fire')
+        Connection.check_online('ir_in')
+        Connection.check_online('door')
+        Connection.check_online('window')
+        #Connection.perform_save();
+        WebSocket.broadcast_device()
 		
     def on_close(self):    
         if self not in Connection.clients:
@@ -198,6 +276,7 @@ class Connection(object):
             self.write_ack_timer.cancel()
 			
         print("%s closed, connection num %d" % (self._address[0], len(Connection.clients)))  
+
 
         if Connection.close_timer:
             Connection.close_timer.cancel()	
@@ -223,6 +302,7 @@ class Connection(object):
             if v.get('ip') == self._address[0]:
                 _PLUGIN_[mode][k]['status'] = 'off'
 
+        Connection.do_OnOff()
         WebSocket.broadcast_lamp_status()
         WebSocket.broadcast_curtain_status()
         WebSocket.broadcast_plugin_status()
@@ -379,21 +459,37 @@ class Connection(object):
             self.do_write(msg)
         except:
             logging.error('Error sending message', exc_info=True)	
-					
+		
+    def check_online(dev_id): 
+        for id in _DEVICE_[dev_id].keys():
+            if not _DEVICE_[dev_id][id].get('ip'):
+                continue
+
+            sock = Connection.is_online(_DEVICE_[dev_id][id]['ip'])
+
+            if sock:
+                _DEVICE_[dev_id][id]['online'] = 1
+            else:
+                _DEVICE_[dev_id][id]['online'] = 0
+            print('dev_id:%s, id:%s, ip:%s, online:%d' %(dev_id, id, _DEVICE_[dev_id][id]['ip'], _DEVICE_[dev_id][id]['online']))
+		
     def is_online(ip): 
         for conn in Connection.clients:
             if conn._address[0].find(ip) != -1:
                 return conn
         return None
 		
-    def do_disarming(): 
-        Connection.do_disarming_timer = None
+    def is_disarming(): 
         Disarming = 'false'
         mode = GlobalVar.get_mode()
         if "normal" == mode or "guests" == mode or "diner" == mode:#在‘回家’、‘会客’、‘用餐’场景模式下撤防，其它场景模式下布防
             Disarming = 'true'
+        return Disarming
+			
+    def do_disarming(): 
+        Connection.do_disarming_timer = None
 
-        msg = "{\"event\":\"disarming\", \"data\":\"%s\", \"mode\":\"%s\"}" %(Disarming, mode)
+        msg = "{\"event\":\"disarming\", \"data\":\"%s\", \"mode\":\"%s\"}" %(Connection.is_disarming(), GlobalVar.get_mode())
 
         for conn in Connection.clients:
             try:

@@ -17,7 +17,7 @@ function lamp()
 			this.bar3.isdown = false;
 		}
 		
-		if("lamp" == dev_id && _LAMP_[mode][this.id]['status'] === 'off')
+		if("lamp" == dev_id && (_LAMP_[mode][this.id]['status'] === 'off' || _DEVICE_['lamp'][this.id]['pin'] == '0'))
 			return;
 		
 		if(loc.x > this.bar1.x + this.bar1.width || loc.x < this.bar1.x)
@@ -43,7 +43,12 @@ function lamp()
 		if(-1 == r || -1 == g || -1 == b)
 			return;
 		
-		color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+		if(_DEVICE_['lamp'][this.id]['pin'] != '0')
+			color = parseInt(r/16).toString(16) + parseInt(r%16).toString(16) + parseInt(g/16).toString(16) + parseInt(g%16).toString(16) + parseInt(b/16).toString(16) + parseInt(b%16).toString(16);
+		else{
+			color = 'ffffff';
+			console.log('pin:' + _DEVICE_['lamp'][this.id]['pin']);
+		}
 		this.docommand(this.id, color);
 	//	window.parent.postMessage({'msg':'send' , 'data':'dsdsfdfdf'},'*');
 		
@@ -100,12 +105,13 @@ function lamp()
 	this.drawIt = function(ctx){
 		var pos1 = this.bar1.pos*this.bar1.width/100, pos2 = this.bar2.pos*this.bar2.width/100, pos3 = this.bar3.pos*this.bar3.width/100;
 		var offset = this.bar1.height/2 - 5, r = 5, h = 10;
+		var on = _LAMP_[mode][this.id]['status'] === 'on' && _DEVICE_['lamp'][this.id]['pin'] != '0';
 		//滚动条的左半部分
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
+		ctx.fillStyle = on ? "rgb(220, 0, 0)" : "rgb(220, 220, 220)";
 		ctx.roundRect(this.bar1.x, this.bar1.y+offset, pos1, h, r, 1, 0);
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
+		ctx.fillStyle = on ? "rgb(0, 220, 0)" : "rgb(220, 220, 220)";
 		ctx.roundRect(this.bar2.x, this.bar2.y+offset, pos2, h, r, 1, 0);
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
+		ctx.fillStyle = on ? "rgb(0, 0, 220)" : "rgb(220, 220, 220)";
 		ctx.roundRect(this.bar3.x, this.bar3.y+offset, pos3, h, r, 1, 0);
 		
 		//滚动条的右半部分
@@ -116,11 +122,11 @@ function lamp()
 		
 		//滚动条的拖动按钮部分
 		r = this.bar1.height/4;
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		ctx.fillStyle = on ? "rgba(120, 0, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
 		ctx.roundRect(this.bar1.x + pos1 - r, this.bar1.y+r, r*2, r*2, r, 1, 0);
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		ctx.fillStyle = on ? "rgba(0, 120, 0, 0.5)" : "rgb(120, 120, 120, 0.5)";
 		ctx.roundRect(this.bar2.x + pos2 - r, this.bar2.y+r, r*2, r*2, r, 1, 0);
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
+		ctx.fillStyle = on ? "rgba(0, 0, 120, 0.5)" : "rgb(120, 120, 120, 0.5)";
 		ctx.roundRect(this.bar3.x + pos3 - r, this.bar3.y+r, r*2, r*2, r, 1, 0);
 		
 		//七彩条状滚动条
@@ -137,7 +143,7 @@ function lamp()
 		grd.addColorStop(0.67, "rgba(0, 0, 255, 1)");
 		grd.addColorStop(0.83, "rgba(255, 0, 255, 1)");
 		grd.addColorStop(1, "rgba(255, 0, 0, 1)");
-		ctx.fillStyle = _LAMP_[mode][this.id]['status'] === 'on' ? grd : "rgb(220, 220, 220)";
+		ctx.fillStyle = on ? grd : "rgb(220, 220, 220)";
 		ctx.fill();
 	}
 	
